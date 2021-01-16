@@ -1,0 +1,12 @@
+main: com.github.dawsonvilamaa.beaconwaypoint.Main
+name: BeaconWaypoints
+version: 1.0
+author: Dawson Vilamaa
+description: Allows players to set waypoints at beacons
+commands:
+  waypoint:
+    aliases: wp
+    description: Add or remove a waypoint
+    usage: /waypoint [create | tp | remove | list] [name]
+    permission: BeaconWaypoint.waypoint
+    permission-message: You don't have permission to use that command
