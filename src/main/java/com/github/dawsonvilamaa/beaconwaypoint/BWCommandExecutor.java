@@ -1,9 +1,12 @@
 package com.github.dawsonvilamaa.beaconwaypoint;
 
+import com.github.dawsonvilamaa.beaconwaypoint.gui.GUIs;
+import com.github.dawsonvilamaa.beaconwaypoint.waypoints.Waypoint;
+import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointCoord;
+import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointPlayer;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -21,83 +24,69 @@ public class BWCommandExecutor implements CommandExecutor {
             Player player = (Player) sender;
             String cleanCmd = cmd.getName().toLowerCase();
 
-            switch (cleanCmd) {
-                case "waypoint":
-                case "wp":
-                    if (args.length < 1) return false;
-                    if (args[0].toLowerCase().equals("add") || args[0].toLowerCase().equals("create")) {
-                        if (args.length < 2) return false;
-                        for (Waypoint waypoint : Main.waypoints) {
-                            if (waypoint != null) {
-                                if (waypoint.getName().equals(args[1])) {
-                                    player.sendMessage(ChatColor.RED + "There is already a waypoint of that name");
-                                    return true;
-                                }
-                            }
-                        }
-                        Location playerLoc = player.getLocation();
-                        playerLoc.setY(playerLoc.getY() - 1);
-                        if (player.getWorld().getBlockAt(playerLoc).getType() == Material.BEACON) {
-                            Waypoint newWaypoint = new Waypoint(args[1], playerLoc);
-                            Main.waypoints.add(newWaypoint);
-                            player.sendMessage(ChatColor.GREEN + "Created the waypoint " + ChatColor.BOLD + args[1]);
-                            return true;
-                        }
-                        else player.sendMessage(ChatColor.RED + "You must be standing on a beacon to set a waypoint");
-                        return true;
-                    }
-                    else if (args[0].toLowerCase().equals("tp")) {
-                        if (args.length < 2) return false;
-                        Location playerLoc = player.getLocation();
-                        playerLoc.setY(playerLoc.getY() - 1);
-                        if (player.getWorld().getBlockAt(playerLoc).getType() == Material.BEACON) {
-                            for (Waypoint waypoint : Main.waypoints) {
-                                if (waypoint != null) {
-                                    if (waypoint.getName().equals(args[1])) {
-                                        if (player.getWorld().getBlockAt(waypoint.getX(), waypoint.getY(), waypoint.getZ()).getType() != Material.BEACON)
-                                            player.sendMessage(ChatColor.RED + "Cannot find a beacon for that waypoint. Either it was destroyed or it is in another dimension.");
-                                        else {
-                                            player.sendMessage(ChatColor.YELLOW + "Teleported to " + ChatColor.BOLD + waypoint.getName());
-                                            Location tpLoc = new Location(player.getWorld(), (double) (waypoint.getX() + 0.5), (double) (waypoint.getY() + 1), (double) (waypoint.getZ() + 0.5), player.getLocation().getYaw(), player.getLocation().getPitch());
-                                            player.teleport(tpLoc);
-                                        }
-                                        return true;
-                                    }
-                                }
-                            }
-                            player.sendMessage(ChatColor.RED + "No waypoint with that name found");
-                            return true;
-                        }
-                        else player.sendMessage(ChatColor.RED + "You must be standing on a beacon to teleport to a waypoint");
-                        return true;
-                    }
-                    else if (args[0].toLowerCase().equals("remove") || args[0].toLowerCase().equals("delete")) {
-                        if (args.length < 2) return false;
-                        for (int i = 0; i < Main.waypoints.size(); i++) {
-                            if (Main.waypoints.get(i) != null) {
-                                if (Main.waypoints.get(i).getName().equals(args[1].toLowerCase())) {
-                                    Main.waypoints.set(i, null);
-                                    player.sendMessage(ChatColor.GREEN + "Removed waypoint " + ChatColor.BOLD + args[1]);
-                                    return true;
-                                }
-                            }
-                        }
-                        player.sendMessage(ChatColor.RED + "No waypoint with that name was found");
-                        return true;
-                    }
-                    else if (args[0].toLowerCase().equals("list")) {
-                        String listStr = ChatColor.YELLOW + "List of waypoints:" + ChatColor.WHITE;
-                        for (Waypoint waypoint : Main.waypoints) {
-                            if (waypoint != null) listStr += "\n" + waypoint.getName();
-                        }
-                        player.sendMessage(listStr);
-                        return true;
-                    }
-
-                default:
+            if (cleanCmd.equals("waypoint") || cleanCmd.equals("wp")) {
+                if (args.length < 2)
                     return false;
+                if (!(args[1].equalsIgnoreCase("public") || args[1].equalsIgnoreCase("private")))
+                    return false;
+
+                Location playerLoc = player.getLocation();
+                playerLoc.setY(playerLoc.getY() - 1);
+
+                //check if waypoint already exists at location
+                boolean waypointExists = false;
+                if (args[1].equalsIgnoreCase("public")) {
+                    if (Main.waypointManager.getPublicWaypoint(playerLoc) != null)
+                        waypointExists = true;
+                } else {
+                    if (Main.waypointManager.getPrivateWaypoint(player.getUniqueId(), playerLoc) != null)
+                        waypointExists = true;
+                }
+
+                if (waypointExists) {
+                    player.sendMessage(ChatColor.RED + "A waypoint already exists at that location.");
+                    return true;
+                }
+
+                //check if waypoint with that name already exists
+                if (args[1].equalsIgnoreCase("public")) {
+                    for (Waypoint waypoint : Main.waypointManager.getPublicWaypoints().values()) {
+                        if (waypoint != null && waypoint.getName().equals(args[0])) {
+                            player.sendMessage(ChatColor.RED + "There is already a waypoint of that name");
+                            return true;
+                        }
+                    }
+                } else {
+                    for (Waypoint waypoint : Main.waypointManager.getPrivateWaypoints(player.getUniqueId()).values()) {
+                        if (waypoint != null && waypoint.getName().equals(args[0])) {
+                            player.sendMessage(ChatColor.RED + "There is already a waypoint of that name");
+                            return true;
+                        }
+                    }
+                }
+
+                //check if player is standing on a beacon
+                if (player.getWorld().getBlockAt(playerLoc).getType() == Material.BEACON) {
+
+                    //add waypoint
+                    WaypointCoord newWaypointCoord = new WaypointCoord(playerLoc);
+                    Waypoint newWaypoint = new Waypoint(args[0], playerLoc);
+
+                    if (args[1].equalsIgnoreCase("public"))
+                        Main.waypointManager.addPublicWaypoint(newWaypoint);
+                    else {
+                        WaypointPlayer waypointPlayer = Main.waypointManager.getPlayer(player.getUniqueId());
+                        if (waypointPlayer != null)
+                            waypointPlayer.addWaypoint(newWaypoint);
+                    }
+                    player.sendMessage(ChatColor.GREEN + "Created the " + (args[1].equalsIgnoreCase("public") ? "public" : "private") + " waypoint " + ChatColor.BOLD + args[0]);
+                    GUIs.waypointIconPickerMenu(player, newWaypoint);
+                    return true;
+                }
+                else player.sendMessage(ChatColor.RED + "You must be standing on a beacon to set a waypoint");
+                return true;
             }
         }
-        else return true;
+        return false;
     }
 }
