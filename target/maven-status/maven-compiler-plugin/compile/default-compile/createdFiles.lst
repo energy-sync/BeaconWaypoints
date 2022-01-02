@@ -1,5 +1,6 @@
 com\github\dawsonvilamaa\beaconwaypoint\waypoints\WaypointCoord.class
 com\github\dawsonvilamaa\beaconwaypoint\listeners\WorldListener.class
+com\github\dawsonvilamaa\beaconwaypoint\waypoints\Waypoint$1$1.class
 com\github\dawsonvilamaa\beaconwaypoint\gui\InventoryGUI.class
 com\github\dawsonvilamaa\beaconwaypoint\BWCommandExecutor.class
 com\github\dawsonvilamaa\beaconwaypoint\waypoints\Waypoint.class
@@ -7,6 +8,9 @@ com\github\dawsonvilamaa\beaconwaypoint\waypoints\WaypointManager.class
 com\github\dawsonvilamaa\beaconwaypoint\gui\MenuManager.class
 com\github\dawsonvilamaa\beaconwaypoint\gui\GUIs.class
 com\github\dawsonvilamaa\beaconwaypoint\listeners\InventoryListener.class
+com\github\dawsonvilamaa\beaconwaypoint\Main$1.class
 com\github\dawsonvilamaa\beaconwaypoint\Main.class
+com\github\dawsonvilamaa\beaconwaypoint\waypoints\Waypoint$1.class
+com\github\dawsonvilamaa\beaconwaypoint\waypoints\Waypoint$1$1$1.class
 com\github\dawsonvilamaa\beaconwaypoint\gui\InventoryGUIButton.class
 com\github\dawsonvilamaa\beaconwaypoint\waypoints\WaypointPlayer.class

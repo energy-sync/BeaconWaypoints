@@ -19,7 +19,13 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.util.Vector;
+
+import java.util.Collection;
+import java.util.List;
 
 public class WorldListener implements Listener {
     private Main plugin;
@@ -45,34 +51,40 @@ public class WorldListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
         if (e.getBlock().getType() == Material.BEACON) {
-            Waypoint removedWaypoint = null;
             WaypointCoord waypointCoord = new WaypointCoord(e.getBlock().getLocation());
 
-            //check public waypoints
-            removedWaypoint = Main.waypointManager.removePublicWaypoint(waypointCoord);
-
-            //check private waypoints
-            if (removedWaypoint == null) {
-                WaypointPlayer waypointPlayer = Main.waypointManager.getPlayer(e.getPlayer().getUniqueId());
-                if (waypointPlayer != null)
-                    removedWaypoint = waypointPlayer.getWaypoints().remove(waypointCoord);
+            //remove public waypoint
+            Waypoint publicWaypoint = Main.waypointManager.getPublicWaypoint(waypointCoord);
+            if (publicWaypoint != null) {
+                Main.waypointManager.removePublicWaypoint(waypointCoord);
+                e.getPlayer().sendMessage(ChatColor.RED + "Removed public waypoint " + ChatColor.BOLD + publicWaypoint.getName());
             }
 
-            //send message to player
-            if (removedWaypoint != null)
-                e.getPlayer().sendMessage(ChatColor.RED + "Removed waypoint " + ChatColor.BOLD + removedWaypoint.getName());
+            //remove private waypoints
+            for (WaypointPlayer waypointPlayer : Main.waypointManager.getWaypointPlayers().values()) {
+                Waypoint privateWaypoint = Main.waypointManager.getPrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
+                if (privateWaypoint != null) {
+                    Main.waypointManager.removePrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
+                    e.getPlayer().sendMessage(ChatColor.RED + "Removed private waypoint " + ChatColor.BOLD + privateWaypoint.getName());
+                }
+            }
         }
     }
 
     //when player opens a beacon
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getClickedBlock().getType() == Material.BEACON && e.getPlayer().isSneaking()) {
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getHand() == EquipmentSlot.HAND && e.getClickedBlock().getType() == Material.BEACON && e.getPlayer().isSneaking()) {
             WaypointCoord waypointCoord = new WaypointCoord(e.getClickedBlock().getLocation());
-            Waypoint waypoint = Main.plugin.getWaypoint(waypointCoord);
+            Waypoint waypoint = Main.waypointManager.getPublicWaypoint(waypointCoord);
+            if (waypoint == null)
+                waypoint = Main.waypointManager.getPrivateWaypoint(e.getPlayer().getUniqueId(), waypointCoord);
             if (waypoint != null) {
+                int beaconStatus = waypoint.getBeaconStatus();
+                if (beaconStatus != 0)
+                    GUIs.privateOrPublicMenu(e.getPlayer(), waypoint, e);
+                else e.getPlayer().sendMessage(ChatColor.RED + "Unable to teleport with this beacon. It either does not have a pyramid underneath it, or something is obstructing the beam.");
                 e.setCancelled(true);
-                GUIs.privateOrPublicMenu(e.getPlayer(), waypoint, e);
             }
         }
     }
@@ -82,7 +94,9 @@ public class WorldListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent e) {
         if (e.getBlock().getType() == Material.BEACON && e.getPlayer().isSneaking()) {
             WaypointCoord waypointCoord = new WaypointCoord(e.getBlock().getLocation());
-            Waypoint waypoint = Main.plugin.getWaypoint(waypointCoord);
+            Waypoint waypoint = Main.waypointManager.getPublicWaypoint(waypointCoord);
+            if (waypoint == null)
+                waypoint = Main.waypointManager.getPrivateWaypoint(e.getPlayer().getUniqueId(), waypointCoord);
             if (waypoint != null)
                 e.setCancelled(true);
         }

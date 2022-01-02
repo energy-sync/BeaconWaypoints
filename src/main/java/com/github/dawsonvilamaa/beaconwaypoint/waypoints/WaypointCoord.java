@@ -1,5 +1,6 @@
 package com.github.dawsonvilamaa.beaconwaypoint.waypoints;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.json.simple.JSONObject;
 
@@ -68,6 +69,10 @@ public class WaypointCoord {
      */
     public String getWorldName() {
         return this.worldName;
+    }
+
+    public Location getLocation() {
+        return new Location(Bukkit.getWorld(worldName), x, y, z);
     }
 
     @Override

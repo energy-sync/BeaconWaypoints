@@ -9,6 +9,7 @@ import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointManager;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointPlayer;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -28,6 +29,13 @@ public class Main extends JavaPlugin {
 
     private final WorldListener worldListener = new WorldListener(this);
     private final InventoryListener inventoryListener = new InventoryListener(this);
+
+    private BukkitRunnable autoSave = new BukkitRunnable() {
+        @Override
+        public void run() {
+            saveData();
+        }
+    };
 
     @Override
     public void onEnable() {
@@ -52,6 +60,17 @@ public class Main extends JavaPlugin {
         File playerDir = new File("plugins\\BeaconWaypoints\\players");
         if (!playerDir.exists()) playerDir.mkdir();
 
+        loadData();
+        autoSave.runTaskTimer(plugin, 6000, 6000);
+    }
+
+    @Override
+    public void onDisable() {
+        autoSave.cancel();
+        saveData();
+    }
+
+    public void loadData() {
         //read data from public file
         JSONParser parser = new JSONParser();
         try {
@@ -64,6 +83,7 @@ public class Main extends JavaPlugin {
 
         //read data from player files
         try {
+            File playerDir = new File("plugins\\BeaconWaypoints\\players");
             for (File playerFile : Objects.requireNonNull(playerDir.listFiles())) {
                 if (playerFile.isFile() && playerFile.getName().endsWith(".json")) {
                     JSONObject jsonPlayer = (JSONObject) parser.parse(new FileReader("plugins\\BeaconWaypoints\\players\\" + playerFile.getName()));
@@ -77,8 +97,7 @@ public class Main extends JavaPlugin {
         }
     }
 
-    @Override
-    public void onDisable() {
+    public void saveData() {
         //save public waypoints
         JSONArray jsonWaypoints = new JSONArray();
         for (Waypoint waypoint : waypointManager.getPublicWaypoints().values())

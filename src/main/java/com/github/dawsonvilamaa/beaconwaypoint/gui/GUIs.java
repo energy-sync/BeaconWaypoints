@@ -4,6 +4,7 @@ import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.Waypoint;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointCoord;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,7 +21,7 @@ public class GUIs {
                 Material.POPPY,             Material.PUMPKIN,      Material.HONEYCOMB,        Material.SEA_LANTERN,  Material.BLUE_ICE,          Material.PURPUR_BLOCK,          Material.ENCHANTING_TABLE, Material.OAK_LOG,         Material.WHEAT,
                 Material.RED_BED,           Material.ORANGE_TULIP, Material.BLAZE_POWDER,     Material.SUGAR_CANE,   Material.LAPIS_LAZULI,      Material.CHORUS_FRUIT,          Material.END_PORTAL_FRAME, Material.ELYTRA,          Material.BREWING_STAND,
                 Material.REDSTONE,          Material.RED_SAND,     Material.END_STONE,        Material.CACTUS,       Material.WATER_BUCKET,      Material.SHULKER_BOX,           Material.CHEST,            Material.NETHERITE_INGOT, Material.SOUL_SAND,
-                Material.RED_NETHER_BRICKS, Material.MAGMA_BLOCK,  Material.SAND,             Material.ENDER_PEARL,  Material.WARPED_STEM,       Material.STRIPPED_CRIMSON_STEM, Material.ZOMBIE_HEAD,      Material.OBSIDIAN,        Material.WITHER_SKELETON_SKULL
+                Material.RED_NETHER_BRICKS, Material.MAGMA_BLOCK,  Material.SAND,             Material.ENDER_PEARL,  Material.WARPED_STEM,       Material.CRIMSON_STEM,          Material.ZOMBIE_HEAD,      Material.OBSIDIAN,        Material.WITHER_SKELETON_SKULL
         };
 
         InventoryGUI gui = new InventoryGUI(player, "Waypoint Icon", 6, true);
@@ -40,7 +41,7 @@ public class GUIs {
 
     //menu that opens when player clicks on a beacon, giving a choice between regular beacon menu, public waypoints, or private waypoints
     public static void privateOrPublicMenu(Player player, Waypoint waypoint, PlayerInteractEvent e) {
-        InventoryGUI gui = new InventoryGUI(player, waypoint.getName() + " Waypoint", 1, true);
+        InventoryGUI gui = new InventoryGUI(player, "Waypoint: " + waypoint.getName(), 1, true);
 
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 3);
 
@@ -70,16 +71,12 @@ public class GUIs {
         //add buttons for each public waypoint
         for (Waypoint publicWaypoint : Main.waypointManager.getPublicWaypointsSortedAlphabetically()) {
             if (!publicWaypoint.equals(waypoint)) {
-                InventoryGUIButton waypointButton = new InventoryGUIButton(gui, publicWaypoint.getName(), null, waypoint.getIcon());
+                InventoryGUIButton waypointButton = new InventoryGUIButton(gui, publicWaypoint.getName(), null, publicWaypoint.getIcon());
                 waypointButton.setOnClick(f -> {
                     player.closeInventory();
-                    WaypointCoord coord = publicWaypoint.getCoord();
-                    Location tpLoc = new Location(Bukkit.getWorld(coord.getWorldName()), coord.getX(), coord.getY(), coord.getZ());
-                    tpLoc.setX(tpLoc.getX() + 0.5);
-                    tpLoc.setY(tpLoc.getY() + 1);
-                    tpLoc.setZ(tpLoc.getZ() + 0.5);
-                    tpLoc.setDirection(player.getLocation().getDirection());
-                    player.teleport(tpLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                    if (publicWaypoint.getBeaconStatus() == 0)
+                        player.sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either does not have a pyramid underneath it, or something is obstructing the beam.");
+                    else Waypoint.teleport(waypoint, publicWaypoint);
                 });
                 gui.addButton(waypointButton);
             }
@@ -95,16 +92,12 @@ public class GUIs {
         //add buttons for each private waypoint
         for (Waypoint privateWaypoint : Main.waypointManager.getPrivateWaypointsSortedAlphabetically(player.getUniqueId())) {
             if (!privateWaypoint.equals(waypoint)) {
-                InventoryGUIButton waypointButton = new InventoryGUIButton(gui, privateWaypoint.getName(), null, waypoint.getIcon());
+                InventoryGUIButton waypointButton = new InventoryGUIButton(gui, privateWaypoint.getName(), null, privateWaypoint.getIcon());
                 waypointButton.setOnClick(f -> {
                     player.closeInventory();
-                    WaypointCoord coord = privateWaypoint.getCoord();
-                    Location tpLoc = new Location(Bukkit.getWorld(coord.getWorldName()), coord.getX(), coord.getY(), coord.getZ());
-                    tpLoc.setX(tpLoc.getX() + 0.5);
-                    tpLoc.setY(tpLoc.getY() + 1);
-                    tpLoc.setZ(tpLoc.getZ() + 0.5);
-                    tpLoc.setDirection(player.getLocation().getDirection());
-                    player.teleport(tpLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                    if (privateWaypoint.getBeaconStatus() == 0)
+                        player.sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either does not have a pyramid underneath it, or something is obstructing the beam.");
+                    else Waypoint.teleport(waypoint, privateWaypoint);
                 });
                 gui.addButton(waypointButton);
             }

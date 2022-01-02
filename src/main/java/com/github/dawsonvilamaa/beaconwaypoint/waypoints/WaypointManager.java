@@ -130,6 +130,19 @@ public class WaypointManager {
     }
 
     /**
+     * Returns a collection of all public and private waypoints at a location
+     * @param coord
+     * @return
+     */
+    public Collection<Waypoint> getAllWaypointsAtCoord(WaypointCoord coord) {
+        List<Waypoint> waypoints = new ArrayList<>();
+        waypoints.add(getPublicWaypoint(coord));
+        for (WaypointPlayer waypointPlayer : this.waypointPlayers.values())
+            waypoints.add(waypointPlayer.getWaypoint(coord));
+        return waypoints;
+    }
+
+    /**
      * Adds a player to the waypoint player list
      * @param uuid
      */
