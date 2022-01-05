@@ -39,7 +39,7 @@ public class WaypointCoord {
         this.x = location.getBlockX();
         this.y = location.getBlockY();
         this.z = location.getBlockZ();
-        this.worldName = location.getWorld().getName();
+        this.worldName = Objects.requireNonNull(location.getWorld()).getName();
         this.hashCode = Objects.hash(x, y, z, worldName);
     }
 

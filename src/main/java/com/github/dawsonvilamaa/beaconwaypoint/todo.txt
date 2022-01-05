@@ -1,0 +1,1 @@
+- add delete option in GUI for waypoints, maybe through right click

@@ -132,7 +132,7 @@ public class WaypointManager {
     /**
      * Returns a collection of all public and private waypoints at a location
      * @param coord
-     * @return
+     * @return waypoints
      */
     public Collection<Waypoint> getAllWaypointsAtCoord(WaypointCoord coord) {
         List<Waypoint> waypoints = new ArrayList<>();

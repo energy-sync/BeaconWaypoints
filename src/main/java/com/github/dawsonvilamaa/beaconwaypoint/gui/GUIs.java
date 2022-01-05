@@ -2,20 +2,15 @@ package com.github.dawsonvilamaa.beaconwaypoint.gui;
 
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.Waypoint;
-import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointCoord;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
 
 public class GUIs {
 
     //shows all icons for waypoints
     public static void waypointIconPickerMenu(Player player, Waypoint waypoint) {
-        Material icons[] = {
+        Material[] icons = {
                 Material.APPLE,             Material.SHROOMLIGHT,  Material.TOTEM_OF_UNDYING, Material.EMERALD,      Material.DIAMOND,           Material.END_CRYSTAL,           Material.LEATHER,          Material.FILLED_MAP,      Material.SNOW_BLOCK,
                 Material.RED_MUSHROOM,      Material.CARROT,       Material.GOLDEN_APPLE,     Material.CREEPER_HEAD, Material.PRISMARINE_BRICKS, Material.ALLIUM,                Material.IRON_PICKAXE,     Material.QUARTZ_BRICKS,   Material.SKELETON_SKULL,
                 Material.POPPY,             Material.PUMPKIN,      Material.HONEYCOMB,        Material.SEA_LANTERN,  Material.BLUE_ICE,          Material.PURPUR_BLOCK,          Material.ENCHANTING_TABLE, Material.OAK_LOG,         Material.WHEAT,
@@ -40,23 +35,19 @@ public class GUIs {
     }
 
     //menu that opens when player clicks on a beacon, giving a choice between regular beacon menu, public waypoints, or private waypoints
-    public static void privateOrPublicMenu(Player player, Waypoint waypoint, PlayerInteractEvent e) {
+    public static void privateOrPublicMenu(Player player, Waypoint waypoint) {
         InventoryGUI gui = new InventoryGUI(player, "Waypoint: " + waypoint.getName(), 1, true);
 
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 3);
 
         InventoryGUIButton publicWaypointsButton = new InventoryGUIButton(gui, "Public Waypoints", null, Material.FILLED_MAP);
-        publicWaypointsButton.setOnClick(f -> {
-            publicWaypointsMenu(player, waypoint, e);
-        });
+        publicWaypointsButton.setOnClick(f -> publicWaypointsMenu(player, waypoint));
         gui.addButton(publicWaypointsButton);
 
         gui.addButton(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE));
 
         InventoryGUIButton privateWaypointsButton = new InventoryGUIButton(gui, "Private Waypoints", null, Material.TRIPWIRE_HOOK);
-        privateWaypointsButton.setOnClick(f -> {
-            privateWaypointsMenu(player, waypoint, e);
-        });
+        privateWaypointsButton.setOnClick(f -> privateWaypointsMenu(player, waypoint));
         gui.addButton(privateWaypointsButton);
 
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 3);
@@ -65,7 +56,7 @@ public class GUIs {
     }
 
     //shows all public waypoints
-    public static void publicWaypointsMenu(Player player, Waypoint waypoint, PlayerInteractEvent e) {
+    public static void publicWaypointsMenu(Player player, Waypoint waypoint) {
         InventoryGUI gui = new InventoryGUI(player, "Public Waypoints", 6, true);
 
         //add buttons for each public waypoint
@@ -86,7 +77,7 @@ public class GUIs {
     }
 
     //shows all private waypoints
-    public static void privateWaypointsMenu(Player player, Waypoint waypoint, PlayerInteractEvent e) {
+    public static void privateWaypointsMenu(Player player, Waypoint waypoint) {
         InventoryGUI gui = new InventoryGUI(player, "Private Waypoints", 3, true);
 
         //add buttons for each private waypoint

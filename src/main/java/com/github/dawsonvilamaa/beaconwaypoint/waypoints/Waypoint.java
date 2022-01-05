@@ -5,7 +5,6 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -15,6 +14,7 @@ import org.json.simple.JSONObject;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Waypoint {
     private String name;
@@ -46,27 +46,6 @@ public class Waypoint {
      */
     public String getName() {
         return this.name;
-    }
-
-    /**
-     * @return x
-     */
-    public int getX() {
-        return this.coord.getX();
-    }
-
-    /**
-     * @return y
-     */
-    public int getY() {
-        return this.coord.getY();
-    }
-
-    /**
-     * @return z
-     */
-    public int getZ() {
-        return this.coord.getZ();
     }
 
     /**
@@ -116,12 +95,12 @@ public class Waypoint {
         WaypointCoord destinationCoord = destinationWaypoint.getCoord();
         Location tpLoc = new Location(Bukkit.getWorld(destinationCoord.getWorldName()), destinationCoord.getX(), destinationCoord.getY(), destinationCoord.getZ());
         tpLoc.setX(tpLoc.getX() + 0.5);
-        tpLoc.setY(tpLoc.getWorld().getMaxHeight() + 256);
+        tpLoc.setY(Objects.requireNonNull(tpLoc.getWorld()).getMaxHeight() + 256);
         tpLoc.setZ(tpLoc.getZ() + 0.5);
 
 
         //spawn warm-up particles and play warm-up sound
-        startLoc.getWorld().spawnParticle(Particle.PORTAL, startLoc, 500, 1, 1, 1);
+        Objects.requireNonNull(startLoc.getWorld()).spawnParticle(Particle.PORTAL, startLoc, 500, 1, 1, 1);
         startLoc.getWorld().playSound(startLoc, Sound.BLOCK_BEACON_POWER_SELECT, SoundCategory.BLOCKS, 1, 1);
         startLoc.getWorld().playSound(startLoc, Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.BLOCKS, 1, 1);
 
@@ -135,7 +114,7 @@ public class Waypoint {
                 startLoc.getWorld().playSound(startLoc, Sound.BLOCK_BEACON_DEACTIVATE, SoundCategory.BLOCKS, 1, 0.65F);
 
                 //get all entities on the beacon
-                Bukkit.getWorld(startWaypoint.getWorldName()).getNearbyEntities(startLoc, 0.5, 0.5, 0.5).forEach(entity -> {
+                Objects.requireNonNull(Bukkit.getWorld(startWaypoint.getWorldName())).getNearbyEntities(startLoc, 0.5, 0.5, 0.5).forEach(entity -> {
                     if (entity.getType() == EntityType.PLAYER) {
                         int startBeamTop = startBeaconStatus == 1 ? entity.getWorld().getMaxHeight() + 256 : startBeaconStatus - 2;
                         int destinationBeamTop = destinationBeaconStatus == 1 ? entity.getWorld().getMaxHeight() + 256 : destinationBeaconStatus - 2;
@@ -202,7 +181,7 @@ public class Waypoint {
         //check if there are pyramid blocks under the beacon
         for (int blockX = beaconLoc.getBlockX() - 1; blockX <= beaconLoc.getBlockX() + 1; blockX++) {
             for (int blockZ = beaconLoc.getBlockZ() - 1; blockZ <= beaconLoc.getBlockZ() + 1; blockZ++) {
-                if (!pyramidBlocks.contains(beaconLoc.getWorld().getBlockAt(blockX, beaconLoc.getBlockY() - 1, blockZ).getType())) {
+                if (!pyramidBlocks.contains(Objects.requireNonNull(beaconLoc.getWorld()).getBlockAt(blockX, beaconLoc.getBlockY() - 1, blockZ).getType())) {
                     isActive = 0;
                     break;
                 }
@@ -211,7 +190,7 @@ public class Waypoint {
 
         if (isActive != 0) {
             //check if there are opaque blocks above the beacon
-            for (int blockY = beaconLoc.getBlockY() + 1; blockY < beaconLoc.getWorld().getMaxHeight(); blockY++) {
+            for (int blockY = beaconLoc.getBlockY() + 1; blockY < Objects.requireNonNull(beaconLoc.getWorld()).getMaxHeight(); blockY++) {
                 Block block = beaconLoc.getWorld().getBlockAt(beaconLoc.getBlockX(), blockY, beaconLoc.getBlockZ());
                 if (block.getType() != Material.AIR && block.getType() != Material.VOID_AIR) {
                     if (block.getType() == Material.BEDROCK)

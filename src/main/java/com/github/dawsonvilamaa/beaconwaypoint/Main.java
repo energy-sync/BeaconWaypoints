@@ -27,7 +27,7 @@ public class Main extends JavaPlugin {
     public static WaypointManager waypointManager;
     public static MenuManager menuManager;
 
-    private final WorldListener worldListener = new WorldListener(this);
+    private final WorldListener worldListener = new WorldListener();
     private final InventoryListener inventoryListener = new InventoryListener(this);
 
     private BukkitRunnable autoSave = new BukkitRunnable() {
@@ -53,11 +53,11 @@ public class Main extends JavaPlugin {
         pm.registerEvents(inventoryListener, this);
 
         //create data folder if it doesn't exist
-        File pluginDir = new File("plugins\\BeaconWaypoints");
+        File pluginDir = new File("plugins/" + File.separator + "BeaconWaypoints");
         if (!pluginDir.exists()) pluginDir.mkdir();
 
         //create folder for player waypoints if it doesn't exist
-        File playerDir = new File("plugins\\BeaconWaypoints\\players");
+        File playerDir = new File("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "players");
         if (!playerDir.exists()) playerDir.mkdir();
 
         loadData();
@@ -74,7 +74,7 @@ public class Main extends JavaPlugin {
         //read data from public file
         JSONParser parser = new JSONParser();
         try {
-            JSONArray jsonWaypoints = (JSONArray) parser.parse(new FileReader("plugins\\BeaconWaypoints\\public.json"));
+            JSONArray jsonWaypoints = (JSONArray) parser.parse(new FileReader("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json"));
             for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonWaypoints)
                 waypointManager.addPublicWaypoint(new Waypoint(jsonWaypoint));
         } catch(IOException | ParseException e) {
@@ -83,10 +83,10 @@ public class Main extends JavaPlugin {
 
         //read data from player files
         try {
-            File playerDir = new File("plugins\\BeaconWaypoints\\players");
+            File playerDir = new File("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "players");
             for (File playerFile : Objects.requireNonNull(playerDir.listFiles())) {
                 if (playerFile.isFile() && playerFile.getName().endsWith(".json")) {
-                    JSONObject jsonPlayer = (JSONObject) parser.parse(new FileReader("plugins\\BeaconWaypoints\\players\\" + playerFile.getName()));
+                    JSONObject jsonPlayer = (JSONObject) parser.parse(new FileReader("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "players/" + File.separator + "" + playerFile.getName()));
                     waypointManager.addPlayer(UUID.fromString(jsonPlayer.get("uuid").toString()));
                     for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonPlayer.get("waypoints"))
                         waypointManager.addPrivateWaypoint(UUID.fromString(jsonPlayer.get("uuid").toString()), new Waypoint(jsonWaypoint));
@@ -105,7 +105,7 @@ public class Main extends JavaPlugin {
 
         FileWriter waypointFile = null;
         try {
-            waypointFile = new FileWriter("plugins\\BeaconWaypoints\\public.json");
+            waypointFile = new FileWriter("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json");
             waypointFile.write(jsonWaypoints.toJSONString());
         } catch(IOException e) {
             getLogger().info(e.getMessage());
@@ -131,7 +131,7 @@ public class Main extends JavaPlugin {
 
             FileWriter playerWaypointFile = null;
             try {
-                playerWaypointFile = new FileWriter("plugins\\BeaconWaypoints\\players\\" + waypointPlayer.getUUID().toString() + ".json");
+                playerWaypointFile = new FileWriter("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "players/" + File.separator + "" + waypointPlayer.getUUID().toString() + ".json");
                 playerWaypointFile.write(playerData.toJSONString());
             } catch (IOException e) {
                 e.printStackTrace();

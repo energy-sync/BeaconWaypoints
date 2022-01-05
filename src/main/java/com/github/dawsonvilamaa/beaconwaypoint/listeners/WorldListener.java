@@ -5,13 +5,8 @@ import com.github.dawsonvilamaa.beaconwaypoint.gui.GUIs;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.Waypoint;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointCoord;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointPlayer;
-import com.github.dawsonvilamaa.beaconwaypoint.gui.InventoryGUI;
-import com.github.dawsonvilamaa.beaconwaypoint.gui.InventoryGUIButton;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -19,22 +14,16 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.util.Vector;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.Objects;
 
 public class WorldListener implements Listener {
-    private Main plugin;
 
     /**
-     * @param plugin
      */
-    public WorldListener(Main plugin) {
-        this.plugin = plugin;
+    public WorldListener() {
+
     }
 
     //adds players to waypointPlayers map when they join if they are already not in the map
@@ -74,7 +63,7 @@ public class WorldListener implements Listener {
     //when player opens a beacon
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getHand() == EquipmentSlot.HAND && e.getClickedBlock().getType() == Material.BEACON && e.getPlayer().isSneaking()) {
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getHand() == EquipmentSlot.HAND && Objects.requireNonNull(e.getClickedBlock()).getType() == Material.BEACON && e.getPlayer().isSneaking()) {
             WaypointCoord waypointCoord = new WaypointCoord(e.getClickedBlock().getLocation());
             Waypoint waypoint = Main.waypointManager.getPublicWaypoint(waypointCoord);
             if (waypoint == null)
@@ -82,7 +71,7 @@ public class WorldListener implements Listener {
             if (waypoint != null) {
                 int beaconStatus = waypoint.getBeaconStatus();
                 if (beaconStatus != 0)
-                    GUIs.privateOrPublicMenu(e.getPlayer(), waypoint, e);
+                    GUIs.privateOrPublicMenu(e.getPlayer(), waypoint);
                 else e.getPlayer().sendMessage(ChatColor.RED + "Unable to teleport with this beacon. It either does not have a pyramid underneath it, or something is obstructing the beam.");
                 e.setCancelled(true);
             }

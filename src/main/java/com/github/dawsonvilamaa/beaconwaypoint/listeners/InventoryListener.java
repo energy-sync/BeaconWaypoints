@@ -3,7 +3,6 @@ package com.github.dawsonvilamaa.beaconwaypoint.listeners;
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import com.github.dawsonvilamaa.beaconwaypoint.gui.InventoryGUI;
 import com.github.dawsonvilamaa.beaconwaypoint.gui.InventoryGUIButton;
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -23,8 +22,7 @@ public class InventoryListener implements Listener {
     @EventHandler
     public void onItemClick(InventoryClickEvent e) {
         InventoryGUI gui = Main.menuManager.getMenuByPlayerUUID(e.getWhoClicked().getUniqueId());
-        assert gui != null;
-        if (e.getWhoClicked().equals(gui.getPlayer()) && e.getCurrentItem() != null && e.getView().getTitle().equals(gui.getName())) {
+        if (gui != null && e.getWhoClicked().equals(gui.getPlayer()) && e.getCurrentItem() != null && e.getView().getTitle().equals(gui.getName())) {
             InventoryGUIButton button = gui.getButtons().get(e.getRawSlot());
             if (button != null) {
                 if (button.getOnClick() != null)

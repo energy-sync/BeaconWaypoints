@@ -15,7 +15,7 @@ public class WaypointPlayer {
      */
     public WaypointPlayer(UUID uuid) {
         this.uuid = uuid;
-        this.waypoints = new HashMap<WaypointCoord, Waypoint>();
+        this.waypoints = new HashMap<>();
     }
 
     /**
