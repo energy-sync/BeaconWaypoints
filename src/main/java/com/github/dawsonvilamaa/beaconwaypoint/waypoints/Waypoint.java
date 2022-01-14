@@ -194,7 +194,7 @@ public class Waypoint {
                 Block block = beaconLoc.getWorld().getBlockAt(beaconLoc.getBlockX(), blockY, beaconLoc.getBlockZ());
                 if (block.getType() != Material.AIR && block.getType() != Material.VOID_AIR) {
                     if (block.getType() == Material.BEDROCK)
-                        isActive = blockY;
+                        return blockY;
                     else {
                         isActive = 0;
                         break;
