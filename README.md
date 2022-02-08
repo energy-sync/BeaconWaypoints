@@ -38,5 +38,5 @@ Note: Teleportation between beacons requires the beacon to have no blocks inside
 - waypoint-icons: List of items that can be used for waypoint icons, the order given here is the same order that will be in the icon picker menu (default includes 111 items)
 
 
-### Issue Tracker - Please report bugs here
+### [Issue Tracker](https://github.com/dawson-vilamaa/BeaconWaypoints/issues) - Please report bugs here
 ### Contact me on Discord: energy_sync#9851
