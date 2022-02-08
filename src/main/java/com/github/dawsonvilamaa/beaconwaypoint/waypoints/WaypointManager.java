@@ -7,10 +7,12 @@ import java.util.*;
 public class WaypointManager {
     private HashMap<WaypointCoord, Waypoint> publicWaypoints;
     private HashMap<UUID, WaypointPlayer> waypointPlayers;
+    private HashMap<WaypointCoord, Waypoint> inactiveWaypoints;
 
     public WaypointManager() {
         publicWaypoints = new HashMap<>();
         waypointPlayers = new HashMap<>();
+        inactiveWaypoints = new HashMap<>();
     }
 
     /**
@@ -82,7 +84,7 @@ public class WaypointManager {
      */
     public List<Waypoint> getPublicWaypointsSortedAlphabetically() {
         List<Waypoint> sortedWaypoints = new ArrayList<>(publicWaypoints.values());
-        sortedWaypoints.sort(Comparator.comparing(Waypoint::getName));
+        Collections.sort(sortedWaypoints, Comparator.comparing(Waypoint::getLowerCaseName));
         return sortedWaypoints;
     }
 
@@ -127,6 +129,36 @@ public class WaypointManager {
         List<Waypoint> sortedWaypoints = new ArrayList<>(waypointPlayers.get(uuid).getWaypoints().values());
         sortedWaypoints.sort(Comparator.comparing(Waypoint::getName));
         return sortedWaypoints;
+    }
+
+    /**
+     * Returns a HashMap of all waypoints where the beacon has been placed, but a waypoint has not been created
+     * @return
+     */
+    public HashMap<WaypointCoord, Waypoint> getInactiveWaypoints() {
+        return this.inactiveWaypoints;
+    }
+
+    /**
+     * @param waypoint
+     */
+    public void addInactiveWaypoint(Waypoint waypoint) {
+        this.inactiveWaypoints.put(waypoint.getCoord(), waypoint);
+    }
+
+    /**
+     * @param coord waypoint
+     */
+    public void removeInactiveWaypoint(WaypointCoord coord) {
+        this.inactiveWaypoints.remove(coord);
+    }
+
+    /**
+     * @param coord
+     * @return waypoint
+     */
+    public Waypoint getInactiveWaypoint(WaypointCoord coord) {
+        return this.inactiveWaypoints.get(coord);
     }
 
     /**

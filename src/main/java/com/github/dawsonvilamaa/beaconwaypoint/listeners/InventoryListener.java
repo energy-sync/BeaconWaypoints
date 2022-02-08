@@ -5,8 +5,8 @@ import com.github.dawsonvilamaa.beaconwaypoint.gui.InventoryGUI;
 import com.github.dawsonvilamaa.beaconwaypoint.gui.InventoryGUIButton;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 
 public class InventoryListener implements Listener {
     Main plugin;
@@ -25,22 +25,17 @@ public class InventoryListener implements Listener {
         if (gui != null && e.getWhoClicked().equals(gui.getPlayer()) && e.getCurrentItem() != null && e.getView().getTitle().equals(gui.getName())) {
             InventoryGUIButton button = gui.getButtons().get(e.getRawSlot());
             if (button != null) {
-                if (button.getOnClick() != null)
-                    button.onClick(e);
+                if (button.getOnClick() != null) {
+                    if (e.getClick() == ClickType.LEFT)
+                        button.onClick(e);
+                    else if (e.getClick() == ClickType.RIGHT)
+                        button.onRightClick(e);
+                }
                 if (button.isLocked())
                     e.setCancelled(true);
             }
             else if (gui.isLocked())
                 e.setCancelled(true);
-        }
-    }
-
-    //remove all click events on buttons when the menu is closed
-    @EventHandler
-    public void onMenuClose(InventoryCloseEvent e) {
-        InventoryGUI gui = Main.menuManager.getMenuByPlayerUUID(e.getPlayer().getUniqueId());
-        if (gui != null && e.getView().getTitle().equals(gui.getName()) && e.getPlayer().equals(gui.getPlayer())) {
-            Main.menuManager.removeMenu(e.getPlayer().getUniqueId());
         }
     }
 }

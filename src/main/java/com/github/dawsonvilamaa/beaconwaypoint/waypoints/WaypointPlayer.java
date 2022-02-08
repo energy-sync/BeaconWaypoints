@@ -9,6 +9,7 @@ import java.util.UUID;
 public class WaypointPlayer {
     private UUID uuid;
     private HashMap<WaypointCoord, Waypoint> waypoints;
+    private boolean isTeleporting;
 
     /**
      * @param uuid
@@ -16,6 +17,7 @@ public class WaypointPlayer {
     public WaypointPlayer(UUID uuid) {
         this.uuid = uuid;
         this.waypoints = new HashMap<>();
+        this.isTeleporting = false;
     }
 
     /**
@@ -29,6 +31,8 @@ public class WaypointPlayer {
         JSONArray jsonWaypoints = (JSONArray) jsonPlayer.get("waypoints");
         for (Object jsonWaypoint : jsonWaypoints)
             this.waypoints.put(new WaypointCoord((JSONObject) jsonWaypoint), new Waypoint((JSONObject) jsonWaypoint));
+
+        this.isTeleporting = false;
     }
 
     /**
@@ -65,5 +69,19 @@ public class WaypointPlayer {
      */
     public Waypoint removeWaypoint(WaypointCoord coord) {
         return this.waypoints.remove(coord);
+    }
+
+    /**
+     * @return isTeleporting
+     */
+    public boolean isTeleporting() {
+        return isTeleporting;
+    }
+
+    /**
+     * @param isTeleporting
+     */
+    public void setTeleporting(boolean isTeleporting) {
+        this.isTeleporting = isTeleporting;
     }
 }

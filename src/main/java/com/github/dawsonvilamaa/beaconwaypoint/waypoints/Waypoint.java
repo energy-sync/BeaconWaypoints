@@ -3,8 +3,10 @@ package com.github.dawsonvilamaa.beaconwaypoint.waypoints;
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -15,30 +17,40 @@ import org.json.simple.JSONObject;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
-public class Waypoint {
+public class Waypoint implements Cloneable {
     private String name;
     private WaypointCoord coord;
     private Material icon;
+    private UUID ownerUUID;
+    private boolean isWaypoint;
 
     /**
-     * @param name
-     * @param location
+     * @param ownerUUID
      */
-    public Waypoint(String name, Location location) {
-        this.name = name;
-        this.coord = new WaypointCoord(location);
+    public Waypoint(UUID ownerUUID, WaypointCoord coord) {
+        this.name = null;
+        this.coord = coord;
         this.icon = Material.BEACON;
+        this.ownerUUID = ownerUUID;
+        this.isWaypoint = false;
     }
 
+    /**
+     * @param jsonWaypoint
+     */
     public Waypoint(JSONObject jsonWaypoint) {
-        this.name = jsonWaypoint.get("name").toString();
+        Object jsonName = jsonWaypoint.get("name");
+        this.name = jsonName == null ? null : jsonName.toString();
         int x = Integer.parseInt(jsonWaypoint.get("x").toString());
         int y = Integer.parseInt(jsonWaypoint.get("y").toString());
         int z = Integer.parseInt(jsonWaypoint.get("z").toString());
         String worldName = jsonWaypoint.get("world").toString();
         this.coord = new WaypointCoord(x, y, z, worldName);
         this.icon = Material.valueOf(jsonWaypoint.get("icon").toString());
+        this.ownerUUID = UUID.fromString(jsonWaypoint.get("ownerUUID").toString());
+        this.isWaypoint = Boolean.parseBoolean(jsonWaypoint.get("isWaypoint").toString());
     }
 
     /**
@@ -46,6 +58,20 @@ public class Waypoint {
      */
     public String getName() {
         return this.name;
+    }
+
+    /**
+     * @return lowerCaseName
+     */
+    public String getLowerCaseName() {
+        return this.name.toLowerCase();
+    }
+
+    /**
+     * @param name
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
@@ -60,6 +86,13 @@ public class Waypoint {
      */
     public WaypointCoord getCoord() {
         return this.coord;
+    }
+
+    /**
+     * @param coord
+     */
+    public void setCoord(WaypointCoord coord) {
+        this.coord = coord;
     }
 
     /**
@@ -79,10 +112,42 @@ public class Waypoint {
     }
 
     /**
+     * @return ownerUUID
+     */
+    public UUID getOwnerUUID() {
+        return this.ownerUUID;
+    }
+
+    /**
+     * @param ownerUUID
+     */
+    public void setOwnerUUID(UUID ownerUUID) {
+        this.ownerUUID = ownerUUID;
+    }
+
+    /**
+     * @return isWaypoint
+     */
+    public boolean isWaypoint() {
+        return this.isWaypoint;
+    }
+
+    /**
+     * @param isWaypoint
+     */
+    public void setIsWaypoint(boolean isWaypoint) {
+        this.isWaypoint = isWaypoint;
+    }
+
+    /**
      * @param startWaypoint
      * @param destinationWaypoint
      */
     public static void teleport(Waypoint startWaypoint, Waypoint destinationWaypoint) {
+        FileConfiguration config = Main.plugin.getConfig();
+        boolean instantTeleport = config.getBoolean("instant-teleport");
+        boolean disableAnimations = config.getBoolean("disable-animations");
+
         int startBeaconStatus = startWaypoint.getBeaconStatus();
         int destinationBeaconStatus = destinationWaypoint.getBeaconStatus();
 
@@ -98,30 +163,39 @@ public class Waypoint {
         tpLoc.setY(Objects.requireNonNull(tpLoc.getWorld()).getMaxHeight() + 256);
         tpLoc.setZ(tpLoc.getZ() + 0.5);
 
-
-        //spawn warm-up particles and play warm-up sound
-        Objects.requireNonNull(startLoc.getWorld()).spawnParticle(Particle.PORTAL, startLoc, 500, 1, 1, 1);
-        startLoc.getWorld().playSound(startLoc, Sound.BLOCK_BEACON_POWER_SELECT, SoundCategory.BLOCKS, 1, 1);
-        startLoc.getWorld().playSound(startLoc, Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.BLOCKS, 1, 1);
+        if (!instantTeleport && !disableAnimations) {
+            //spawn warm-up particles and play warm-up sound
+            Objects.requireNonNull(startLoc.getWorld()).spawnParticle(Particle.PORTAL, startLoc, 500, 1, 1, 1);
+            startLoc.getWorld().playSound(startLoc, Sound.BLOCK_BEACON_POWER_SELECT, SoundCategory.BLOCKS, 1, 1);
+            startLoc.getWorld().playSound(startLoc, Sound.BLOCK_BEACON_ACTIVATE, SoundCategory.BLOCKS, 1, 1);
+        }
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                //spawn launch particles and play launch sound
-                startLoc.getWorld().spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, startLoc, 50);
-                startLoc.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, startLoc, 500, 1, 1, 1);
-                startLoc.getWorld().playSound(startLoc, Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, SoundCategory.BLOCKS, 2, 1);
-                startLoc.getWorld().playSound(startLoc, Sound.BLOCK_BEACON_DEACTIVATE, SoundCategory.BLOCKS, 1, 0.65F);
+                if (!disableAnimations) {
+                    //spawn launch particles and play launch sound
+                    Objects.requireNonNull(startLoc.getWorld()).spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, startLoc, 50);
+                    startLoc.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, startLoc, 500, 1, 1, 1);
+                    startLoc.getWorld().playSound(startLoc, Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, SoundCategory.BLOCKS, 2, 1);
+                    startLoc.getWorld().playSound(startLoc, Sound.BLOCK_BEACON_DEACTIVATE, SoundCategory.BLOCKS, 1, 0.65F);
+                }
 
                 //get all entities on the beacon
                 Objects.requireNonNull(Bukkit.getWorld(startWaypoint.getWorldName())).getNearbyEntities(startLoc, 0.5, 0.5, 0.5).forEach(entity -> {
                     if (entity.getType() == EntityType.PLAYER) {
+                        WaypointPlayer waypointPlayer = Main.waypointManager.getPlayer(entity.getUniqueId());
+                        if (waypointPlayer != null)
+                            waypointPlayer.setTeleporting(true);
+
+                        ((Player) entity).closeInventory();
                         int startBeamTop = startBeaconStatus == 1 ? entity.getWorld().getMaxHeight() + 256 : startBeaconStatus - 2;
                         int destinationBeamTop = destinationBeaconStatus == 1 ? entity.getWorld().getMaxHeight() + 256 : destinationBeaconStatus - 2;
                         tpLoc.setY(destinationBeamTop);
 
                         //keep players in start beam
                         new BukkitRunnable() {
+                            int time = 0;
                             @Override
                             public void run() {
                                 //give entities resistance and levitation
@@ -135,6 +209,14 @@ public class Waypoint {
                                         entity.teleport(startBeamLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
                                         entity.setVelocity(new Vector(0, 5, 0));
                                     }
+                                    time++;
+
+                                    //let player go if they are stuck after 30 seconds
+                                    if (time >= 80) {
+                                        ((LivingEntity) entity).removePotionEffect(PotionEffectType.LEVITATION);
+                                        Objects.requireNonNull(waypointPlayer).setTeleporting(false);
+                                        this.cancel();
+                                    }
                                 }
                                 else {
                                     this.cancel();
@@ -147,6 +229,7 @@ public class Waypoint {
 
                                     //keep players in destination beam
                                     new BukkitRunnable() {
+                                        int time = 0;
                                         @Override
                                         public void run() {
                                             if (entity.getLocation().getY() > destinationWaypoint.getCoord().getY() + 1) {
@@ -156,8 +239,19 @@ public class Waypoint {
                                                     entity.teleport(destinationBeamLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
                                                     entity.setVelocity(new Vector(0, -2, 0));
                                                 }
+                                                time++;
+
+                                                //let player go if they are stuck after 30 seconds
+                                                if (time >= 80) {
+                                                    ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 255, false, false));
+                                                    Objects.requireNonNull(waypointPlayer).setTeleporting(false);
+                                                    this.cancel();
+                                                }
                                             }
-                                            else this.cancel();
+                                            else {
+                                                Objects.requireNonNull(waypointPlayer).setTeleporting(false);
+                                                this.cancel();
+                                            }
                                         }
                                     }.runTaskTimer(Main.plugin, 0, 5);
                                 }
@@ -166,7 +260,7 @@ public class Waypoint {
                     }
                 });
             }
-        }.runTaskLater(Main.plugin, 50);
+        }.runTaskLater(Main.plugin, instantTeleport ? 0 : 50);
     }
 
     /**
@@ -217,6 +311,16 @@ public class Waypoint {
         jsonWaypoint.put("z", String.valueOf(this.coord.getZ()));
         jsonWaypoint.put("world", this.coord.getWorldName());
         jsonWaypoint.put("icon", this.icon.toString());
+        jsonWaypoint.put("ownerUUID", this.ownerUUID.toString());
+        jsonWaypoint.put("isWaypoint", String.valueOf(this.isWaypoint));
         return jsonWaypoint;
+    }
+
+    public Waypoint clone() {
+        Waypoint clonedWaypoint = new Waypoint(this.ownerUUID, this.coord);
+        clonedWaypoint.setName(this.name);
+        clonedWaypoint.setIcon(this.icon);
+        clonedWaypoint.setIsWaypoint(this.isWaypoint);
+        return clonedWaypoint;
     }
 }

@@ -1,7 +1,7 @@
 main: com.github.dawsonvilamaa.beaconwaypoint.Main
 name: BeaconWaypoints
 version: 1.0
-api-version: 1.16
+api-version: 1.18
 author: Dawson Vilamaa
 description: Allows players to set waypoints at beacons
 commands:
@@ -9,5 +9,10 @@ commands:
     aliases: wp
     description: Add or remove a waypoint
     usage: /waypoint <name> <public | private>
-    permission: BeaconWaypoint.waypoint
+    permission: BeaconWaypoints.waypoint
     permission-message: You don't have permission to use that command
+    
+permissions:
+  BeaconWaypoints.waypoint:
+    description: Allows players to create waypoints
+    default: true

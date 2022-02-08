@@ -14,7 +14,7 @@ public class InventoryGUI implements Listener, InventoryHolder {
     private Player player;
     private String title;
     private Inventory inventory;
-    private HashMap<Integer, com.github.dawsonvilamaa.beaconwaypoint.gui.InventoryGUIButton> buttons;
+    private HashMap<Integer, InventoryGUIButton> buttons;
     private int slot;
     private int maxItems;
     private boolean locked;
@@ -37,7 +37,13 @@ public class InventoryGUI implements Listener, InventoryHolder {
         this.maxItems = (9 * rows) - 1;
         this.locked = locked;
         this.runnable = null;
-        Main.menuManager.addMenu(player.getUniqueId(), this);
+    }
+
+    /**
+     * @return title
+     */
+    public String getTitle() {
+        return this.title;
     }
 
     /**
@@ -99,7 +105,6 @@ public class InventoryGUI implements Listener, InventoryHolder {
      * Adds an item to the inventory with a given name, description, and material. Multiple of the same item can be added using this method.
      * @param button
      * @param amount
-     * @return
      */
     public void addButtons(InventoryGUIButton button, int amount) {
         for (int i = 0; i < amount; i++)
@@ -119,10 +124,25 @@ public class InventoryGUI implements Listener, InventoryHolder {
     }
 
     /**
+     * Removes the button from the given slot
+     * @param slot
+     */
+    public void removeButton(int slot) {
+        this.buttons.remove(slot);
+    }
+
+    /**
      * @return slot
      */
     public int getSlot() {
         return this.slot;
+    }
+
+    /**
+     * @param slot
+     */
+    public void setSlot(int slot) {
+        this.slot = slot;
     }
 
     /**
@@ -151,6 +171,7 @@ public class InventoryGUI implements Listener, InventoryHolder {
      * Opens this GUI for the player
      */
     public void showMenu() {
+        Main.menuManager.addMenu(player.getUniqueId(), this);
         this.player.openInventory(this.inventory);
     }
 

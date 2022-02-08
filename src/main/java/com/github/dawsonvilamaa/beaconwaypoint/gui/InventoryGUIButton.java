@@ -8,6 +8,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Consumer;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class InventoryGUIButton {
     private String name;
@@ -18,6 +19,7 @@ public class InventoryGUIButton {
     private boolean locked;
     private InventoryGUI parentGUI;
     private Consumer<InventoryClickEvent> onClick;
+    private Consumer<InventoryClickEvent> onRightClick;
 
     /**
      * @param parentGUI
@@ -30,16 +32,16 @@ public class InventoryGUIButton {
         ItemMeta meta = newItem.getItemMeta();
         if (name != null) {
             this.name = name;
-            meta.setDisplayName(name);
+            Objects.requireNonNull(meta).setDisplayName(name);
         }
         if (description != null) {
             this.description = description;
             String[] lines = description.split("\n");
-            meta.setLore(Arrays.asList(lines));
+            Objects.requireNonNull(meta).setLore(Arrays.asList(lines));
         }
         this.material = material;
         if (material != Material.AIR) {
-            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            Objects.requireNonNull(meta).addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             newItem.setItemMeta(meta);
         }
         this.item = newItem;
@@ -47,6 +49,7 @@ public class InventoryGUIButton {
         this.parentGUI = parentGUI;
         this.slot = parentGUI.getSlot();
         this.onClick = null;
+        this.onRightClick = null;
     }
 
     /**
@@ -75,7 +78,7 @@ public class InventoryGUIButton {
     public void setName(String name) {
         this.name = name;
         ItemMeta meta = this.item.getItemMeta();
-        meta.setDisplayName(name);
+        Objects.requireNonNull(meta).setDisplayName(name);
         this.item.setItemMeta(meta);
         this.parentGUI.getInventory().setItem(this.slot, this.item);
     }
@@ -94,7 +97,7 @@ public class InventoryGUIButton {
         this.description = description;
         ItemMeta meta = this.item.getItemMeta();
         String[] lines = description.split("\n");
-        meta.setLore(Arrays.asList(lines));
+        Objects.requireNonNull(meta).setLore(Arrays.asList(lines));
         this.item.setItemMeta(meta);
         this.parentGUI.getInventory().setItem(this.slot, this.item);
     }
@@ -165,12 +168,32 @@ public class InventoryGUIButton {
     }
 
     /**
+     * @param e
+     */
+    public void onRightClick(InventoryClickEvent e) {
+        if (this.onRightClick != null)
+            this.onRightClick.accept(e);
+    }
+
+    /**
+     * @param consumer
+     */
+    public void setOnRightClick(Consumer<InventoryClickEvent> consumer) {
+        this.onRightClick = consumer;
+    }
+
+    /**
+     * @return onRightClick
+     */
+    public Consumer<InventoryClickEvent> getOnRightClick() {
+        return this.onRightClick;
+    }
+
+    /**
      * @param compare
      * @return is equal
      */
     public boolean equals(InventoryGUIButton compare) {
-        if (this.name.equals(compare.getName()) && this.description.equals(compare.getDescription()) && this.material == compare.material)
-            return true;
-        return false;
+        return this.name.equals(compare.getName()) && this.description.equals(compare.getDescription()) && this.material == compare.material;
     }
 }

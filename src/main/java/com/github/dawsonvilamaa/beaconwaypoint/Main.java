@@ -34,18 +34,20 @@ public class Main extends JavaPlugin {
         @Override
         public void run() {
             saveData();
+            Main.plugin.saveDefaultConfig();
         }
     };
 
     @Override
     public void onEnable() {
         plugin = this;
+        this.saveDefaultConfig();
         waypointManager = new WaypointManager();
         menuManager = new MenuManager();
 
         //register commands
         BWCommandExecutor commandExecutor = new BWCommandExecutor(this);
-        getCommand("waypoint").setExecutor(commandExecutor);
+        Objects.requireNonNull(getCommand("waypoint")).setExecutor(commandExecutor);
 
         //register events
         PluginManager pm = getServer().getPluginManager();
@@ -95,6 +97,15 @@ public class Main extends JavaPlugin {
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
+
+        //load inactive waypoints
+        try {
+            JSONArray jsonInactiveWaypoints = (JSONArray) parser.parse(new FileReader("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "inactive.json"));
+            for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonInactiveWaypoints)
+                waypointManager.addInactiveWaypoint(new Waypoint(jsonWaypoint));
+        } catch(IOException | ParseException e) {
+            getLogger().info(e.getMessage());
+        }
     }
 
     public void saveData() {
@@ -142,6 +153,26 @@ public class Main extends JavaPlugin {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+        }
+
+        //save inactive waypoints
+        JSONArray jsonInactiveWaypoints = new JSONArray();
+        for (Waypoint waypoint : waypointManager.getInactiveWaypoints().values())
+            if (waypoint != null) jsonInactiveWaypoints.add(waypoint.toJSON());
+
+        FileWriter inactiveWaypointFile = null;
+        try {
+            inactiveWaypointFile = new FileWriter("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "inactive.json");
+            inactiveWaypointFile.write(jsonInactiveWaypoints.toJSONString());
+        } catch(IOException e) {
+            getLogger().info(e.getMessage());
+        } finally {
+            try {
+                Objects.requireNonNull(inactiveWaypointFile).flush();
+                inactiveWaypointFile.close();
+            } catch (IOException ex) {
+                getLogger().info(ex.getMessage());
             }
         }
     }
