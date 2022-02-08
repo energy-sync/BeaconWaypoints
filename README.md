@@ -14,6 +14,7 @@ Developed and tested for version 1.18.1
 
 
 ## Demo
+https://www.youtube.com/watch?v=-dx9NGfIUa0
 
 [![](http://img.youtube.com/vi/-dx9NGfIUa0/0.jpg)](https://www.youtube.com/watch?v=-dx9NGfIUa0 "Beacon Waypoints Plugin")
 
