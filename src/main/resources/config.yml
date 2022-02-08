@@ -16,7 +16,7 @@ public-waypoint-menu-rows: 3
 # Range: 1-5
 private-waypoint-menu-rows: 2
 
-# Activate teleportation as soon as the destination is chosen
+# Activate teleportation as soon as the destination is chosen without a warmup animation
 instant-teleport: false
 
 # Disable the particle animations when teleporting through a beacon
