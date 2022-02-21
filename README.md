@@ -42,6 +42,8 @@ Note: Teleportation between beacons requires the beacon to have no blocks inside
 - allowed-worlds: List of worlds that allow waypoints based on folder name (default: world, world_nether, world_the_end)
 - waypoint-icons: List of items that can be used for waypoint icons, the order given here is the same order that will be in the icon picker menu (default includes 111 items)
 
+Note: If WorldEdit is used to delete a beacon, the waypoint will not be deleted. You will need to manually place back the beacon and break it, or use the setblock and fill commands instead.
+
 
 ### [Issue Tracker](https://github.com/dawson-vilamaa/BeaconWaypoints/issues) - Please report bugs here
 ### Contact me on Discord: energy_sync#9851
