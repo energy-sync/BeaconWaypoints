@@ -7,6 +7,7 @@ import com.github.dawsonvilamaa.beaconwaypoint.waypoints.Waypoint;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointCoord;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointManager;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointPlayer;
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -34,16 +35,17 @@ public class Main extends JavaPlugin {
         @Override
         public void run() {
             saveData();
-            Main.plugin.saveDefaultConfig();
         }
     };
 
     @Override
     public void onEnable() {
         plugin = this;
-        this.saveDefaultConfig();
         waypointManager = new WaypointManager();
         menuManager = new MenuManager();
+
+        //bStats
+        Metrics metrics = new Metrics(this, 14276);
 
         //register commands
         BWCommandExecutor commandExecutor = new BWCommandExecutor(this);
@@ -64,6 +66,17 @@ public class Main extends JavaPlugin {
 
         loadData();
         autoSave.runTaskTimer(plugin, 6000, 6000);
+
+        //update checker
+        new UpdateChecker(this, 99866).getVersion(version -> {
+            if (!this.getDescription().getVersion().equals(version))
+                this.getLogger().info("\n=======================================================================\n"
+                        + ChatColor.AQUA + "A new version of Beacon Waypoints is available!\n"
+                        + ChatColor.YELLOW + "Current version: " + Main.plugin.getDescription().getVersion()
+                        + "\nUpdated version: " + version
+                        + ChatColor.WHITE + "\nDownload link: " + ChatColor.UNDERLINE + "https://www.spigotmc.org/resources/beaconwaypoints.99866\n"
+                        + ChatColor.RESET + "=======================================================================");
+        });
     }
 
     @Override
@@ -73,6 +86,8 @@ public class Main extends JavaPlugin {
     }
 
     public void loadData() {
+        this.reloadConfig();
+
         //read data from public file
         JSONParser parser = new JSONParser();
         try {
@@ -175,23 +190,5 @@ public class Main extends JavaPlugin {
                 getLogger().info(ex.getMessage());
             }
         }
-    }
-
-    /**
-     * Returns a waypoint from a waypoint coordinate, public or private, or null if it doesn't exist
-     * @param coord
-     * @return waypoint
-     */
-    public Waypoint getWaypoint(WaypointCoord coord) {
-        Waypoint waypoint = waypointManager.getPublicWaypoints().get(coord);
-
-        if (waypoint == null) {
-            for (WaypointPlayer waypointPlayer : waypointManager.getWaypointPlayers().values()) {
-                waypoint = waypointPlayer.getWaypoints().get(coord);
-                if (waypoint != null) break;
-            }
-        }
-
-        return waypoint;
     }
 }

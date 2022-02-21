@@ -108,8 +108,8 @@ public class GUIs {
                     if (Main.waypointManager.getPublicWaypoint(coord) == null)
                         player.sendMessage(ChatColor.RED + "That waypoint doesn't exist!");
                     else if (publicWaypoint.getBeaconStatus() == 0)
-                        player.sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either does not have a pyramid underneath it, or something is obstructing the beam.");
-                    else Waypoint.teleport(waypoint, publicWaypoint);
+                        player.sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.");
+                    else Waypoint.teleport(waypoint, publicWaypoint, Main.plugin.getConfig().getBoolean("disable-group-teleporting") ? player : null);
                 });
                 if (publicWaypoint.getOwnerUUID().equals(player.getUniqueId())) {
                     waypointButton.setOnRightClick(e -> {
@@ -125,7 +125,7 @@ public class GUIs {
         //options button for this waypoint
         Waypoint thisWaypoint = Main.waypointManager.getPublicWaypoint(waypoint.getCoord());
         if (thisWaypoint != null) {
-            InventoryGUIButton optionsButton = new InventoryGUIButton(gui.getGUI(), "Options for this public waypoint", null, Material.COMPARATOR);
+            InventoryGUIButton optionsButton = new InventoryGUIButton(gui.getGUI(), "Options for this public waypoint", null, thisWaypoint.getIcon());
             optionsButton.setOnClick(e -> {
                 waypointOptionsMenu(player, thisWaypoint, waypoint, gui.getGUI(), true);
             });
@@ -152,8 +152,8 @@ public class GUIs {
                     if (Main.waypointManager.getPrivateWaypoint(player.getUniqueId(), coord) == null)
                         player.sendMessage(ChatColor.RED + "That waypoint doesn't exist!");
                     else if (privateWaypoint.getBeaconStatus() == 0)
-                        player.sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either does not have a pyramid underneath it, or something is obstructing the beam.");
-                    else Waypoint.teleport(waypoint, privateWaypoint);
+                        player.sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.");
+                    else Waypoint.teleport(waypoint, privateWaypoint, Main.plugin.getConfig().getBoolean("disable-group-teleporting") ? player : null);
                 });
                 if (privateWaypoint.getOwnerUUID().equals(player.getUniqueId())) {
                     waypointButton.setOnRightClick(e -> {
@@ -169,7 +169,7 @@ public class GUIs {
         //options button for this waypoint
         Waypoint thisWaypoint = Main.waypointManager.getPrivateWaypoint(player.getUniqueId(), waypoint.getCoord());
         if (thisWaypoint != null) {
-            InventoryGUIButton optionsButton = new InventoryGUIButton(gui.getGUI(), "Options for this private waypoint", null, Material.COMPARATOR);
+            InventoryGUIButton optionsButton = new InventoryGUIButton(gui.getGUI(), "Options for this private waypoint", null, thisWaypoint.getIcon());
             optionsButton.setOnClick(e -> {
                 waypointOptionsMenu(player, thisWaypoint, waypoint, gui.getGUI(), false);
             });

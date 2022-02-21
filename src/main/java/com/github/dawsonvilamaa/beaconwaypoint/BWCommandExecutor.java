@@ -4,6 +4,7 @@ import com.github.dawsonvilamaa.beaconwaypoint.gui.GUIs;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.Waypoint;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointCoord;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -24,7 +25,19 @@ public class BWCommandExecutor implements CommandExecutor {
             Player player = (Player) sender;
             String cleanCmd = cmd.getName().toLowerCase();
 
-            if (cleanCmd.equals("waypoint") || cleanCmd.equals("wp")) {
+            if (cleanCmd.equals("waypoint") || cleanCmd.equals("wp") || cleanCmd.equals("waypoints")) {
+                //reload
+                if (args.length >= 1 && args[0].equalsIgnoreCase("reload")) {
+                    if (player.hasPermission("BeaconWaypoints.reload")) {
+                        Main.plugin.reloadConfig();
+                        player.sendMessage(ChatColor.GREEN + "BeaconWaypoints config reloaded!");
+                    }
+                    else
+                        player.sendMessage(ChatColor.RED + "You don't have permission to use that command");
+                    return true;
+                }
+
+                //create waypoint
                 if (args.length < 2)
                     return false;
                 if (!(args[args.length - 1].equalsIgnoreCase("public") || args[args.length - 1].equalsIgnoreCase("private")))

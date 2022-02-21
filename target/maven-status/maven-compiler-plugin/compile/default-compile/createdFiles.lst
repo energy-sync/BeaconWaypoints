@@ -11,6 +11,7 @@ com\github\dawsonvilamaa\beaconwaypoint\Main.class
 com\github\dawsonvilamaa\beaconwaypoint\Metrics$DrilldownPie.class
 com\github\dawsonvilamaa\beaconwaypoint\waypoints\Waypoint$1.class
 com\github\dawsonvilamaa\beaconwaypoint\gui\InventoryGUIButton.class
+com\github\dawsonvilamaa\beaconwaypoint\UpdateChecker.class
 com\github\dawsonvilamaa\beaconwaypoint\Metrics$SingleLineChart.class
 com\github\dawsonvilamaa\beaconwaypoint\waypoints\WaypointCoord.class
 com\github\dawsonvilamaa\beaconwaypoint\waypoints\Waypoint$1$1.class

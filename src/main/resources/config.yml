@@ -22,6 +22,10 @@ instant-teleport: false
 # Disable the particle animations when teleporting through a beacon
 disable-animations: false
 
+# By default, beacons teleport anyone standing on top of them. If you want to limit the teleportation to only the
+# player who chooses the destination, set this to true.
+disable-group-teleporting: false
+
 # List of worlds that allow waypoints (based on folder name)
 allowed-worlds:
   - world

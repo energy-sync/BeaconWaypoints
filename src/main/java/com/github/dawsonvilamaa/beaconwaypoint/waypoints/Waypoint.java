@@ -4,6 +4,7 @@ import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -14,10 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.json.simple.JSONObject;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class Waypoint implements Cloneable {
     private String name;
@@ -142,8 +140,9 @@ public class Waypoint implements Cloneable {
     /**
      * @param startWaypoint
      * @param destinationWaypoint
+     * @param player If group teleporting is enabled, set to null, otherwise set to the player who is teleporting
      */
-    public static void teleport(Waypoint startWaypoint, Waypoint destinationWaypoint) {
+    public static void teleport(Waypoint startWaypoint, Waypoint destinationWaypoint, Player player) {
         FileConfiguration config = Main.plugin.getConfig();
         boolean instantTeleport = config.getBoolean("instant-teleport");
         boolean disableAnimations = config.getBoolean("disable-animations");
@@ -183,10 +182,13 @@ public class Waypoint implements Cloneable {
 
                 //get all entities on the beacon
                 Objects.requireNonNull(Bukkit.getWorld(startWaypoint.getWorldName())).getNearbyEntities(startLoc, 0.5, 0.5, 0.5).forEach(entity -> {
-                    if (entity.getType() == EntityType.PLAYER) {
+                    if (entity.getType() == EntityType.PLAYER && (player == null || entity.getUniqueId().equals(player.getUniqueId()))) {
                         WaypointPlayer waypointPlayer = Main.waypointManager.getPlayer(entity.getUniqueId());
-                        if (waypointPlayer != null)
-                            waypointPlayer.setTeleporting(true);
+                        if (waypointPlayer == null) {
+                            Main.waypointManager.addPlayer(entity.getUniqueId());
+                            waypointPlayer = Main.waypointManager.getPlayer(entity.getUniqueId());
+                        }
+                        waypointPlayer.setTeleporting(true);
 
                         ((Player) entity).closeInventory();
                         int startBeamTop = startBeaconStatus == 1 ? entity.getWorld().getMaxHeight() + 256 : startBeaconStatus - 2;
@@ -194,6 +196,7 @@ public class Waypoint implements Cloneable {
                         tpLoc.setY(destinationBeamTop);
 
                         //keep players in start beam
+                        WaypointPlayer finalWaypointPlayer = waypointPlayer;
                         new BukkitRunnable() {
                             int time = 0;
                             @Override
@@ -214,7 +217,8 @@ public class Waypoint implements Cloneable {
                                     //let player go if they are stuck after 30 seconds
                                     if (time >= 80) {
                                         ((LivingEntity) entity).removePotionEffect(PotionEffectType.LEVITATION);
-                                        Objects.requireNonNull(waypointPlayer).setTeleporting(false);
+                                        ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 255, false, false));
+                                        Objects.requireNonNull(finalWaypointPlayer).setTeleporting(false);
                                         this.cancel();
                                     }
                                 }
@@ -244,12 +248,12 @@ public class Waypoint implements Cloneable {
                                                 //let player go if they are stuck after 30 seconds
                                                 if (time >= 80) {
                                                     ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 255, false, false));
-                                                    Objects.requireNonNull(waypointPlayer).setTeleporting(false);
+                                                    Objects.requireNonNull(finalWaypointPlayer).setTeleporting(false);
                                                     this.cancel();
                                                 }
                                             }
                                             else {
-                                                Objects.requireNonNull(waypointPlayer).setTeleporting(false);
+                                                Objects.requireNonNull(finalWaypointPlayer).setTeleporting(false);
                                                 this.cancel();
                                             }
                                         }
@@ -264,7 +268,7 @@ public class Waypoint implements Cloneable {
     }
 
     /**
-     * @return 0 if no, 1 if yes, returns y-coordinate of bedrock if there is bedrock above the beacon
+     * @return 0 if beacon cannot be teleported to, 1 if it is able to be teleported to, returns y-coordinate of bedrock if there is bedrock above the beacon
      */
     public int getBeaconStatus() {
         final List<Material> pyramidBlocks = Arrays.asList(Material.IRON_BLOCK, Material.GOLD_BLOCK, Material.DIAMOND_BLOCK, Material.EMERALD_BLOCK, Material.NETHERITE_BLOCK);
@@ -272,12 +276,18 @@ public class Waypoint implements Cloneable {
 
         Location beaconLoc = this.coord.getLocation();
 
-        //check if there are pyramid blocks under the beacon
-        for (int blockX = beaconLoc.getBlockX() - 1; blockX <= beaconLoc.getBlockX() + 1; blockX++) {
-            for (int blockZ = beaconLoc.getBlockZ() - 1; blockZ <= beaconLoc.getBlockZ() + 1; blockZ++) {
-                if (!pyramidBlocks.contains(Objects.requireNonNull(beaconLoc.getWorld()).getBlockAt(blockX, beaconLoc.getBlockY() - 1, blockZ).getType())) {
-                    isActive = 0;
-                    break;
+        //check if beacon is there
+        if (beaconLoc.getWorld().getBlockAt(beaconLoc).getType() != Material.BEACON)
+            isActive = 0;
+
+        if (isActive != 0) {
+            //check if there are pyramid blocks under the beacon
+            for (int blockX = beaconLoc.getBlockX() - 1; blockX <= beaconLoc.getBlockX() + 1; blockX++) {
+                for (int blockZ = beaconLoc.getBlockZ() - 1; blockZ <= beaconLoc.getBlockZ() + 1; blockZ++) {
+                    if (!pyramidBlocks.contains(Objects.requireNonNull(beaconLoc.getWorld()).getBlockAt(blockX, beaconLoc.getBlockY() - 1, blockZ).getType())) {
+                        isActive = 0;
+                        break;
+                    }
                 }
             }
         }
