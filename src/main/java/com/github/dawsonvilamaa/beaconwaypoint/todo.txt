@@ -1,7 +1,2 @@
-- delete waypoint if beacon is removed via command rather than manually breaking (done but doesn't work for worldedit)
-- add config option to change whether beacon teleports all entities standing on it or just that player (done)
-- add bStats (done)
-- disable player fall damage when falling on destination beacon (event) (done)
-- plugin reload command (/waypoint reload) (done)
-- change current beacon settings button to waypoint's icon (done)
-- add update notification for console and when op joins the server (done)
+- fix config.yml not being created on first install (done)
+- add support back to 1.14

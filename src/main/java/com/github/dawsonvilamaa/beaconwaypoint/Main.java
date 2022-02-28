@@ -57,12 +57,17 @@ public class Main extends JavaPlugin {
         pm.registerEvents(inventoryListener, this);
 
         //create data folder if it doesn't exist
-        File pluginDir = new File("plugins/" + File.separator + "BeaconWaypoints");
-        if (!pluginDir.exists()) pluginDir.mkdir();
+        if (!getDataFolder().exists())
+            getDataFolder().mkdirs();
+
+        //create config file if it doesn't exist
+        if (!new File(getDataFolder(), "config.yml").exists())
+            saveDefaultConfig();
 
         //create folder for player waypoints if it doesn't exist
-        File playerDir = new File("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "players");
-        if (!playerDir.exists()) playerDir.mkdir();
+        File playerDir = new File(getDataFolder() + File.separator + "players");
+        if (!playerDir.exists())
+            playerDir.mkdirs();
 
         loadData();
         autoSave.runTaskTimer(plugin, 6000, 6000);
