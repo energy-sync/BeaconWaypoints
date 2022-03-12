@@ -1,0 +1,149 @@
+#
+# CONFIGURATION FOR BEACON WAYPOINTS
+#
+
+# The maximum amount of public waypoints that can exist at once on the server
+max-public-waypoints: 100
+
+# The maximum amount of private waypoints that each player can have
+max-private-waypoints: 30
+
+# The number of rows the public waypoint selection menu will show per page, not including the row for page navigation
+# Range: 1-5
+public-waypoint-menu-rows: 3
+
+# The number of rows the private waypoint selection menu will show per page, not including the row for page navigation
+# Range: 1-5
+private-waypoint-menu-rows: 2
+
+# Activate teleportation as soon as the destination is chosen without a warmup animation
+instant-teleport: false
+
+# Disable the particle animations when teleporting through a beacon
+disable-animations: false
+
+# By default, beacons teleport anyone standing on top of them. If you want to limit the teleportation to only the
+# player who chooses the destination, set this to true.
+disable-group-teleporting: false
+
+# List of worlds that allow waypoints (based on folder name)
+allowed-worlds:
+  - world
+  - world_nether
+  - world_the_end
+
+# List of items that can be used for waypoint icons
+# The order given here is the same order that will be in the icon picker menu
+waypoint-icons:
+  - APPLE
+  - SHROOMLIGHT
+  - TOTEM_OF_UNDYING
+  - EMERALD
+  - DIAMOND
+  - END_CRYSTAL
+  - LEATHER
+  - FILLED_MAP
+  - SNOW_BLOCK
+  - RED_MUSHROOM
+  - CARROT
+  - GOLDEN_APPLE
+  - CREEPER_HEAD
+  - PRISMARINE_BRICKS
+  - ALLIUM
+  - IRON_PICKAXE
+  - QUARTZ_BRICKS
+  - SKELETON_SKULL
+  - POPPY
+  - PUMPKIN
+  - HONEYCOMB
+  - SEA_LANTERN
+  - BLUE_ICE
+  - PURPUR_BLOCK
+  - ENCHANTING_TABLE
+  - OAK_LOG
+  - WHEAT
+  - RED_BED
+  - ORANGE_TULIP
+  - BLAZE_POWDER
+  - SUGAR_CANE
+  - LAPIS_LAZULI
+  - CHORUS_FRUIT
+  - END_PORTAL_FRAME
+  - ELYTRA
+  - BREWING_STAND
+  - REDSTONE
+  - RED_SAND
+  - END_STONE
+  - CACTUS
+  - WATER_BUCKET
+  - SHULKER_BOX
+  - CHEST
+  - NETHERITE_INGOT
+  - SOUL_SAND
+  - RED_NETHER_BRICKS
+  - MAGMA_BLOCK
+  - SAND
+  - ENDER_PEARL
+  - WARPED_STEM
+  - CRIMSON_STEM
+  - ZOMBIE_HEAD
+  - OBSIDIAN
+  - WITHER_SKELETON_SKULL
+  - GRASS_BLOCK
+  - IRON_BLOCK
+  - COPPER_BLOCK
+  - GOLD_BLOCK
+  - DIAMOND_BLOCK
+  - NETHERITE_BLOCK
+  - SPRUCE_LOG
+  - BIRCH_LOG
+  - JUNGLE_LOG
+  - ACACIA_LOG
+  - DARK_OAK_LOG
+  - SPONGE
+  - BOOKSHELF
+  - NETHERRACK
+  - GLOWSTONE
+  - STONE_BRICKS
+  - DEEPSLATE_BRICKS
+  - MELON
+  - MYCELIUM
+  - EMERALD_BLOCK
+  - HAY_BLOCK
+  - BAMBOO
+  - IRON_BARS
+  - DRAGON_HEAD
+  - CAMPFIRE
+  - BEE_NEST
+  - TNT
+  - BEACON
+  - QUARTZ
+  - IRON_INGOT
+  - COPPER_INGOT
+  - GOLD_INGOT
+  - STRING
+  - FEATHER
+  - GUNPOWDER
+  - WHEAT_SEEDS
+  - BRICK
+  - BOOK
+  - SLIME_BALL
+  - EGG
+  - BONE
+  - BLAZE_ROD
+  - GOLD_NUGGET
+  - NETHER_WART
+  - ENDER_EYE
+  - EXPERIENCE_BOTTLE
+  - NETHER_STAR
+  - FIREWORK_ROCKET
+  - MUSIC_DISC_STAL
+  - CAKE
+  - SWEET_BERRIES
+  - WHITE_WOOL
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+  - FISHING_ROD
+  - TRIDENT
+  - GOLDEN_CARROT

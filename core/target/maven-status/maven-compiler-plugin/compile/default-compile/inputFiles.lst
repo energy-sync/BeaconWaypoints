@@ -1,0 +1,15 @@
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/gui/InventoryGUI.java
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/Metrics.java
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/gui/MultiPageInventoryGUI.java
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/BWCommandExecutor.java
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/gui/GUIs.java
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/gui/InventoryGUIButton.java
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/waypoints/WaypointCoord.java
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/Main.java
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/waypoints/WaypointPlayer.java
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/waypoints/WaypointManager.java
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/listeners/InventoryListener.java
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/UpdateChecker.java
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/listeners/WorldListener.java
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/waypoints/Waypoint.java
+/home/energy/Documents/Coding/BeaconWaypoints/core/src/main/java/com/github/dawsonvilamaa/beaconwaypoint/gui/MenuManager.java

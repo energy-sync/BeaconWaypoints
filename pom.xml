@@ -3,19 +3,13 @@
     <groupId>com.github.dawsonvilamaa</groupId>
     <artifactId>BeaconWaypoints</artifactId>
     <version>1.1.1</version>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
+    <packaging>pom</packaging>
+    <modules>
+        <module>core</module>
+        <module>1_18_R1</module>
+        <module>VersionWrapper</module>
+        <module>Build</module>
+    </modules>
     <repositories>
         <repository>
             <id>spigot-repo</id>
@@ -28,21 +22,14 @@
             </snapshots>
         </repository>
     </repositories>
-
     <dependencies>
-        <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot</artifactId>
-            <version>1.18.1-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
             <version>1.1.1</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

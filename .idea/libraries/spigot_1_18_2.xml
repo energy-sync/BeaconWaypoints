@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="spigot-1.18.2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/BuildTools/spigot-1.18.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
