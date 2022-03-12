@@ -6,15 +6,14 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="core" />
-        <module name="VersionWrapper" />
-        <module name="1_18_R1" />
-        <module name="Build" />
+        <module name="BeaconWaypoints" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="1_18_R2" target="17" />
-      <module name="VersionMatcher" target="1.8" />
+      <module name="1_18_R1" target="17" />
+      <module name="Build" target="17" />
+      <module name="core" target="1.8" />
+      <module name="VersionWrapper" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>
