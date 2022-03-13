@@ -19,14 +19,14 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_18_R1.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class Version_1_18_R1 implements VersionWrapper {
+public class Version_1_17_R1 implements VersionWrapper {
 
     /**
      * Opens the vanilla beacon GUI for a player
@@ -39,14 +39,14 @@ public class Version_1_18_R1 implements VersionWrapper {
         Location beaconLoc = beacon.getLocation();
         Vec3D blockLocVec3D = new Vec3D(beaconLoc.getBlockX(), beaconLoc.getBlockY(), beaconLoc.getBlockZ());
         EntityPlayer playerHandle = ((CraftPlayer) player).getHandle();
-        net.minecraft.world.level.block.Block beaconHandle = ((CraftBlock) beacon).getNMS().b(); //b(): getBlock()
-        ItemStack itemStackHandle = playerHandle.fq().f(); //fq().f(): getInventory().getItemInHand()
+        net.minecraft.world.level.block.Block beaconHandle = ((CraftBlock) beacon).getNMS().getBlock();
+        ItemStack itemStackHandle = playerHandle.getInventory().getItemInHand();
         MovingObjectPositionBlock blockHitResult = new MovingObjectPositionBlock(blockLocVec3D, EnumDirection.b, new BlockPosition(blockLocVec3D), true);
         BlockActionContext blockPlaceContext = new BlockActionContext(playerHandle, EnumHand.a, itemStackHandle, blockHitResult);
-        IBlockData blockState = beaconHandle.a(blockPlaceContext); //a(): getPlacedState()
-        World levelHandle = playerHandle.W(); //W(): getWorld()
+        IBlockData blockState = beaconHandle.getPlacedState(blockPlaceContext);
+        World levelHandle = playerHandle.getWorld();
         BlockPosition blockPos = new BlockPosition(blockLocVec3D);
-        beaconHandle.a(blockState, levelHandle, blockPos, playerHandle, EnumHand.a, blockHitResult); //a(): interact()
+        beaconHandle.interact(blockState, levelHandle, blockPos, playerHandle, EnumHand.a, blockHitResult);
     }
 
     /**
@@ -71,7 +71,7 @@ public class Version_1_18_R1 implements VersionWrapper {
                 player.sendMessage(ChatColor.AQUA + "A new version of Beacon Waypoints is available!\n" + ChatColor.YELLOW + "Current version: " + Main.plugin.getDescription().getVersion() + "\nUpdated version: " + version);
                 String json = "[{\"text\":\"§b§nClick here to download\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"https://www.spigotmc.org/resources/beaconwaypoints.99866/\"}}]";
                 PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(json), ChatMessageType.a, player.getUniqueId());
-                ((CraftPlayer)player).getHandle().b.a(packet);
+                ((CraftPlayer)player).getHandle().b.sendPacket(packet);
             }
         });
     }
