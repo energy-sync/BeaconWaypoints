@@ -6,10 +6,11 @@
     <packaging>pom</packaging>
     <modules>
         <module>core</module>
-        <module>1_18_R1</module>
         <module>VersionWrapper</module>
-        <module>Build</module>
         <module>1_17_R1</module>
+        <module>1_18_R1</module>
+        <module>1_18_R2</module>
+        <module>Build</module>
     </modules>
     <repositories>
         <repository>
