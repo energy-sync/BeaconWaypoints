@@ -7,7 +7,7 @@
         <version>1.1.1</version>
     </parent>
 
-    <artifactId>1_17_R1</artifactId>
+    <artifactId>1_17_1_R1</artifactId>
 
     <repositories>
         <repository>
@@ -38,7 +38,7 @@
     </dependencies>
 
     <properties>
-        <maven.compiler.source>16</maven.compiler.source>
-        <maven.compiler.target>16</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 </project>
