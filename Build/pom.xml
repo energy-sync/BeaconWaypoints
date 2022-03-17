@@ -32,6 +32,18 @@
         </dependency>
         <dependency>
             <groupId>com.github.dawsonvilamaa</groupId>
+            <artifactId>1_16_R2</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.dawsonvilamaa</groupId>
+            <artifactId>1_16_R3</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.dawsonvilamaa</groupId>
             <artifactId>1_17_R1</artifactId>
             <version>${project.parent.version}</version>
             <scope>compile</scope>
