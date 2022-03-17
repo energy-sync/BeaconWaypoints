@@ -42,12 +42,12 @@ public class Version_1_18_R2 implements VersionWrapper {
         EntityPlayer playerHandle = ((CraftPlayer) player).getHandle();
         net.minecraft.world.level.block.Block beaconHandle = ((CraftBlock) beacon).getNMS().b(); //b(): getBlock()
         ItemStack itemStackHandle = playerHandle.fr().f(); //fr().f(): getInventory().getItemInHand()
-        MovingObjectPositionBlock blockHitResult = new MovingObjectPositionBlock(blockLocVec3D, EnumDirection.b, new BlockPosition(blockLocVec3D), true);
-        BlockActionContext blockPlaceContext = new BlockActionContext(playerHandle, EnumHand.a, itemStackHandle, blockHitResult);
+        MovingObjectPositionBlock blockHitResult = new MovingObjectPositionBlock(blockLocVec3D, EnumDirection.b, new BlockPosition(blockLocVec3D), true); //EnumDirection.b: EnumDirection.UP
+        BlockActionContext blockPlaceContext = new BlockActionContext(playerHandle, EnumHand.a, itemStackHandle, blockHitResult); //EnumHand.a: EnumHand.MAIN_HAND
         IBlockData blockState = beaconHandle.a(blockPlaceContext); //a(): getPlacedState()
         World levelHandle = playerHandle.W(); //W(): getWorld()
         BlockPosition blockPos = new BlockPosition(blockLocVec3D);
-        beaconHandle.a(blockState, levelHandle, blockPos, playerHandle, EnumHand.a, blockHitResult); //a(): interact()
+        beaconHandle.a(blockState, levelHandle, blockPos, playerHandle, EnumHand.a, blockHitResult); //a(): interact(), EnumHand.a: EnumHand.MAIN_HAND
     }
 
     /**
@@ -71,8 +71,8 @@ public class Version_1_18_R2 implements VersionWrapper {
             if (!Main.plugin.getDescription().getVersion().equals(version)) {
                 player.sendMessage(ChatColor.AQUA + "A new version of Beacon Waypoints is available!\n" + ChatColor.YELLOW + "Current version: " + Main.plugin.getDescription().getVersion() + "\nUpdated version: " + version);
                 String json = "[{\"text\":\"§b§nClick here to download\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"https://www.spigotmc.org/resources/beaconwaypoints.99866/\"}}]";
-                PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(json), ChatMessageType.a, player.getUniqueId());
-                ((CraftPlayer)player).getHandle().b.a(packet);
+                PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(json), ChatMessageType.a, player.getUniqueId()); //ChatMessageType.a: ChatMessageType.CHAT
+                ((CraftPlayer)player).getHandle().b.a(packet); //b.a(): connection.send()
             }
         });
     }

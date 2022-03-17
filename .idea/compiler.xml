@@ -10,6 +10,7 @@
         <module name="core" />
         <module name="VersionWrapper" />
         <module name="1_18_R2" />
+        <module name="1_16_R1" />
         <module name="1_18_R1" />
         <module name="Build" />
         <module name="1_17_1_R1" />

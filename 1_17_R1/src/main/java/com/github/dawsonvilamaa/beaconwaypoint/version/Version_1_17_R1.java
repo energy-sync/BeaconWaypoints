@@ -41,12 +41,12 @@ public class Version_1_17_R1 implements VersionWrapper {
         EntityPlayer playerHandle = ((CraftPlayer) player).getHandle();
         net.minecraft.world.level.block.Block beaconHandle = ((CraftBlock) beacon).getNMS().getBlock();
         ItemStack itemStackHandle = playerHandle.getInventory().getItemInHand();
-        MovingObjectPositionBlock blockHitResult = new MovingObjectPositionBlock(blockLocVec3D, EnumDirection.b, new BlockPosition(blockLocVec3D), true);
-        BlockActionContext blockPlaceContext = new BlockActionContext(playerHandle, EnumHand.a, itemStackHandle, blockHitResult);
+        MovingObjectPositionBlock blockHitResult = new MovingObjectPositionBlock(blockLocVec3D, EnumDirection.b, new BlockPosition(blockLocVec3D), true); //EnumDirection.b: EnumDirection.UP
+        BlockActionContext blockPlaceContext = new BlockActionContext(playerHandle, EnumHand.a, itemStackHandle, blockHitResult); //EnumHand.a: EnumHand.MAIN_HAND
         IBlockData blockState = beaconHandle.getPlacedState(blockPlaceContext);
         World levelHandle = playerHandle.getWorld();
         BlockPosition blockPos = new BlockPosition(blockLocVec3D);
-        beaconHandle.interact(blockState, levelHandle, blockPos, playerHandle, EnumHand.a, blockHitResult);
+        beaconHandle.interact(blockState, levelHandle, blockPos, playerHandle, EnumHand.a, blockHitResult); //EnumHand.a: EnumHand.MAIN_HAND
     }
 
     /**
@@ -70,8 +70,8 @@ public class Version_1_17_R1 implements VersionWrapper {
             if (!Main.plugin.getDescription().getVersion().equals(version)) {
                 player.sendMessage(ChatColor.AQUA + "A new version of Beacon Waypoints is available!\n" + ChatColor.YELLOW + "Current version: " + Main.plugin.getDescription().getVersion() + "\nUpdated version: " + version);
                 String json = "[{\"text\":\"§b§nClick here to download\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"https://www.spigotmc.org/resources/beaconwaypoints.99866/\"}}]";
-                PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(json), ChatMessageType.a, player.getUniqueId());
-                ((CraftPlayer)player).getHandle().b.sendPacket(packet);
+                PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(json), ChatMessageType.a, player.getUniqueId()); //ChatMessageType.a: ChatMessageType.CHAT
+                ((CraftPlayer)player).getHandle().b.sendPacket(packet); //b: connection
             }
         });
     }
