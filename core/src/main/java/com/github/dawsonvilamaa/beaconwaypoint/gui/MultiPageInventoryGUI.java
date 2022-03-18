@@ -77,7 +77,8 @@ public class MultiPageInventoryGUI {
             InventoryGUIButton previousButton = new InventoryGUIButton(gui, "Previous Page", null, Material.PLAYER_HEAD);
             ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
             SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-            Objects.requireNonNull(skullMeta).setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString("a68f0b64-8d14-4000-a95f-4b9ba14f8df9"))); //MHF_ArrowLeft
+            //skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString("a68f0b64-8d14-4000-a95f-4b9ba14f8df9"))); //MHF_ArrowLeft
+            skullMeta.setOwner("MHF_ArrowLeft"); //much more consistent but deprecated
             skull.setItemMeta(skullMeta);
             previousButton.setItem(skull);
             previousButton.setName("Previous Page");
@@ -96,7 +97,8 @@ public class MultiPageInventoryGUI {
             InventoryGUIButton nextButton = new InventoryGUIButton(gui, "Next Page", null, Material.PLAYER_HEAD);
             ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
             SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-            Objects.requireNonNull(skullMeta).setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString("50c8510b-5ea0-4d60-be9a-7d542d6cd156"))); //MHF_ArrowRight
+            //skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString("50c8510b-5ea0-4d60-be9a-7d542d6cd156"))); //MHF_ArrowRight
+            skullMeta.setOwner("MHF_ArrowRight"); //much more consistent but deprecated
             skull.setItemMeta(skullMeta);
             nextButton.setItem(skull);
             nextButton.setName("Next Page");

@@ -2,19 +2,19 @@ package com.github.dawsonvilamaa.beaconwaypoint.version;
 
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import com.github.dawsonvilamaa.beaconwaypoint.UpdateChecker;
-import net.minecraft.server.v1_15_R1.*;
+import net.minecraft.server.v1_14_R1.*;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_15_R1.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_14_R1.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class Version_1_15_R1 implements VersionWrapper {
+public class Version_1_14_R1 implements VersionWrapper {
 
     /**
      * Opens the vanilla beacon GUI for a player
@@ -27,7 +27,7 @@ public class Version_1_15_R1 implements VersionWrapper {
         Location beaconLoc = beacon.getLocation();
         Vec3D blockLocVec3D = new Vec3D(beaconLoc.getBlockX(), beaconLoc.getBlockY(), beaconLoc.getBlockZ());
         EntityPlayer playerHandle = ((CraftPlayer) player).getHandle();
-        net.minecraft.server.v1_15_R1.Block beaconHandle = ((CraftBlock) beacon).getNMS().getBlock();
+        net.minecraft.server.v1_14_R1.Block beaconHandle = ((CraftBlock) beacon).getNMS().getBlock();
         MovingObjectPositionBlock blockHitResult = new MovingObjectPositionBlock(blockLocVec3D, EnumDirection.UP, new BlockPosition(blockLocVec3D), true);
         World levelHandle = playerHandle.getWorld();
         ItemActionContext useOnContent = new ItemActionContext(playerHandle, EnumHand.MAIN_HAND, blockHitResult);

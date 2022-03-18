@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 public class VersionMatcher {
     public VersionWrapper match() {
         final String serverVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
+        Bukkit.getLogger().info("[BeaconWaypoints] Loading module for version " + serverVersion);
         try {
             return (VersionWrapper) Class.forName(getClass().getPackage().getName() + ".Version_" + serverVersion).newInstance();
         } catch (IllegalAccessException | InstantiationException exception) {
