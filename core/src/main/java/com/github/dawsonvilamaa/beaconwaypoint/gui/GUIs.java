@@ -83,11 +83,13 @@ public class GUIs {
                 InventoryGUIButton waypointButton = new InventoryGUIButton(gui.getGUI(), publicWaypoint.getName(), ChatColor.GRAY + "" + coord.getX() + ", " + coord.getY() + ", " + coord.getZ() + "\n" + ChatColor.DARK_GRAY + Bukkit.getOfflinePlayer(publicWaypoint.getOwnerUUID()).getName() + "\n" + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + publicWaypoint.getCoord().getWorldName(), publicWaypoint.getIcon());
                 waypointButton.setOnClick(e -> {
                     player.closeInventory();
-                    if (Main.waypointManager.getPublicWaypoint(coord) == null)
-                        player.sendMessage(ChatColor.RED + "That waypoint doesn't exist!");
-                    else if (publicWaypoint.getBeaconStatus() == 0)
-                        player.sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.");
-                    else Waypoint.teleport(waypoint, publicWaypoint, Main.plugin.getConfig().getBoolean("disable-group-teleporting") ? player : null);
+                    if (player.getLocation().distance(waypoint.getCoord().getLocation()) <= 5.5) {
+                        if (Main.waypointManager.getPublicWaypoint(coord) == null)
+                            player.sendMessage(ChatColor.RED + "That waypoint doesn't exist!");
+                        else if (publicWaypoint.getBeaconStatus() == 0)
+                            player.sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.");
+                        else Waypoint.teleport(waypoint, publicWaypoint, Main.plugin.getConfig().getBoolean("disable-group-teleporting") ? player : null);
+                    }
                 });
                 if (publicWaypoint.getOwnerUUID().equals(player.getUniqueId())) {
                     waypointButton.setOnRightClick(e -> {
@@ -127,11 +129,13 @@ public class GUIs {
                 InventoryGUIButton waypointButton = new InventoryGUIButton(gui.getGUI(), privateWaypoint.getName(), ChatColor.GRAY + "" + coord.getX() + ", " + coord.getY() + ", " + coord.getZ() + "\n" + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + privateWaypoint.getCoord().getWorldName(), privateWaypoint.getIcon());
                 waypointButton.setOnClick(e -> {
                     player.closeInventory();
-                    if (Main.waypointManager.getPrivateWaypoint(player.getUniqueId(), coord) == null)
-                        player.sendMessage(ChatColor.RED + "That waypoint doesn't exist!");
-                    else if (privateWaypoint.getBeaconStatus() == 0)
-                        player.sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.");
-                    else Waypoint.teleport(waypoint, privateWaypoint, Main.plugin.getConfig().getBoolean("disable-group-teleporting") ? player : null);
+                    if (player.getLocation().distance(waypoint.getCoord().getLocation()) <= 5.5) {
+                        if (Main.waypointManager.getPrivateWaypoint(player.getUniqueId(), coord) == null)
+                            player.sendMessage(ChatColor.RED + "That waypoint doesn't exist!");
+                        else if (privateWaypoint.getBeaconStatus() == 0)
+                            player.sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.");
+                        else Waypoint.teleport(waypoint, privateWaypoint, Main.plugin.getConfig().getBoolean("disable-group-teleporting") ? player : null);
+                    }
                 });
                 if (privateWaypoint.getOwnerUUID().equals(player.getUniqueId())) {
                     waypointButton.setOnRightClick(e -> {

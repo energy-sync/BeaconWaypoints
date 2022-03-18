@@ -20,6 +20,7 @@ com\github\dawsonvilamaa\beaconwaypoint\gui\InventoryGUI.class
 com\github\dawsonvilamaa\beaconwaypoint\BWCommandExecutor.class
 com\github\dawsonvilamaa\beaconwaypoint\Metrics$AdvancedPie.class
 com\github\dawsonvilamaa\beaconwaypoint\gui\MenuManager.class
+com\github\dawsonvilamaa\beaconwaypoint\Main$2.class
 com\github\dawsonvilamaa\beaconwaypoint\gui\GUIs.class
 com\github\dawsonvilamaa\beaconwaypoint\gui\MultiPageInventoryGUI.class
 com\github\dawsonvilamaa\beaconwaypoint\Metrics$CustomChart.class

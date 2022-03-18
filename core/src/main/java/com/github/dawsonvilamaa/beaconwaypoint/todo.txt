@@ -1,2 +1,0 @@
-- fix config.yml not being created on first install (done)
-- add support back to 1.14

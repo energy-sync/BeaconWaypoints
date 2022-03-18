@@ -21,8 +21,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 public class Main extends JavaPlugin {
     public static Main plugin;
@@ -51,6 +54,12 @@ public class Main extends JavaPlugin {
 
         //bStats
         Metrics metrics = new Metrics(this, 14276);
+        metrics.addCustomChart(new Metrics.SingleLineChart("waypoints", new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return waypointManager.getPublicWaypoints().size() + waypointManager.getNumPrivateWaypoints();
+            }
+        }));
 
         //register commands
         BWCommandExecutor commandExecutor = new BWCommandExecutor(this);

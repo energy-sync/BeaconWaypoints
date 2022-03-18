@@ -17,6 +17,7 @@
     <option name="ignoredFiles">
       <set>
         <option value="$PROJECT_DIR$/1_14_4_R1/pom.xml" />
+        <option value="$PROJECT_DIR$/1_17_1_R1/pom.xml" />
       </set>
     </option>
   </component>

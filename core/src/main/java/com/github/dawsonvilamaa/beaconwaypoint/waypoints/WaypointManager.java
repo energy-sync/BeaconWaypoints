@@ -121,6 +121,17 @@ public class WaypointManager {
     }
 
     /**
+     * Returns the total number of private waypoints between all players
+     * @return numPrivateWaypoints
+     */
+    public int getNumPrivateWaypoints() {
+        int numPrivateWaypoints = 0;
+        for (WaypointPlayer waypointPlayer : waypointPlayers.values())
+            numPrivateWaypoints += waypointPlayer.getWaypoints().size();
+        return numPrivateWaypoints;
+    }
+
+    /**
      * Returns a collection of all private waypoints for a player sorted alphabetically
      * @param uuid
      * @return waypoints
