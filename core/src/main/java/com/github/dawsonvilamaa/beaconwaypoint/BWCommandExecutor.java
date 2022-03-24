@@ -26,6 +26,9 @@ public class BWCommandExecutor implements CommandExecutor {
             String cleanCmd = cmd.getName().toLowerCase();
 
             if (cleanCmd.equals("waypoint") || cleanCmd.equals("wp") || cleanCmd.equals("waypoints")) {
+                if (args.length == 0)
+                    return false;
+
                 //reload
                 if (args.length >= 1 && args[0].equalsIgnoreCase("reload")) {
                     if (player.hasPermission("BeaconWaypoints.reload")) {
@@ -37,11 +40,22 @@ public class BWCommandExecutor implements CommandExecutor {
                     return true;
                 }
 
-                //create waypoint
-                if (args.length < 2)
-                    return false;
-                if (!(args[args.length - 1].equalsIgnoreCase("public") || args[args.length - 1].equalsIgnoreCase("private")))
-                    return false;
+                //check if player has permission to create public waypoints
+                if (!player.hasPermission("BeaconWaypoints.createWaypoints")) {
+                    player.sendMessage(ChatColor.RED + "You don't have permission to use that command");
+                    return true;
+                }
+
+                //check if player has permission to create private waypoints
+                boolean privateWaypoint = false;
+                if (args[args.length - 1].equalsIgnoreCase("private")) {
+                    privateWaypoint = true;
+                    if (!player.hasPermission("BeaconWaypoints.createPrivateWaypoints")) {
+                        player.sendMessage(ChatColor.RED + "You don't have permission to create private waypoints");
+                        privateWaypoint = false;
+                        return true;
+                    }
+                }
 
                 Location playerLoc = player.getLocation();
                 playerLoc.setY(playerLoc.getY() - 1);
@@ -60,7 +74,7 @@ public class BWCommandExecutor implements CommandExecutor {
 
                 //check if waypoint already exists at location
                 boolean waypointExists = false;
-                if (args[args.length - 1].equalsIgnoreCase("public")) {
+                if (!privateWaypoint) {
                     //check if player is owner
                     Waypoint inactiveWaypoint = Main.waypointManager.getInactiveWaypoints().get(new WaypointCoord(playerLoc));
                     if (inactiveWaypoint != null && !inactiveWaypoint.getOwnerUUID().equals(player.getUniqueId())) {
@@ -99,16 +113,20 @@ public class BWCommandExecutor implements CommandExecutor {
 
                 //check if name is alphanumeric (including spaces, underscores, and hyphens) and is 30 characters or fewer
                 StringBuilder fullWaypointName = new StringBuilder();
-                for (int argIndex = 0; argIndex < args.length - 1; argIndex++)
+                for (int argIndex = 0; argIndex < args.length; argIndex++)
                     fullWaypointName.append(args[argIndex]).append(" ");
                 fullWaypointName.setLength(fullWaypointName.length() - 1);
+                if (fullWaypointName.toString().endsWith(" public"))
+                    fullWaypointName.replace(fullWaypointName.length() - 7, fullWaypointName.length(), "");
+                if (fullWaypointName.toString().endsWith(" private"))
+                    fullWaypointName.replace(fullWaypointName.length() - 8, fullWaypointName.length(), "");
                 if (fullWaypointName.length() > 30 || !fullWaypointName.toString().matches("^[A-Za-z0-9- ]+$")) {
                     player.sendMessage(ChatColor.RED + "Waypoint names must be 30 characters or fewer and can only contain letters, numbers, spaces, underscores, and hyphens.");
                     return true;
                 }
 
                 //check if waypoint with that name already exists
-                if (args[args.length - 1].equalsIgnoreCase("public")) {
+                if (!privateWaypoint) {
                     for (Waypoint waypoint : Main.waypointManager.getPublicWaypoints().values()) {
                         if (waypoint != null && waypoint.getName().equals(fullWaypointName.toString())) {
                             player.sendMessage(ChatColor.RED + "There is already a public waypoint of that name");
@@ -137,14 +155,14 @@ public class BWCommandExecutor implements CommandExecutor {
                 newWaypoint.setName(fullWaypointName.toString());
                 newWaypoint.setIsWaypoint(true);
 
-                if (args[args.length - 1].equalsIgnoreCase("public"))
+                if (!privateWaypoint)
                     Main.waypointManager.addPublicWaypoint(newWaypoint);
                 else {
                     WaypointPlayer waypointPlayer = Main.waypointManager.getPlayer(player.getUniqueId());
                     if (waypointPlayer != null)
                         waypointPlayer.addWaypoint(newWaypoint);
                 }
-                player.sendMessage(ChatColor.GREEN + "Created the " + (args[args.length - 1].equalsIgnoreCase("public") ? "public" : "private") + " waypoint " + ChatColor.BOLD + fullWaypointName);
+                player.sendMessage(ChatColor.GREEN + "Created the " + (privateWaypoint ? "private" : "public") + " waypoint " + ChatColor.BOLD + fullWaypointName);
                 GUIs.waypointIconPickerMenu(player, newWaypoint, null);
                 return true;
             }

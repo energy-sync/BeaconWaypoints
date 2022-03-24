@@ -121,6 +121,21 @@ public class WaypointManager {
     }
 
     /**
+     * Returns all private waypoints at a location
+     * @param waypointCoord
+     * @return privateWaypoints
+     */
+    public List<Waypoint> getPrivateWaypointsAtCoord(WaypointCoord waypointCoord) {
+        List<Waypoint> privateWaypoints = new ArrayList<>();
+        for (WaypointPlayer waypointPlayer : waypointPlayers.values()) {
+            Waypoint privateWaypoint = waypointPlayer.getWaypoint(waypointCoord);
+            if (privateWaypoint != null)
+                privateWaypoints.add(privateWaypoint);
+        }
+        return privateWaypoints;
+    }
+
+    /**
      * Returns the total number of private waypoints between all players
      * @return numPrivateWaypoints
      */

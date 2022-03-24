@@ -24,6 +24,8 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -60,28 +62,50 @@ public class WorldListener implements Listener {
         if (e.getBlock().getType() == Material.BEACON) {
             WaypointCoord waypointCoord = new WaypointCoord(e.getBlock().getLocation());
 
-            //remove public waypoint
-            Waypoint publicWaypoint = Main.waypointManager.getPublicWaypoint(waypointCoord);
-            if (publicWaypoint != null) {
-                Main.waypointManager.removePublicWaypoint(waypointCoord);
-                e.getPlayer().sendMessage(ChatColor.RED + "Removed public waypoint " + ChatColor.BOLD + publicWaypoint.getName());
-            }
-
-            //remove private waypoint
-            for (WaypointPlayer waypointPlayer : Main.waypointManager.getWaypointPlayers().values()) {
-                Waypoint privateWaypoint = Main.waypointManager.getPrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
-                if (privateWaypoint != null) {
-                    Main.waypointManager.removePrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
-                    Player player = Bukkit.getPlayer(waypointPlayer.getUUID());
-                    if (player != null)
-                        player.sendMessage(ChatColor.RED + "Removed private waypoint " + ChatColor.BOLD + privateWaypoint.getName());
+            //check if player has permission to break waypoint beacons and if the beacon has waypoints
+            Waypoint publicWaypoint1 = Main.waypointManager.getPublicWaypoint(waypointCoord);
+            List<Waypoint> privateWaypoints = Main.waypointManager.getPrivateWaypointsAtCoord(waypointCoord);
+            boolean ownsWaypoint = true;
+            if (publicWaypoint1 != null && !publicWaypoint1.getOwnerUUID().equals(e.getPlayer().getUniqueId()))
+                ownsWaypoint = false;
+            if (ownsWaypoint && privateWaypoints.size() > 0) {
+                for (Waypoint privateWaypoint : privateWaypoints) {
+                    if (!privateWaypoint.getOwnerUUID().equals(e.getPlayer().getUniqueId())) {
+                        ownsWaypoint = false;
+                        break;
+                    }
                 }
             }
+            if (!e.getPlayer().hasPermission("BeaconWaypoints.breakWaypointBeacons")) {
+                if (ownsWaypoint && !Main.plugin.getConfig().getBoolean("allow-beacon-break-by-owner")) {
+                    e.getPlayer().sendMessage(ChatColor.RED + "You do not have permission to break beacons that have waypoints set");
+                    e.setCancelled(true);
+                }
+            }
+            else {
+                //remove public waypoint
+                Waypoint publicWaypoint = Main.waypointManager.getPublicWaypoint(waypointCoord);
+                if (publicWaypoint != null) {
+                    Main.waypointManager.removePublicWaypoint(waypointCoord);
+                    e.getPlayer().sendMessage(ChatColor.RED + "Removed public waypoint " + ChatColor.BOLD + publicWaypoint.getName());
+                }
 
-            //remove inactive waypoint
-            Waypoint inactiveWaypoint = Main.waypointManager.getInactiveWaypoint(waypointCoord);
-            if (inactiveWaypoint != null)
-                Main.waypointManager.removeInactiveWaypoint(waypointCoord);
+                //remove private waypoint
+                for (WaypointPlayer waypointPlayer : Main.waypointManager.getWaypointPlayers().values()) {
+                    Waypoint privateWaypoint = Main.waypointManager.getPrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
+                    if (privateWaypoint != null) {
+                        Main.waypointManager.removePrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
+                        Player player = Bukkit.getPlayer(waypointPlayer.getUUID());
+                        if (player != null)
+                            player.sendMessage(ChatColor.RED + "Removed private waypoint " + ChatColor.BOLD + privateWaypoint.getName());
+                    }
+                }
+
+                //remove inactive waypoint
+                Waypoint inactiveWaypoint = Main.waypointManager.getInactiveWaypoint(waypointCoord);
+                if (inactiveWaypoint != null)
+                    Main.waypointManager.removeInactiveWaypoint(waypointCoord);
+            }
         }
     }
 
@@ -115,16 +139,19 @@ public class WorldListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getHand() == EquipmentSlot.HAND && Objects.requireNonNull(e.getClickedBlock()).getType() == Material.BEACON && !e.getPlayer().isSneaking()) {
-            WaypointCoord waypointCoord = new WaypointCoord(e.getClickedBlock().getLocation());
-            Waypoint waypoint = Main.waypointManager.getPublicWaypoint(waypointCoord);
-            if (waypoint == null)
-                waypoint = Main.waypointManager.getPrivateWaypoint(e.getPlayer().getUniqueId(), waypointCoord);
-            if (waypoint != null) {
-                e.setCancelled(true);
-                int beaconStatus = waypoint.getBeaconStatus();
-                if (beaconStatus != 0)
-                    GUIs.beaconMenu(e.getPlayer(), waypoint);
-                else e.getPlayer().sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.");
+            //check if player has permission to use waypoints
+            if (e.getPlayer().hasPermission("BeaconWaypoints.useWaypoints")) {
+                WaypointCoord waypointCoord = new WaypointCoord(e.getClickedBlock().getLocation());
+                Waypoint waypoint = Main.waypointManager.getPublicWaypoint(waypointCoord);
+                if (waypoint == null)
+                    waypoint = Main.waypointManager.getPrivateWaypoint(e.getPlayer().getUniqueId(), waypointCoord);
+                if (waypoint != null) {
+                    e.setCancelled(true);
+                    int beaconStatus = waypoint.getBeaconStatus();
+                    if (beaconStatus != 0)
+                        GUIs.beaconMenu(e.getPlayer(), waypoint);
+                    else e.getPlayer().sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.");
+                }
             }
         }
     }

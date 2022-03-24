@@ -147,6 +147,7 @@ public class Waypoint implements Cloneable {
         FileConfiguration config = Main.plugin.getConfig();
         boolean instantTeleport = config.getBoolean("instant-teleport");
         boolean disableAnimations = config.getBoolean("disable-animations");
+        boolean launchPlayer = config.getBoolean("launch-player");
 
         int startBeaconStatus = startWaypoint.getBeaconStatus();
         int destinationBeaconStatus = destinationWaypoint.getBeaconStatus();
@@ -160,7 +161,7 @@ public class Waypoint implements Cloneable {
         WaypointCoord destinationCoord = destinationWaypoint.getCoord();
         Location tpLoc = new Location(Bukkit.getWorld(destinationCoord.getWorldName()), destinationCoord.getX(), destinationCoord.getY(), destinationCoord.getZ());
         tpLoc.setX(tpLoc.getX() + 0.5);
-        tpLoc.setY(Objects.requireNonNull(tpLoc.getWorld()).getMaxHeight() + 256);
+        tpLoc.setY(launchPlayer ? tpLoc.getWorld().getMaxHeight() + 256 : destinationCoord.getY() + 1);
         tpLoc.setZ(tpLoc.getZ() + 0.5);
 
         if (!instantTeleport && !disableAnimations) {
@@ -189,79 +190,87 @@ public class Waypoint implements Cloneable {
                             Main.waypointManager.addPlayer(entity.getUniqueId());
                             waypointPlayer = Main.waypointManager.getPlayer(entity.getUniqueId());
                         }
-                        waypointPlayer.setTeleporting(true);
 
-                        ((Player) entity).closeInventory();
-                        int startBeamTop = startBeaconStatus == 1 ? entity.getWorld().getMaxHeight() + 256 : startBeaconStatus - 2;
-                        int destinationBeamTop = destinationBeaconStatus == 1 ? entity.getWorld().getMaxHeight() + 256 : destinationBeaconStatus - 2;
-                        tpLoc.setY(destinationBeamTop);
+                        //if launch is disabled
+                        if (!launchPlayer) {
+                            tpLoc.setDirection(entity.getLocation().getDirection());
+                            entity.teleport(tpLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                        }
+                        else {
+                            waypointPlayer.setTeleporting(true);
 
-                        //keep players in start beam
-                        WaypointPlayer finalWaypointPlayer = waypointPlayer;
-                        new BukkitRunnable() {
-                            int time = 0;
-                            @Override
-                            public void run() {
-                                //give entities resistance and levitation
-                                ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 255, false, false));
-                                ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 600, 127, false, false));
+                            ((Player) entity).closeInventory();
+                            int startBeamTop = startBeaconStatus == 1 ? entity.getWorld().getMaxHeight() + 256 : startBeaconStatus - 2;
+                            int destinationBeamTop = destinationBeaconStatus == 1 ? entity.getWorld().getMaxHeight() + 256 : destinationBeaconStatus - 2;
+                            tpLoc.setY(destinationBeamTop);
 
-                                if (entity.getLocation().getY() < startBeamTop) {
-                                    Location startBeamLoc = new Location(entity.getWorld(), startLoc.getX(), entity.getLocation().getY(), startLoc.getZ());
-                                    if (entity.getLocation().distance(startBeamLoc) > 0.125) {
-                                        startBeamLoc.setDirection(entity.getLocation().getDirection());
-                                        entity.teleport(startBeamLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
-                                        entity.setVelocity(new Vector(0, 5, 0));
+                            //keep players in start beam
+                            WaypointPlayer finalWaypointPlayer = waypointPlayer;
+                            new BukkitRunnable() {
+                                int time = 0;
+                                @Override
+                                public void run() {
+                                    //give entities resistance and levitation
+                                    ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 255, false, false));
+                                    ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 600, 127, false, false));
+
+                                    if (entity.getLocation().getY() < startBeamTop) {
+                                        Location startBeamLoc = new Location(entity.getWorld(), startLoc.getX(), entity.getLocation().getY(), startLoc.getZ());
+                                        if (entity.getLocation().distance(startBeamLoc) > 0.125) {
+                                            startBeamLoc.setDirection(entity.getLocation().getDirection());
+                                            entity.teleport(startBeamLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                                            entity.setVelocity(new Vector(0, 5, 0));
+                                        }
+                                        time++;
+
+                                        //let player go if they are stuck after 30 seconds
+                                        if (time >= 80) {
+                                            ((LivingEntity) entity).removePotionEffect(PotionEffectType.LEVITATION);
+                                            ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 255, false, false));
+                                            Objects.requireNonNull(finalWaypointPlayer).setTeleporting(false);
+                                            this.cancel();
+                                        }
                                     }
-                                    time++;
-
-                                    //let player go if they are stuck after 30 seconds
-                                    if (time >= 80) {
-                                        ((LivingEntity) entity).removePotionEffect(PotionEffectType.LEVITATION);
-                                        ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 255, false, false));
-                                        Objects.requireNonNull(finalWaypointPlayer).setTeleporting(false);
+                                    else {
                                         this.cancel();
-                                    }
-                                }
-                                else {
-                                    this.cancel();
 
-                                    //teleport player to new beam
-                                    tpLoc.setDirection(entity.getLocation().getDirection());
-                                    entity.teleport(tpLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
-                                    entity.setVelocity(new Vector(0, -2, 0));
-                                    ((LivingEntity) entity).removePotionEffect(PotionEffectType.LEVITATION);
+                                        //teleport player to new beam
+                                        tpLoc.setDirection(entity.getLocation().getDirection());
+                                        entity.teleport(tpLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                                        entity.setVelocity(new Vector(0, -2, 0));
+                                        ((LivingEntity) entity).removePotionEffect(PotionEffectType.LEVITATION);
 
-                                    //keep players in destination beam
-                                    new BukkitRunnable() {
-                                        int time = 0;
-                                        @Override
-                                        public void run() {
-                                            if (entity.getLocation().getY() > destinationWaypoint.getCoord().getY() + 1) {
-                                                Location destinationBeamLoc = new Location(destinationCoord.getLocation().getWorld(), tpLoc.getX(), entity.getLocation().getY(), tpLoc.getZ());
-                                                if (entity.getLocation().distance(destinationBeamLoc) > 0.125) {
-                                                    destinationBeamLoc.setDirection(entity.getLocation().getDirection());
-                                                    entity.teleport(destinationBeamLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
-                                                    entity.setVelocity(new Vector(0, -2, 0));
+                                        //keep players in destination beam
+                                        new BukkitRunnable() {
+                                            int time = 0;
+                                            @Override
+                                            public void run() {
+                                                if (entity.getLocation().getY() > destinationWaypoint.getCoord().getY() + 1) {
+                                                    Location destinationBeamLoc = new Location(destinationCoord.getLocation().getWorld(), tpLoc.getX(), entity.getLocation().getY(), tpLoc.getZ());
+                                                    if (entity.getLocation().distance(destinationBeamLoc) > 0.125) {
+                                                        destinationBeamLoc.setDirection(entity.getLocation().getDirection());
+                                                        entity.teleport(destinationBeamLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                                                        entity.setVelocity(new Vector(0, -2, 0));
+                                                    }
+                                                    time++;
+
+                                                    //let player go if they are stuck after 30 seconds
+                                                    if (time >= 80) {
+                                                        ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 255, false, false));
+                                                        Objects.requireNonNull(finalWaypointPlayer).setTeleporting(false);
+                                                        this.cancel();
+                                                    }
                                                 }
-                                                time++;
-
-                                                //let player go if they are stuck after 30 seconds
-                                                if (time >= 80) {
-                                                    ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 255, false, false));
+                                                else {
                                                     Objects.requireNonNull(finalWaypointPlayer).setTeleporting(false);
                                                     this.cancel();
                                                 }
                                             }
-                                            else {
-                                                Objects.requireNonNull(finalWaypointPlayer).setTeleporting(false);
-                                                this.cancel();
-                                            }
-                                        }
-                                    }.runTaskTimer(Main.plugin, 0, 5);
+                                        }.runTaskTimer(Main.plugin, 0, 5);
+                                    }
                                 }
-                            }
-                        }.runTaskTimer(Main.plugin, 0, 5);
+                            }.runTaskTimer(Main.plugin, 0, 5);
+                        }
                     }
                 });
             }

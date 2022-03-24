@@ -22,9 +22,16 @@ instant-teleport: false
 # Disable the particle animations when teleporting through a beacon
 disable-animations: false
 
+# Launch the player into the air when teleporting through a beacon
+launch-player: true
+
 # By default, beacons teleport anyone standing on top of them. If you want to limit the teleportation to only the
 # player who chooses the destination, set this to true.
 disable-group-teleporting: false
+
+# If the BeaconWaypoints.removeWaypoints permission is disabled for a player, this will still allow them to break
+# a beacon if all waypoints attached to it are owned by them. The owner of a beacon is the player who placed it.
+allow-beacon-break-by-owner: true
 
 # List of worlds that allow waypoints (based on folder name)
 allowed-worlds:

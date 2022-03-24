@@ -1,4 +1,3 @@
-- fix config.yml not being created on first install (done)
-- add support back to 1.14 (done)
-- prevent players from using waypoint menu if moved too far away (done)
-- add number of waypoints to bStats (done)
+- add new permissions (break beacon, create and use private waypoints, teleport) (done)
+- add config options (allow owners to break beacons if they own all waypoints, launch player) (done)
+- fix back arrow not loading for waypoint options menu (done)

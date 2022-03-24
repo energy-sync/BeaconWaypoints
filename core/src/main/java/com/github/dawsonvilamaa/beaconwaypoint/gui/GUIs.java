@@ -52,15 +52,24 @@ public class GUIs {
         });
         gui.addButton(vanillaBeaconButton);
 
+        boolean canUsePrivateWaypoints = player.hasPermission("BeaconWaypoints.usePrivateWaypoints");
+
         //public waypoints button
         InventoryGUIButton publicWaypointsButton = new InventoryGUIButton(gui, "Public Waypoints", null, Material.FILLED_MAP);
         publicWaypointsButton.setOnClick(f -> publicWaypointsMenu(player, waypoint, gui));
-        gui.addButton(publicWaypointsButton);
+        if (canUsePrivateWaypoints)
+            gui.addButton(publicWaypointsButton);
+        else {
+            gui.addButton(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE));
+            gui.addButton(publicWaypointsButton);
+        }
 
         //private waypoints button
-        InventoryGUIButton privateWaypointsButton = new InventoryGUIButton(gui, "Private Waypoints", null, Material.TRIPWIRE_HOOK);
-        privateWaypointsButton.setOnClick(f -> privateWaypointsMenu(player, waypoint, gui));
-        gui.addButton(privateWaypointsButton);
+        if (canUsePrivateWaypoints) {
+            InventoryGUIButton privateWaypointsButton = new InventoryGUIButton(gui, "Private Waypoints", null, Material.TRIPWIRE_HOOK);
+            privateWaypointsButton.setOnClick(f -> privateWaypointsMenu(player, waypoint, gui));
+            gui.addButton(privateWaypointsButton);
+        }
 
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 3);
 
@@ -169,7 +178,7 @@ public class GUIs {
         InventoryGUIButton backButton = new InventoryGUIButton(gui, "Back", null, Material.PLAYER_HEAD);
         org.bukkit.inventory.ItemStack skull = new org.bukkit.inventory.ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-        Objects.requireNonNull(skullMeta).setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString("a68f0b64-8d14-4000-a95f-4b9ba14f8df9")));
+        skullMeta.setOwner("MHF_ArrowLeft");
         skull.setItemMeta(skullMeta);
         backButton.setItem(skull);
         backButton.setName(ChatColor.WHITE + "Back");
