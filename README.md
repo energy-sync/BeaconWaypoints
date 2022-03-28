@@ -27,19 +27,26 @@ Note: Teleportation between beacons requires the beacon to have no blocks inside
 
 
 ## Permissions
-- BeaconWaypoints.waypoint: Allows players to create waypoints
+- BeaconWaypoints.createWaypoints: Allows players to create waypoints
+- BeaconWaypoints.useWaypoints: Allows players to use waypoints
+- BeaconWaypoints.usePrivateWaypoints: Allows players to create and teleport to private waypoints
+- BeaconWaypoints.breakWaypointBeacons: Allows players to break beacons that have waypoints
+- BeaconWaypoints.manageAllWaypoints: Allows players to edit or remove all public waypoints and corresponding beacons
 - BeaconWaypoints.reload: Allows players to reload the config
 
 
 ## Configuration
 - max-public-waypoints: The maximum amount of public waypoints that can exist at once on the server (default: 100)
-- max-private-waypoints: The maximum amount of private waypoints that each player can have
+- max-private-waypoints: The maximum amount of private waypoints that each player can have (default: 30)
 - public-waypoint-menu-rows: The number of rows the public waypoint selection menu will show per page, not including the row for page navigation (default: 3, range: 1-5)
 - private-waypoint-menu-rows: The number of rows the private waypoint selection menu will show per page, not including the row for page navigation (default: 2, range: 1-5)
 - instant-teleport: Activate teleportation as soon as the destination is chosen without a warmup animation (default: false)
 - disable-animations: Disable the particle animations when teleporting through a beacon (default: false)
+- launch-player: Launch the player when teleporting through a beacon (default: true)
 - disable-group-teleporting: By default, beacons teleport anyone standing on top of them. If you want to limit the teleportation to only the player who chooses the destination, set this to true. (default: false)
-- allowed-worlds: List of worlds that allow waypoints based on folder name (default: world, world_nether, world_the_end)
+- allow-beacon-break-by-owner: If the BeaconWaypoints.breakWaypointBeacons permission is disabled for a player, this will still allow them to break a beacon if all waypoints attached to it are owned by them. The owner of a beacon is the player who placed it. (default: true)
+- allow-all-worlds: Allow waypoints to be created in any world (default: true)
+- allowed-worlds: List of worlds that allow waypoints based on folder name if allow-all-worlds is disabled (default: world, world_nether, world_the_end)
 - waypoint-icons: List of items that can be used for waypoint icons, the order given here is the same order that will be in the icon picker menu (default includes 111 items)
 
 Note: If WorldEdit is used to delete a beacon, the waypoint will not be deleted. You will need to manually place back the beacon and break it, or use the setblock and fill commands instead.
@@ -48,6 +55,26 @@ Note: If WorldEdit is used to delete a beacon, the waypoint will not be deleted.
 ### Contact me on Discord: energy_sync#9851
 
 ## Changelog
+
+# 1.3.0
+
+Changes:
+- The default waypoint type is now public, so typing out "public" is no longer required when creating a new waypoint
+- Changed permissions
+    - Removed waypoint permission
+    - Added createWaypoints permission
+    - Added useWaypoints permission
+    - Added usePrivateWaypoints permission
+    - Added breakWaypointBeacons permission
+    - Added manageAllWaypoints permission
+- Changed config.yml
+    - Added launch-player option
+    - Added allow-beacon-break-by-owner option
+    - Added allow-all-worlds option
+
+Bug Fixes:
+- The back arrow player texture for the player skull in the waypoint options menu would not load
+- A waypoint would be removed if a beacon became obstructed and then unobstructed
 
 # 1.2.0
 
