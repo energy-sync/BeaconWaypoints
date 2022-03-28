@@ -8,6 +8,7 @@ import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -76,8 +77,11 @@ public class WorldListener implements Listener {
                     }
                 }
             }
-            if (!e.getPlayer().hasPermission("BeaconWaypoints.breakWaypointBeacons")) {
-                if (ownsWaypoint && !Main.plugin.getConfig().getBoolean("allow-beacon-break-by-owner")) {
+            if (!e.getPlayer().hasPermission("BeaconWaypoints.manageAllWaypoints") && !e.getPlayer().hasPermission("BeaconWaypoints.breakWaypointBeacons")) {
+                FileConfiguration config = Main.plugin.getConfig();
+                if (!config.contains("allow-beacon-break-by-owner"))
+                    config.set("allow-beacon-break-by-owner", true);
+                if (!(ownsWaypoint && config.getBoolean("allow-beacon-break-by-owner"))) {
                     e.getPlayer().sendMessage(ChatColor.RED + "You do not have permission to break beacons that have waypoints set");
                     e.setCancelled(true);
                 }
@@ -112,7 +116,7 @@ public class WorldListener implements Listener {
     //deletes waypoints if they are removed with fill or setblock commands
     @EventHandler
     public void onBlockPhysics(BlockPhysicsEvent e) {
-        if (e.getSourceBlock().getType() == Material.AIR) {
+        if (e.getBlock().getType() == Material.AIR) {
             WaypointCoord waypointCoord = new WaypointCoord(e.getBlock().getLocation());
 
             //remove public waypoint
@@ -147,10 +151,7 @@ public class WorldListener implements Listener {
                     waypoint = Main.waypointManager.getPrivateWaypoint(e.getPlayer().getUniqueId(), waypointCoord);
                 if (waypoint != null) {
                     e.setCancelled(true);
-                    int beaconStatus = waypoint.getBeaconStatus();
-                    if (beaconStatus != 0)
-                        GUIs.beaconMenu(e.getPlayer(), waypoint);
-                    else e.getPlayer().sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.");
+                    GUIs.beaconMenu(e.getPlayer(), waypoint);
                 }
             }
         }

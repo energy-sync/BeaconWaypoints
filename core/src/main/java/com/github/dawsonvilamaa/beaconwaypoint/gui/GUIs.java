@@ -7,9 +7,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.SkullMeta;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -17,9 +19,13 @@ public class GUIs {
 
     //shows all icons for waypoints
     public static void waypointIconPickerMenu(Player player, Waypoint waypoint, InventoryGUI previousGUI) {
+        FileConfiguration config = Main.plugin.getConfig();
+
         MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, "Waypoint Icon", 5, previousGUI);
 
         //add waypoint icons
+        if (!config.contains("waypoint-icons"))
+            config.set("waypoint-icons", Waypoint.DEFAULT_WAYPOINT_ICONS);
         for (String iconStr : Main.plugin.getConfig().getStringList("waypoint-icons")) {
             try {
                 Material icon = Material.valueOf(iconStr);
@@ -56,7 +62,15 @@ public class GUIs {
 
         //public waypoints button
         InventoryGUIButton publicWaypointsButton = new InventoryGUIButton(gui, "Public Waypoints", null, Material.FILLED_MAP);
-        publicWaypointsButton.setOnClick(f -> publicWaypointsMenu(player, waypoint, gui));
+        publicWaypointsButton.setOnClick(f -> {
+            int beaconStatus = waypoint.getBeaconStatus();
+            if (beaconStatus != 0)
+                publicWaypointsMenu(player, waypoint, gui);
+            else {
+                player.sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.");
+                player.closeInventory();
+            }
+        });
         if (canUsePrivateWaypoints)
             gui.addButton(publicWaypointsButton);
         else {
@@ -67,7 +81,15 @@ public class GUIs {
         //private waypoints button
         if (canUsePrivateWaypoints) {
             InventoryGUIButton privateWaypointsButton = new InventoryGUIButton(gui, "Private Waypoints", null, Material.TRIPWIRE_HOOK);
-            privateWaypointsButton.setOnClick(f -> privateWaypointsMenu(player, waypoint, gui));
+            privateWaypointsButton.setOnClick(f -> {
+                int beaconStatus = waypoint.getBeaconStatus();
+                if (beaconStatus != 0)
+                    privateWaypointsMenu(player, waypoint, gui);
+                else {
+                    player.sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.");
+                    player.closeInventory();
+                }
+            });
             gui.addButton(privateWaypointsButton);
         }
 
@@ -78,11 +100,19 @@ public class GUIs {
 
     //shows all public waypoints
     public static void publicWaypointsMenu(Player player, Waypoint waypoint, InventoryGUI previousGUI) {
-        int numRows = Main.plugin.getConfig().getInt("public-waypoint-menu-rows");
-        if (numRows <= 0)
-            numRows = 1;
-        else if (numRows > 5)
-            numRows = 5;
+        FileConfiguration config = Main.plugin.getConfig();
+
+        int numRows = 0;
+        if (!config.contains("public-waypoint-menu-rows"))
+            config.set("public-waypoint-menu-rows", 3);
+        else {
+            numRows = config.getInt("public-waypoint-menu-rows");
+            if (numRows <= 0)
+                numRows = 1;
+            else if (numRows > 5)
+                numRows = 5;
+        }
+
         MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, "Public Waypoints", numRows, previousGUI);
 
         //add buttons for all public waypoints
@@ -97,10 +127,14 @@ public class GUIs {
                             player.sendMessage(ChatColor.RED + "That waypoint doesn't exist!");
                         else if (publicWaypoint.getBeaconStatus() == 0)
                             player.sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.");
-                        else Waypoint.teleport(waypoint, publicWaypoint, Main.plugin.getConfig().getBoolean("disable-group-teleporting") ? player : null);
+                        else {
+                            if (!config.contains("disable-group-teleporting"))
+                                config.set("disable-group-teleporting", false);
+                            Waypoint.teleport(waypoint, publicWaypoint, config.getBoolean("disable-group-teleporting") ? player : null);
+                        }
                     }
                 });
-                if (publicWaypoint.getOwnerUUID().equals(player.getUniqueId())) {
+                if (player.hasPermission("manageAllWaypoints") || publicWaypoint.getOwnerUUID().equals(player.getUniqueId())) {
                     waypointButton.setOnRightClick(e -> {
                         waypointOptionsMenu(player, publicWaypoint, waypoint, gui.getGUI(), true);
                     });
@@ -113,7 +147,7 @@ public class GUIs {
 
         //options button for this waypoint
         Waypoint thisWaypoint = Main.waypointManager.getPublicWaypoint(waypoint.getCoord());
-        if (thisWaypoint != null) {
+        if (thisWaypoint != null && (waypoint.getOwnerUUID().equals(player.getUniqueId()) || player.hasPermission("manageAllWaypoints"))) {
             InventoryGUIButton optionsButton = new InventoryGUIButton(gui.getGUI(), "Options for this public waypoint", null, thisWaypoint.getIcon());
             optionsButton.setOnClick(e -> {
                 waypointOptionsMenu(player, thisWaypoint, waypoint, gui.getGUI(), true);
@@ -124,11 +158,19 @@ public class GUIs {
 
     //shows all private waypoints
     public static void privateWaypointsMenu(Player player, Waypoint waypoint, InventoryGUI previousGUI) {
-        int numRows = Main.plugin.getConfig().getInt("private-waypoint-menu-rows");
-        if (numRows <= 0)
-            numRows = 1;
-        else if (numRows > 5)
-            numRows = 5;
+        FileConfiguration config = Main.plugin.getConfig();
+
+        int numRows = 0;
+        if (!config.contains("private-waypoint-menu-rows"))
+            config.set("private-waypoint-menu-rows", 2);
+        else {
+            numRows = config.getInt("private-waypoint-menu-rows");
+            if (numRows <= 0)
+                numRows = 1;
+            else if (numRows > 5)
+                numRows = 5;
+        }
+
         MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, "Private Waypoints", numRows, previousGUI);
 
         //add buttons for all private waypoints
@@ -143,7 +185,11 @@ public class GUIs {
                             player.sendMessage(ChatColor.RED + "That waypoint doesn't exist!");
                         else if (privateWaypoint.getBeaconStatus() == 0)
                             player.sendMessage(ChatColor.RED + "The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.");
-                        else Waypoint.teleport(waypoint, privateWaypoint, Main.plugin.getConfig().getBoolean("disable-group-teleporting") ? player : null);
+                        else {
+                            if (!config.contains("disable-group-teleporting"))
+                                config.set("disable-group-teleporting", false);
+                            Waypoint.teleport(waypoint, privateWaypoint, config.getBoolean("disable-group-teleporting") ? player : null);
+                        }
                     }
                 });
                 if (privateWaypoint.getOwnerUUID().equals(player.getUniqueId())) {
@@ -159,7 +205,7 @@ public class GUIs {
 
         //options button for this waypoint
         Waypoint thisWaypoint = Main.waypointManager.getPrivateWaypoint(player.getUniqueId(), waypoint.getCoord());
-        if (thisWaypoint != null) {
+        if (thisWaypoint != null && (waypoint.getOwnerUUID().equals(player.getUniqueId()) || player.hasPermission("manageAllWaypoints"))) {
             InventoryGUIButton optionsButton = new InventoryGUIButton(gui.getGUI(), "Options for this private waypoint", null, thisWaypoint.getIcon());
             optionsButton.setOnClick(e -> {
                 waypointOptionsMenu(player, thisWaypoint, waypoint, gui.getGUI(), false);

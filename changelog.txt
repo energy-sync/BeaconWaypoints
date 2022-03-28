@@ -1,7 +1,17 @@
 Changes:
-- Added support for versions 1.14-1.17.1 and 1.18.2
-- Added bStats metric for the total number of waypoints
+- The default waypoint type is now public, so typing out "public" is no longer required when creating a new waypoint
+- Changed permissions
+    - Removed waypoint permission
+    - Added createWaypoints permission
+    - Added useWaypoints permission
+    - Added usePrivateWaypoints permission
+    - Added breakWaypointBeacons permission
+    - Added manageAllWaypoints permission
+- Changed config.yml
+    - Added launch-player option
+    - Added allow-beacon-break-by-owner option
+    - Added allow-all-worlds option
 
 Bug Fixes:
-- config.yml would not be created automatically (bruh moment)
-- Players could activate beacon teleportation if they opened the menu, got moved away, and selected a destination
+- The back arrow player texture for the player skull in the waypoint options menu would not load
+- A waypoint would be removed if a beacon became obstructed and then unobstructed

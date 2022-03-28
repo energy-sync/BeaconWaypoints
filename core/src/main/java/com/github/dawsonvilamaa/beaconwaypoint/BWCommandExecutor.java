@@ -50,9 +50,8 @@ public class BWCommandExecutor implements CommandExecutor {
                 boolean privateWaypoint = false;
                 if (args[args.length - 1].equalsIgnoreCase("private")) {
                     privateWaypoint = true;
-                    if (!player.hasPermission("BeaconWaypoints.createPrivateWaypoints")) {
+                    if (!player.hasPermission("BeaconWaypoints.createWaypoints") || !player.hasPermission("BeaconWaypoints.usePrivateWaypoints")) {
                         player.sendMessage(ChatColor.RED + "You don't have permission to create private waypoints");
-                        privateWaypoint = false;
                         return true;
                     }
                 }
@@ -67,7 +66,11 @@ public class BWCommandExecutor implements CommandExecutor {
                 }
 
                 //check if the beacon is in an allowed world
-                if (!plugin.getConfig().getStringList("allowed-worlds").contains(player.getWorld().getName())) {
+                if (!plugin.getConfig().contains("allow-all-worlds"))
+                    plugin.getConfig().set("allow-all-worlds", true);
+                if (!plugin.getConfig().contains("allowed-worlds"))
+                    plugin.getConfig().set("allowed-worlds", Waypoint.DEFAULT_ALLOWED_WORLDS);
+                if (!plugin.getConfig().getBoolean("allow-all-worlds") && !plugin.getConfig().getStringList("allowed-worlds").contains(player.getWorld().getName())) {
                     player.sendMessage(ChatColor.RED + "You cannot set a waypoint in this world");
                     return true;
                 }
@@ -83,27 +86,35 @@ public class BWCommandExecutor implements CommandExecutor {
                     }
 
                     //check if public waypoint list is full
-                    int maxPublicWaypoints = plugin.getConfig().getInt("max-public-waypoints");
-                    if (maxPublicWaypoints < 0)
-                        maxPublicWaypoints = 0;
-                    if (Main.waypointManager.getPublicWaypoints().values().size() == maxPublicWaypoints) {
-                        player.sendMessage(ChatColor.RED + "Public waypoint list is full!");
-                        return true;
+                    if (!plugin.getConfig().contains("max-public-waypoints"))
+                        plugin.getConfig().set("max-public-waypoints", 100);
+                    else {
+                        int maxPublicWaypoints = plugin.getConfig().getInt("max-public-waypoints");
+                        if (maxPublicWaypoints < 0)
+                            maxPublicWaypoints = 0;
+                        if (Main.waypointManager.getPublicWaypoints().values().size() == maxPublicWaypoints) {
+                            player.sendMessage(ChatColor.RED + "Public waypoint list is full!");
+                            return true;
+                        }
                     }
 
                     if (Main.waypointManager.getPublicWaypoint(playerLoc) != null)
                         waypointExists = true;
                 } else {
                     //check if private waypoint list is full
-                    int maxPrivateWaypoints = plugin.getConfig().getInt("max-private-waypoints");
-                    if (maxPrivateWaypoints < 0)
-                        maxPrivateWaypoints = 0;
-                    if (Main.waypointManager.getPrivateWaypoints(player.getUniqueId()).values().size() == maxPrivateWaypoints) {
-                        player.sendMessage(ChatColor.RED + "Private waypoint list is full!");
-                        return true;
+                    if (!plugin.getConfig().contains("max-private-waypoints"))
+                        plugin.getConfig().set("max-private-waypoints", 30);
+                    else {
+                        int maxPrivateWaypoints = plugin.getConfig().getInt("max-private-waypoints");
+                        if (maxPrivateWaypoints < 0)
+                            maxPrivateWaypoints = 0;
+                        if (Main.waypointManager.getPrivateWaypoints(player.getUniqueId()).values().size() == maxPrivateWaypoints) {
+                            player.sendMessage(ChatColor.RED + "Private waypoint list is full!");
+                            return true;
+                        }
+                        if (Main.waypointManager.getPrivateWaypoint(player.getUniqueId(), playerLoc) != null)
+                            waypointExists = true;
                     }
-                    if (Main.waypointManager.getPrivateWaypoint(player.getUniqueId(), playerLoc) != null)
-                        waypointExists = true;
                 }
 
                 if (waypointExists) {

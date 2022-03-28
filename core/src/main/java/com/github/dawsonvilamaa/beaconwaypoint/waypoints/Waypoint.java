@@ -141,12 +141,19 @@ public class Waypoint implements Cloneable {
     /**
      * @param startWaypoint
      * @param destinationWaypoint
-     * @param player If group teleporting is enabled, set to null, otherwise set to the player who is teleporting
+     * @param player              If group teleporting is enabled, set to null, otherwise set to the player who is teleporting
      */
     public static void teleport(Waypoint startWaypoint, Waypoint destinationWaypoint, Player player) {
         FileConfiguration config = Main.plugin.getConfig();
+
+        if (!config.contains("instant-teleport"))
+            config.set("instant-teleport", false);
         boolean instantTeleport = config.getBoolean("instant-teleport");
+        if (!config.contains("disable-animations"))
+            config.set("disable-animations", false);
         boolean disableAnimations = config.getBoolean("disable-animations");
+        if (!config.contains("launch-player"))
+            config.set("launch-player", true);
         boolean launchPlayer = config.getBoolean("launch-player");
 
         int startBeaconStatus = startWaypoint.getBeaconStatus();
@@ -195,8 +202,7 @@ public class Waypoint implements Cloneable {
                         if (!launchPlayer) {
                             tpLoc.setDirection(entity.getLocation().getDirection());
                             entity.teleport(tpLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
-                        }
-                        else {
+                        } else {
                             waypointPlayer.setTeleporting(true);
 
                             ((Player) entity).closeInventory();
@@ -208,6 +214,7 @@ public class Waypoint implements Cloneable {
                             WaypointPlayer finalWaypointPlayer = waypointPlayer;
                             new BukkitRunnable() {
                                 int time = 0;
+
                                 @Override
                                 public void run() {
                                     //give entities resistance and levitation
@@ -230,8 +237,7 @@ public class Waypoint implements Cloneable {
                                             Objects.requireNonNull(finalWaypointPlayer).setTeleporting(false);
                                             this.cancel();
                                         }
-                                    }
-                                    else {
+                                    } else {
                                         this.cancel();
 
                                         //teleport player to new beam
@@ -243,6 +249,7 @@ public class Waypoint implements Cloneable {
                                         //keep players in destination beam
                                         new BukkitRunnable() {
                                             int time = 0;
+
                                             @Override
                                             public void run() {
                                                 if (entity.getLocation().getY() > destinationWaypoint.getCoord().getY() + 1) {
@@ -260,8 +267,7 @@ public class Waypoint implements Cloneable {
                                                         Objects.requireNonNull(finalWaypointPlayer).setTeleporting(false);
                                                         this.cancel();
                                                     }
-                                                }
-                                                else {
+                                                } else {
                                                     Objects.requireNonNull(finalWaypointPlayer).setTeleporting(false);
                                                     this.cancel();
                                                 }
@@ -343,4 +349,125 @@ public class Waypoint implements Cloneable {
         clonedWaypoint.setIsWaypoint(this.isWaypoint);
         return clonedWaypoint;
     }
+
+    public static final String[] DEFAULT_ALLOWED_WORLDS = new String[]{
+            "world",
+            "world_nether",
+            "world_the_end"
+    };
+
+    public static final String[] DEFAULT_WAYPOINT_ICONS = new String[]{
+            "APPLE",
+            "SHROOMLIGHT",
+            "TOTEM_OF_UNDYING",
+            "EMERALD",
+            "DIAMOND",
+            "END_CRYSTAL",
+            "LEATHER",
+            "FILLED_MAP",
+            "SNOW_BLOCK",
+            "RED_MUSHROOM",
+            "CARROT",
+            "GOLDEN_APPLE",
+            "CREEPER_HEAD",
+            "PRISMARINE_BRICKS",
+            "ALLIUM",
+            "IRON_PICKAXE",
+            "QUARTZ_BRICKS",
+            "SKELETON_SKULL",
+            "POPPY",
+            "PUMPKIN",
+            "HONEYCOMB",
+            "SEA_LANTERN",
+            "BLUE_ICE",
+            "PURPUR_BLOCK",
+            "ENCHANTING_TABLE",
+            "OAK_LOG",
+            "WHEAT",
+            "RED_BED",
+            "ORANGE_TULIP",
+            "BLAZE_POWDER",
+            "SUGAR_CANE",
+            "LAPIS_LAZULI",
+            "CHORUS_FRUIT",
+            "END_PORTAL_FRAME",
+            "ELYTRA",
+            "BREWING_STAND",
+            "REDSTONE",
+            "RED_SAND",
+            "END_STONE",
+            "CACTUS",
+            "WATER_BUCKET",
+            "SHULKER_BOX",
+            "CHEST",
+            "NETHERITE_INGOT",
+            "SOUL_SAND",
+            "RED_NETHER_BRICKS",
+            "MAGMA_BLOCK",
+            "SAND",
+            "ENDER_PEARL",
+            "WARPED_STEM",
+            "CRIMSON_STEM",
+            "ZOMBIE_HEAD",
+            "OBSIDIAN",
+            "WITHER_SKELETON_SKULL",
+            "GRASS_BLOCK",
+            "IRON_BLOCK",
+            "COPPER_BLOCK",
+            "GOLD_BLOCK",
+            "DIAMOND_BLOCK",
+            "NETHERITE_BLOCK",
+            "SPRUCE_LOG",
+            "BIRCH_LOG",
+            "JUNGLE_LOG",
+            "ACACIA_LOG",
+            "DARK_OAK_LOG",
+            "SPONGE",
+            "BOOKSHELF",
+            "NETHERRACK",
+            "GLOWSTONE",
+            "STONE_BRICKS",
+            "DEEPSLATE_BRICKS",
+            "MELON",
+            "MYCELIUM",
+            "EMERALD_BLOCK",
+            "HAY_BLOCK",
+            "BAMBOO",
+            "IRON_BARS",
+            "DRAGON_HEAD",
+            "CAMPFIRE",
+            "BEE_NEST",
+            "TNT",
+            "BEACON",
+            "QUARTZ",
+            "IRON_INGOT",
+            "COPPER_INGOT",
+            "GOLD_INGOT",
+            "STRING",
+            "FEATHER",
+            "GUNPOWDER",
+            "WHEAT_SEEDS",
+            "BRICK",
+            "BOOK",
+            "SLIME_BALL",
+            "EGG",
+            "BONE",
+            "BLAZE_ROD",
+            "GOLD_NUGGET",
+            "NETHER_WART",
+            "ENDER_EYE",
+            "EXPERIENCE_BOTTLE",
+            "NETHER_STAR",
+            "FIREWORK_ROCKET",
+            "MUSIC_DISC_STAL",
+            "CAKE",
+            "SWEET_BERRIES",
+            "WHITE_WOOL",
+            "GOLDEN_PICKAXE",
+            "DIAMOND_PICKAXE",
+            "NETHERITE_PICKAXE",
+            "FISHING_ROD",
+            "TRIDENT",
+            "GOLDEN_CARROT"
+    };
 }

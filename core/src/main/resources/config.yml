@@ -33,7 +33,10 @@ disable-group-teleporting: false
 # a beacon if all waypoints attached to it are owned by them. The owner of a beacon is the player who placed it.
 allow-beacon-break-by-owner: true
 
-# List of worlds that allow waypoints (based on folder name)
+# Allow waypoints to be created in any world
+allow-all-worlds: true
+
+# List of worlds that allow waypoints if allow-all-worlds is disabled (based on folder name)
 allowed-worlds:
   - world
   - world_nether
