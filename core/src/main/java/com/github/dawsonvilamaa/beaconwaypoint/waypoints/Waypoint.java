@@ -1,6 +1,9 @@
 package com.github.dawsonvilamaa.beaconwaypoint.waypoints;
 
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.checks.CheckType;
+import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -203,11 +206,19 @@ public class Waypoint implements Cloneable {
                             tpLoc.setDirection(entity.getLocation().getDirection());
                             entity.teleport(tpLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
                         } else {
+                            NCPExemptionManager.exemptPermanently(entity.getUniqueId(), CheckType.MOVING_CREATIVEFLY);
                             waypointPlayer.setTeleporting(true);
 
                             ((Player) entity).closeInventory();
-                            int startBeamTop = startBeaconStatus == 1 ? entity.getWorld().getMaxHeight() + 256 : startBeaconStatus - 2;
-                            int destinationBeamTop = destinationBeaconStatus == 1 ? entity.getWorld().getMaxHeight() + 256 : destinationBeaconStatus - 2;
+
+                            if (!config.contains("launch-player-height"))
+                                config.set("launch-player-height", 576);
+                            int launchPlayerHeight = config.getInt("launch-player-height");
+                            int worldHeight = startLoc.getWorld().getMaxHeight();
+                            if (launchPlayerHeight < worldHeight)
+                                launchPlayerHeight = worldHeight;
+                            int startBeamTop = startBeaconStatus == 1 ? launchPlayerHeight : startBeaconStatus - 2;
+                            int destinationBeamTop = destinationBeaconStatus == 1 ? launchPlayerHeight : destinationBeaconStatus - 2;
                             tpLoc.setY(destinationBeamTop);
 
                             //keep players in start beam
@@ -242,6 +253,7 @@ public class Waypoint implements Cloneable {
 
                                         //teleport player to new beam
                                         tpLoc.setDirection(entity.getLocation().getDirection());
+                                        NCPExemptionManager.unexempt(entity.getUniqueId(), CheckType.MOVING_CREATIVEFLY);
                                         entity.teleport(tpLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
                                         entity.setVelocity(new Vector(0, -2, 0));
                                         ((LivingEntity) entity).removePotionEffect(PotionEffectType.LEVITATION);

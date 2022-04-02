@@ -1,5 +1,0 @@
-- add new permissions (break beacon, create and use private waypoints, teleport, edit any beacon) (done)
-- add config options (allow owners to break beacons if they own all waypoints, launch player, allow all worlds) (done)
-- fix back arrow not loading for waypoint options menu (done)
-- fix bug where if beacon is obstructed and unobstructed, the waypoint gets deleted (done)
-- make public the default waypoint type (done)

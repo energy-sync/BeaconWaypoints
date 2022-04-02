@@ -12,6 +12,11 @@
       <option name="url" value="https://hub.spigotmc.org/nexus/content/repositories/snapshots/org/spigotmc/spigot-api/" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="md_5-releases" />
+      <option name="name" value="md_5-releases" />
+      <option name="url" value="https://repo.md-5.net/content/repositories/releases/" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="central" />
       <option name="name" value="Central Repository" />
       <option name="url" value="https://repo.maven.apache.org/maven2" />
@@ -20,6 +25,11 @@
       <option name="id" value="spigot" />
       <option name="name" value="spigot" />
       <option name="url" value="https://hub.spigotmc.org/nexus/content/repositories/snapshots/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="md_5-snapshots" />
+      <option name="name" value="md_5-snapshots" />
+      <option name="url" value="https://repo.md-5.net/content/repositories/snapshots/" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="spigot-repo" />
