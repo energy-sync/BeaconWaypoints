@@ -43,6 +43,7 @@ Note: Teleportation between beacons requires the beacon to have no blocks inside
 - instant-teleport: Activate teleportation as soon as the destination is chosen without a warmup animation (default: false)
 - disable-animations: Disable the particle animations when teleporting through a beacon (default: false)
 - launch-player: Launch the player when teleporting through a beacon (default: true)
+- launch-player-height: The y-level players will launch into the air before teleporting to the destination. Anti-cheat plugins may not allow players to go above a certain height, so adjust this as needed. The minimum value is the world height.
 - disable-group-teleporting: By default, beacons teleport anyone standing on top of them. If you want to limit the teleportation to only the player who chooses the destination, set this to true. (default: false)
 - allow-beacon-break-by-owner: If the BeaconWaypoints.breakWaypointBeacons permission is disabled for a player, this will still allow them to break a beacon if all waypoints attached to it are owned by them. The owner of a beacon is the player who placed it. (default: true)
 - allow-all-worlds: Allow waypoints to be created in any world (default: true)
@@ -55,6 +56,12 @@ Note: If WorldEdit is used to delete a beacon, the waypoint will not be deleted.
 ### Contact me on Discord: energy_sync#9851
 
 ## Changelog
+
+# 1.3.1
+
+Fixes:
+- Added compatibility with NoCheatPlus by adding temporary exemptions when a player is teleporting.
+- Added launch-player-height config option to change how high players are launched before teleporting. Anti-cheat plugins might not allow players above a certain height, so this is a way to work around that.
 
 # 1.3.0
 

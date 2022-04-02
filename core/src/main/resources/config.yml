@@ -25,6 +25,10 @@ disable-animations: false
 # Launch the player into the air when teleporting through a beacon
 launch-player: true
 
+# The y-level players will launch into the air before teleporting to the destination. Anti-cheat plugins may not allow
+# players to go above a certain height, so adjust this as needed. The minimum value is the world height.
+launch-player-height: 576
+
 # By default, beacons teleport anyone standing on top of them. If you want to limit the teleportation to only the
 # player who chooses the destination, set this to true.
 disable-group-teleporting: false
