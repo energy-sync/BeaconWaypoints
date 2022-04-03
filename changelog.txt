@@ -1,3 +1,2 @@
 Fixes:
-- Added compatibility with NoCheatPlus by adding temporary exemptions when a player is teleporting.
-- Added launch-player-height config option to change how high players are launched before teleporting. Anti-cheat plugins might not allow players above a certain height, so this is a way to work around that.
+- Fixed major compatibility bug with NoCheatPlus

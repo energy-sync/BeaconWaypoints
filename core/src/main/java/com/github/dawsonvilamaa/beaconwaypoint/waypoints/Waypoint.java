@@ -1,7 +1,6 @@
 package com.github.dawsonvilamaa.beaconwaypoint.waypoints;
 
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
-import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
 import org.bukkit.*;
@@ -206,7 +205,9 @@ public class Waypoint implements Cloneable {
                             tpLoc.setDirection(entity.getLocation().getDirection());
                             entity.teleport(tpLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
                         } else {
-                            NCPExemptionManager.exemptPermanently(entity.getUniqueId(), CheckType.MOVING_CREATIVEFLY);
+                            boolean ncpLoaded = Bukkit.getPluginManager().isPluginEnabled("NoCheatPlus");
+                            if (ncpLoaded)
+                                NCPExemptionManager.exemptPermanently(entity.getUniqueId(), CheckType.MOVING_CREATIVEFLY);
                             waypointPlayer.setTeleporting(true);
 
                             ((Player) entity).closeInventory();
@@ -253,7 +254,8 @@ public class Waypoint implements Cloneable {
 
                                         //teleport player to new beam
                                         tpLoc.setDirection(entity.getLocation().getDirection());
-                                        NCPExemptionManager.unexempt(entity.getUniqueId(), CheckType.MOVING_CREATIVEFLY);
+                                        if (ncpLoaded)
+                                            NCPExemptionManager.unexempt(entity.getUniqueId(), CheckType.MOVING_CREATIVEFLY);
                                         entity.teleport(tpLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
                                         entity.setVelocity(new Vector(0, -2, 0));
                                         ((LivingEntity) entity).removePotionEffect(PotionEffectType.LEVITATION);

@@ -8,7 +8,6 @@ import com.github.dawsonvilamaa.beaconwaypoint.version.VersionWrapper;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.Waypoint;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointManager;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointPlayer;
-import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
