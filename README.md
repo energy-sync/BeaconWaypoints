@@ -57,6 +57,11 @@ Note: If WorldEdit is used to delete a beacon, the waypoint will not be deleted.
 
 ## Changelog
 
+# 1.3.2
+
+Fixes:
+- Fixed major compatibility bug with NoCheatPlus
+
 # 1.3.1
 
 Fixes:
