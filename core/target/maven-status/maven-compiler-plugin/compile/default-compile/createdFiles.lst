@@ -2,6 +2,7 @@ com\github\dawsonvilamaa\beaconwaypoint\listeners\WorldListener.class
 com\github\dawsonvilamaa\beaconwaypoint\waypoints\Waypoint.class
 com\github\dawsonvilamaa\beaconwaypoint\waypoints\WaypointManager.class
 com\github\dawsonvilamaa\beaconwaypoint\Metrics$SimplePie.class
+com\github\dawsonvilamaa\beaconwaypoint\LanguageManager.class
 com\github\dawsonvilamaa\beaconwaypoint\Metrics$SimpleBarChart.class
 com\github\dawsonvilamaa\beaconwaypoint\listeners\InventoryListener.class
 com\github\dawsonvilamaa\beaconwaypoint\Metrics$1.class

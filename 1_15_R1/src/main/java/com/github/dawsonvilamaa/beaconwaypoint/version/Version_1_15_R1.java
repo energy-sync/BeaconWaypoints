@@ -46,21 +46,4 @@ public class Version_1_15_R1 implements VersionWrapper {
     public List<Material> getPyramidBlocks() {
         return Arrays.asList(Material.IRON_BLOCK, Material.GOLD_BLOCK, Material.DIAMOND_BLOCK, Material.EMERALD_BLOCK);
     }
-
-    /**
-     * Sends a player a message notification for a plugin update
-     *
-     * @param player
-     */
-    @Override
-    public void sendOpUpdateMessage(Player player) {
-        new UpdateChecker(com.github.dawsonvilamaa.beaconwaypoint.Main.plugin, 99866).getVersion(version -> {
-            if (!com.github.dawsonvilamaa.beaconwaypoint.Main.plugin.getDescription().getVersion().equals(version)) {
-                player.sendMessage(ChatColor.AQUA + "A new version of Beacon Waypoints is available!\n" + ChatColor.YELLOW + "Current version: " + Main.plugin.getDescription().getVersion() + "\nUpdated version: " + version);
-                String json = "[{\"text\":\"§b§nClick here to download\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"https://www.spigotmc.org/resources/beaconwaypoints.99866/\"}}]";
-                PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a(json), ChatMessageType.CHAT);
-                ((CraftPlayer)player).getHandle().playerConnection.sendPacket(packet);
-            }
-        });
-    }
 }

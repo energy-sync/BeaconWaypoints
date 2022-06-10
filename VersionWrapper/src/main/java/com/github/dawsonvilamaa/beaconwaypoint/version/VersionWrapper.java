@@ -22,11 +22,4 @@ public interface VersionWrapper {
      * @return
      */
     List<Material> getPyramidBlocks();
-
-    /**
-     * Sends a player a message notification for a plugin update
-     *
-     * @param player
-     */
-    void sendOpUpdateMessage(Player player);
 }
