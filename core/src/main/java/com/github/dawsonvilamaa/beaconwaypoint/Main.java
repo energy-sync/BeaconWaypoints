@@ -8,7 +8,9 @@ import com.github.dawsonvilamaa.beaconwaypoint.version.VersionWrapper;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.Waypoint;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointManager;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -17,10 +19,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -29,6 +29,7 @@ import java.util.concurrent.Callable;
 
 public class Main extends JavaPlugin {
     public static Main plugin;
+    private static YamlConfiguration languageManager;
     public static WaypointManager waypointManager;
     public static MenuManager menuManager;
     public static VersionWrapper version;
@@ -83,6 +84,9 @@ public class Main extends JavaPlugin {
         if (!playerDir.exists())
             playerDir.mkdirs();
 
+        //load language config
+        loadLanguage();
+
         loadData();
         autoSave.runTaskTimer(plugin, 6000, 6000);
 
@@ -90,10 +94,10 @@ public class Main extends JavaPlugin {
         new UpdateChecker(this, 99866).getVersion(version -> {
             if (!this.getDescription().getVersion().equals(version))
                 this.getLogger().info("\n=======================================================================\n"
-                        + ChatColor.AQUA + "A new version of Beacon Waypoints is available!\n"
-                        + ChatColor.YELLOW + "Current version: " + Main.plugin.getDescription().getVersion()
-                        + "\nUpdated version: " + version
-                        + ChatColor.WHITE + "\nDownload link: " + ChatColor.UNDERLINE + "https://www.spigotmc.org/resources/beaconwaypoints.99866\n"
+                        + ChatColor.AQUA + languageManager.getString("new-version-available") + "\n"
+                        + ChatColor.YELLOW + languageManager.getString("current-version") + ": " + Main.plugin.getDescription().getVersion() + "\n"
+                        + languageManager.getString("updated-version") + ": " + version + "\n"
+                        + ChatColor.WHITE +languageManager.getString("download-link") + ": " + ChatColor.UNDERLINE + "https://www.spigotmc.org/resources/beaconwaypoints.99866\n"
                         + ChatColor.RESET + "=======================================================================");
         });
     }
@@ -209,5 +213,32 @@ public class Main extends JavaPlugin {
                 getLogger().info(ex.getMessage());
             }
         }
+    }
+
+    public void loadLanguage() {
+        File languageConfigFile = new File(getDataFolder(), "language.yml");
+        YamlConfiguration languageConfig = YamlConfiguration.loadConfiguration(languageConfigFile);
+        Reader configStream = new InputStreamReader(getResource("language.yml"), StandardCharsets.UTF_8);
+        YamlConfiguration defaultLanguageConfig = YamlConfiguration.loadConfiguration(configStream);
+        languageConfig.setDefaults(defaultLanguageConfig);
+        languageManager = defaultLanguageConfig;
+
+        if (!new File(getDataFolder(), "language.yml").exists()) {
+            try {
+                defaultLanguageConfig.save(languageConfigFile);
+            } catch (IOException e) {
+                Bukkit.getLogger().severe(languageConfig.getString("cannot-save-default-language-config"));
+                throw new RuntimeException(e);
+            }
+        }
+        else
+            languageManager = languageConfig;
+    }
+
+    /**
+     * @return languageManager
+     */
+    public YamlConfiguration getLanguageManager() {
+        return languageManager;
     }
 }

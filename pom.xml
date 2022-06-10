@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.dawsonvilamaa</groupId>
     <artifactId>BeaconWaypoints</artifactId>
-    <version>1.3.2</version>
+    <version>1.4.0</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -16,29 +16,9 @@
         <module>1_17_R1</module>
         <module>1_18_R1</module>
         <module>1_18_R2</module>
+        <module>1_19_R1</module>
         <module>Build</module>
     </modules>
-
-    <repositories>
-        <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>md_5-snapshots</id>
-            <url>https://repo.md-5.net/content/repositories/snapshots/</url>
-        </repository>
-        <repository>
-            <id>md_5-releases</id>
-            <url>https://repo.md-5.net/content/repositories/releases/</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
