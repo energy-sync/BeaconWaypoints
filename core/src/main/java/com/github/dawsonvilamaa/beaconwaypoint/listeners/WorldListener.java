@@ -1,10 +1,13 @@
 package com.github.dawsonvilamaa.beaconwaypoint.listeners;
 
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
+import com.github.dawsonvilamaa.beaconwaypoint.UpdateChecker;
 import com.github.dawsonvilamaa.beaconwaypoint.gui.GUIs;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.Waypoint;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointCoord;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointPlayer;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -20,13 +23,11 @@ import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -44,7 +45,16 @@ public class WorldListener implements Listener {
 
         //if player is op, check for updates
         if (e.getPlayer().isOp()) {
-            Main.version.sendOpUpdateMessage(e.getPlayer());
+            new UpdateChecker(Main.plugin, 99866).getVersion(version -> {
+                if (!Main.plugin.getDescription().getVersion().equals(version)) {
+                    e.getPlayer().sendMessage(ChatColor.AQUA + Main.plugin.getLanguageManager().getString("new-version-available") + "\n" +
+                            ChatColor.YELLOW + Main.plugin.getLanguageManager().getString("current-version") + ": " + Main.plugin.getDescription().getVersion() + "\n" +
+                            Main.plugin.getLanguageManager().getString("updated-version") + ": " + version);
+                    TextComponent textComponent = new TextComponent(net.md_5.bungee.api.ChatColor.YELLOW + "" + net.md_5.bungee.api.ChatColor.UNDERLINE + Main.plugin.getLanguageManager().getString("click-to-download"));
+                    textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/beaconwaypoints.99866/"));
+                    e.getPlayer().spigot().sendMessage(textComponent);
+                }
+            });
         }
     }
 
@@ -83,7 +93,7 @@ public class WorldListener implements Listener {
                 if (!config.contains("allow-beacon-break-by-owner"))
                     config.set("allow-beacon-break-by-owner", true);
                 if (!(ownsWaypoint && config.getBoolean("allow-beacon-break-by-owner"))) {
-                    e.getPlayer().sendMessage(ChatColor.RED + "You do not have permission to break beacons that have waypoints set");
+                    e.getPlayer().sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("no-break-permission"));
                     e.setCancelled(true);
                 }
             }
@@ -92,7 +102,7 @@ public class WorldListener implements Listener {
                 Waypoint publicWaypoint = Main.waypointManager.getPublicWaypoint(waypointCoord);
                 if (publicWaypoint != null) {
                     Main.waypointManager.removePublicWaypoint(waypointCoord);
-                    e.getPlayer().sendMessage(ChatColor.RED + "Removed public waypoint " + ChatColor.BOLD + publicWaypoint.getName());
+                    e.getPlayer().sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("removed-public-waypoint") + " " + ChatColor.BOLD + publicWaypoint.getName());
                 }
 
                 //remove private waypoint
@@ -102,7 +112,7 @@ public class WorldListener implements Listener {
                         Main.waypointManager.removePrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
                         Player player = Bukkit.getPlayer(waypointPlayer.getUUID());
                         if (player != null)
-                            player.sendMessage(ChatColor.RED + "Removed private waypoint " + ChatColor.BOLD + privateWaypoint.getName());
+                            player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("removed-private-waypoint") + " " + ChatColor.BOLD + privateWaypoint.getName());
                     }
                 }
 
