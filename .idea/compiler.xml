@@ -23,6 +23,7 @@
     <bytecodeTargetLevel>
       <module name="1_14_4_R1" target="8" />
       <module name="1_17_1_R1" target="17" />
+      <module name="1_19_R2" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>
