@@ -1,3 +1,2 @@
 Changes:
-- Added support for 1.19
-- Added language.yml to support custom languages
+- Added support for 1.19.1 (by changing a single letter lol)
