@@ -5,7 +5,7 @@
 
 [CurseForge page](https://www.curseforge.com/minecraft/bukkit-plugins/beaconwaypoints)
 
-Supports versions 1.14-1.19.1
+Supports versions 1.14-1.19.2
 
 This plugin uses bStats.
 
@@ -63,7 +63,7 @@ Note: If WorldEdit is used to delete a beacon, the waypoint will not be deleted.
 
 # 1.5.0
 Changes:
-- Added support for 1.19.1 (by changing a single letter lol)
+- Added support for 1.19.1 and 1.19.2 (by changing a single letter lol)
 
 # 1.4.0
 Changes:
