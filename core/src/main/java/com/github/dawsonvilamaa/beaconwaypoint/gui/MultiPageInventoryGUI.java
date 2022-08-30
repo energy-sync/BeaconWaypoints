@@ -66,7 +66,7 @@ public class MultiPageInventoryGUI {
 
         //back button if previous GUI was provided
         if (this.previousGUI != null) {
-            InventoryGUIButton backButton  = new InventoryGUIButton(this.gui, ChatColor.WHITE + Main.plugin.getLanguageManager().getString("back"), ChatColor.DARK_GRAY + this.previousGUI.getTitle(), Material.BARRIER);
+            InventoryGUIButton backButton  = new InventoryGUIButton(this.gui, ChatColor.WHITE + Main.getPlugin().getLanguageManager().getString("back"), ChatColor.DARK_GRAY + this.previousGUI.getTitle(), Material.BARRIER);
             backButton.setOnClick(e -> {
                 this.previousGUI.showMenu();
             });
@@ -75,7 +75,7 @@ public class MultiPageInventoryGUI {
 
         //previous page button
         if (page > 0) {
-            InventoryGUIButton previousButton = new InventoryGUIButton(gui, Main.plugin.getLanguageManager().getString("previous-page"), null, Material.PLAYER_HEAD);
+            InventoryGUIButton previousButton = new InventoryGUIButton(gui, Main.getPlugin().getLanguageManager().getString("previous-page"), null, Material.PLAYER_HEAD);
             ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
             SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
             //skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString("a68f0b64-8d14-4000-a95f-4b9ba14f8df9"))); //MHF_ArrowLeft
@@ -95,7 +95,7 @@ public class MultiPageInventoryGUI {
 
         //next page button
         if (this.buttons.size() > (page + 1) * this.numRows * 9) {
-            InventoryGUIButton nextButton = new InventoryGUIButton(gui, Main.plugin.getLanguageManager().getString("next-page"), null, Material.PLAYER_HEAD);
+            InventoryGUIButton nextButton = new InventoryGUIButton(gui, Main.getPlugin().getLanguageManager().getString("next-page"), null, Material.PLAYER_HEAD);
             ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
             SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
             //skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString("50c8510b-5ea0-4d60-be9a-7d542d6cd156"))); //MHF_ArrowRight

@@ -28,11 +28,11 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 
 public class Main extends JavaPlugin {
-    public static Main plugin;
+    private static Main plugin;
     private static YamlConfiguration languageManager;
-    public static WaypointManager waypointManager;
-    public static MenuManager menuManager;
-    public static VersionWrapper version;
+    private static WaypointManager waypointManager;
+    private static MenuManager menuManager;
+    private static VersionWrapper versionWrapper;
 
     private final WorldListener worldListener = new WorldListener();
     private final InventoryListener inventoryListener = new InventoryListener(this);
@@ -51,7 +51,7 @@ public class Main extends JavaPlugin {
         menuManager = new MenuManager();
 
         //get version wrapper
-        version = new VersionMatcher().match();
+        versionWrapper = new VersionMatcher().match();
 
         //bStats
         Metrics metrics = new Metrics(this, 14276);
@@ -236,9 +236,37 @@ public class Main extends JavaPlugin {
     }
 
     /**
+     * @return plugin
+     */
+    public static Main getPlugin() {
+        return plugin;
+    }
+
+    /**
      * @return languageManager
      */
-    public YamlConfiguration getLanguageManager() {
+    public static YamlConfiguration getLanguageManager() {
         return languageManager;
+    }
+
+    /**
+     * @return waypointManager
+     */
+    public static WaypointManager getWaypointManager() {
+        return waypointManager;
+    }
+
+    /**
+     * @return menuManager
+     */
+    public static MenuManager getMenuManager() {
+        return menuManager;
+    }
+
+    /**
+     * @return versionWrapper
+     */
+    public static VersionWrapper getVersionWrapper() {
+        return versionWrapper;
     }
 }

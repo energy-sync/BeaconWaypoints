@@ -1,11 +1,13 @@
 package com.github.dawsonvilamaa.beaconwaypoint.waypoints;
 
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
+import com.github.dawsonvilamaa.beaconwaypoint.MathHelper;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -146,7 +148,7 @@ public class Waypoint implements Cloneable {
      * @param player              If group teleporting is enabled, set to null, otherwise set to the player who is teleporting
      */
     public static void teleport(Waypoint startWaypoint, Waypoint destinationWaypoint, Player player) {
-        FileConfiguration config = Main.plugin.getConfig();
+        FileConfiguration config = Main.getPlugin().getConfig();
 
         if (!config.contains("instant-teleport"))
             config.set("instant-teleport", false);
@@ -194,10 +196,10 @@ public class Waypoint implements Cloneable {
                 //get all entities on the beacon
                 Objects.requireNonNull(Bukkit.getWorld(startWaypoint.getWorldName())).getNearbyEntities(startLoc, 0.5, 0.5, 0.5).forEach(entity -> {
                     if (entity.getType() == EntityType.PLAYER && (player == null || entity.getUniqueId().equals(player.getUniqueId()))) {
-                        WaypointPlayer waypointPlayer = Main.waypointManager.getPlayer(entity.getUniqueId());
+                        WaypointPlayer waypointPlayer = Main.getWaypointManager().getPlayer(entity.getUniqueId());
                         if (waypointPlayer == null) {
-                            Main.waypointManager.addPlayer(entity.getUniqueId());
-                            waypointPlayer = Main.waypointManager.getPlayer(entity.getUniqueId());
+                            Main.getWaypointManager().addPlayer(entity.getUniqueId());
+                            waypointPlayer = Main.getWaypointManager().getPlayer(entity.getUniqueId());
                         }
 
                         //if launch is disabled
@@ -286,22 +288,22 @@ public class Waypoint implements Cloneable {
                                                     this.cancel();
                                                 }
                                             }
-                                        }.runTaskTimer(Main.plugin, 0, 5);
+                                        }.runTaskTimer(Main.getPlugin(), 0, 5);
                                     }
                                 }
-                            }.runTaskTimer(Main.plugin, 0, 5);
+                            }.runTaskTimer(Main.getPlugin(), 0, 5);
                         }
                     }
                 });
             }
-        }.runTaskLater(Main.plugin, instantTeleport ? 0 : 50);
+        }.runTaskLater(Main.getPlugin(), instantTeleport ? 0 : 50);
     }
 
     /**
      * @return 0 if beacon cannot be teleported to, 1 if it is able to be teleported to, returns y-coordinate of bedrock if there is bedrock above the beacon
      */
     public int getBeaconStatus() {
-        final List<Material> pyramidBlocks = Main.version.getPyramidBlocks();
+        final List<Material> pyramidBlocks = Main.getVersionWrapper().getPyramidBlocks();
         int isActive = 1;
 
         Location beaconLoc = this.coord.getLocation();
@@ -338,6 +340,44 @@ public class Waypoint implements Cloneable {
         }
 
         return isActive;
+    }
+
+    /**
+     * Checks if the player needs to pay to teleport, checks if they have enough to pay, deducts if applicable, and returns whether the payment succeeded
+     * @param player
+     * @param startWaypoint
+     * @param destinationWaypoint
+     * @return
+     */
+    public static boolean checkPaymentRequirements(Player player, Waypoint startWaypoint, Waypoint destinationWaypoint) {
+        FileConfiguration config = Main.getPlugin().getConfig();
+        String paymentMode = config.getString("payment-mode");
+        if (!(paymentMode.equals("xp") || paymentMode.equals("money") || paymentMode.equals("item") || paymentMode.equals("money") || paymentMode.equals("none"))) {
+            Bukkit.getLogger().warning(Main.getLanguageManager().getString("payment-mode-not-found"));
+            paymentMode = "none";
+        }
+        if (paymentMode.equals("none"))
+            return true;
+
+        int cost = (int) Math.round(config.getDouble(paymentMode + "-cost-per-chunk") * Math.pow(MathHelper.distance2D(startWaypoint.getCoord(), destinationWaypoint.getCoord()), config.getDouble("cost-multiplier")));
+
+        switch (paymentMode) {
+            case "xp":
+                int currentXp = MathHelper.getXpPoints(player);
+                int pointsNeeded = -(currentXp - cost);
+                if (pointsNeeded > 0) {
+                    player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("insufficient-xp") + ": " + pointsNeeded);
+                    return false;
+                }
+                MathHelper.setXp(player, -cost);
+                return true;
+
+            case "money":
+                return false;
+
+            default:
+                return true;
+        }
     }
 
     /**

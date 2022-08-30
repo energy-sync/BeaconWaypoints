@@ -1,0 +1,7 @@
+- add xp, essentials money, and items as options for using a beacon, and based on distance, with config options
+- add "discovery mode" that only shows beacons a player has interacted with
+- share private waypoints with other players
+- banned items and required items option
+- maybe add a GUI option for creating beacons
+    - clicking on a beacon without a waypoint has option for creating one in the menu
+    - anvil GUI for setting name

@@ -32,18 +32,18 @@ public class BWCommandExecutor implements CommandExecutor {
                 //reload
                 if (args.length >= 1 && args[0].equalsIgnoreCase("reload")) {
                     if (player.hasPermission("BeaconWaypoints.reload")) {
-                        Main.plugin.reloadConfig();
-                        Main.plugin.loadLanguage();
-                        player.sendMessage(ChatColor.GREEN + Main.plugin.getLanguageManager().getString("config-reloaded"));
+                        Main.getPlugin().reloadConfig();
+                        Main.getPlugin().loadLanguage();
+                        player.sendMessage(ChatColor.GREEN + Main.getPlugin().getLanguageManager().getString("config-reloaded"));
                     }
                     else
-                        player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("no-command-permission"));
+                        player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("no-command-permission"));
                     return true;
                 }
 
                 //check if player has permission to create public waypoints
                 if (!player.hasPermission("BeaconWaypoints.createWaypoints")) {
-                    player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("no-command-permission"));
+                    player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("no-command-permission"));
                     return true;
                 }
 
@@ -52,7 +52,7 @@ public class BWCommandExecutor implements CommandExecutor {
                 if (args[args.length - 1].equalsIgnoreCase("private")) {
                     privateWaypoint = true;
                     if (!player.hasPermission("BeaconWaypoints.createWaypoints") || !player.hasPermission("BeaconWaypoints.usePrivateWaypoints")) {
-                        player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("no-private-waypoint-permission"));
+                        player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("no-private-waypoint-permission"));
                         return true;
                     }
                 }
@@ -62,7 +62,7 @@ public class BWCommandExecutor implements CommandExecutor {
 
                 //check if player is standing on a beacon
                 if (player.getWorld().getBlockAt(playerLoc).getType() != Material.BEACON) {
-                    player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("stand-on-beacon"));
+                    player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("stand-on-beacon"));
                     return true;
                 }
 
@@ -72,7 +72,7 @@ public class BWCommandExecutor implements CommandExecutor {
                 if (!plugin.getConfig().contains("allowed-worlds"))
                     plugin.getConfig().set("allowed-worlds", Waypoint.DEFAULT_ALLOWED_WORLDS);
                 if (!plugin.getConfig().getBoolean("allow-all-worlds") && !plugin.getConfig().getStringList("allowed-worlds").contains(player.getWorld().getName())) {
-                    player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("world-not-allowed"));
+                    player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("world-not-allowed"));
                     return true;
                 }
 
@@ -80,9 +80,9 @@ public class BWCommandExecutor implements CommandExecutor {
                 boolean waypointExists = false;
                 if (!privateWaypoint) {
                     //check if player is owner
-                    Waypoint inactiveWaypoint = Main.waypointManager.getInactiveWaypoints().get(new WaypointCoord(playerLoc));
+                    Waypoint inactiveWaypoint = Main.getWaypointManager().getInactiveWaypoints().get(new WaypointCoord(playerLoc));
                     if (inactiveWaypoint != null && !inactiveWaypoint.getOwnerUUID().equals(player.getUniqueId())) {
-                        player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("not-owner"));
+                        player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("not-owner"));
                         return true;
                     }
 
@@ -93,13 +93,13 @@ public class BWCommandExecutor implements CommandExecutor {
                         int maxPublicWaypoints = plugin.getConfig().getInt("max-public-waypoints");
                         if (maxPublicWaypoints < 0)
                             maxPublicWaypoints = 0;
-                        if (Main.waypointManager.getPublicWaypoints().values().size() == maxPublicWaypoints) {
-                            player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("public-list-full"));
+                        if (Main.getWaypointManager().getPublicWaypoints().values().size() == maxPublicWaypoints) {
+                            player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("public-list-full"));
                             return true;
                         }
                     }
 
-                    if (Main.waypointManager.getPublicWaypoint(playerLoc) != null)
+                    if (Main.getWaypointManager().getPublicWaypoint(playerLoc) != null)
                         waypointExists = true;
                 } else {
                     //check if private waypoint list is full
@@ -109,17 +109,17 @@ public class BWCommandExecutor implements CommandExecutor {
                         int maxPrivateWaypoints = plugin.getConfig().getInt("max-private-waypoints");
                         if (maxPrivateWaypoints < 0)
                             maxPrivateWaypoints = 0;
-                        if (Main.waypointManager.getPrivateWaypoints(player.getUniqueId()).values().size() == maxPrivateWaypoints) {
-                            player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("private-list-full"));
+                        if (Main.getWaypointManager().getPrivateWaypoints(player.getUniqueId()).values().size() == maxPrivateWaypoints) {
+                            player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("private-list-full"));
                             return true;
                         }
-                        if (Main.waypointManager.getPrivateWaypoint(player.getUniqueId(), playerLoc) != null)
+                        if (Main.getWaypointManager().getPrivateWaypoint(player.getUniqueId(), playerLoc) != null)
                             waypointExists = true;
                     }
                 }
 
                 if (waypointExists) {
-                    player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("already-exists-at-location"));
+                    player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("already-exists-at-location"));
                     return true;
                 }
 
@@ -133,33 +133,33 @@ public class BWCommandExecutor implements CommandExecutor {
                 if (fullWaypointName.toString().endsWith(" private"))
                     fullWaypointName.replace(fullWaypointName.length() - 8, fullWaypointName.length(), "");
                 if (fullWaypointName.length() > 30 || !fullWaypointName.toString().matches("^[A-Za-z0-9- ]+$")) {
-                    player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("invalid-name"));
+                    player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("invalid-name"));
                     return true;
                 }
 
                 //check if waypoint with that name already exists
                 if (!privateWaypoint) {
-                    for (Waypoint waypoint : Main.waypointManager.getPublicWaypoints().values()) {
+                    for (Waypoint waypoint : Main.getWaypointManager().getPublicWaypoints().values()) {
                         if (waypoint != null && waypoint.getName().equals(fullWaypointName.toString())) {
-                            player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("name-taken"));
+                            player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("name-taken"));
                             return true;
                         }
                     }
                 } else {
-                    for (Waypoint waypoint : Main.waypointManager.getPrivateWaypoints(player.getUniqueId()).values()) {
+                    for (Waypoint waypoint : Main.getWaypointManager().getPrivateWaypoints(player.getUniqueId()).values()) {
                         if (waypoint != null && waypoint.getName().equals(fullWaypointName.toString())) {
-                            player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("private-name-taken"));
+                            player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("private-name-taken"));
                             return true;
                         }
                     }
                 }
 
                 //activate waypoint
-                Waypoint inactiveWaypoint = Main.waypointManager.getInactiveWaypoints().get(new WaypointCoord(playerLoc));
+                Waypoint inactiveWaypoint = Main.getWaypointManager().getInactiveWaypoints().get(new WaypointCoord(playerLoc));
                 Waypoint newWaypoint;
                 if (inactiveWaypoint != null) {
                     newWaypoint = inactiveWaypoint.clone();
-                    Main.waypointManager.getInactiveWaypoints().remove(newWaypoint.getCoord());
+                    Main.getWaypointManager().getInactiveWaypoints().remove(newWaypoint.getCoord());
                 }
                 else {
                     newWaypoint = new Waypoint(player.getUniqueId(), new WaypointCoord(playerLoc));
@@ -168,13 +168,13 @@ public class BWCommandExecutor implements CommandExecutor {
                 newWaypoint.setIsWaypoint(true);
 
                 if (!privateWaypoint)
-                    Main.waypointManager.addPublicWaypoint(newWaypoint);
+                    Main.getWaypointManager().addPublicWaypoint(newWaypoint);
                 else {
-                    WaypointPlayer waypointPlayer = Main.waypointManager.getPlayer(player.getUniqueId());
+                    WaypointPlayer waypointPlayer = Main.getWaypointManager().getPlayer(player.getUniqueId());
                     if (waypointPlayer != null)
                         waypointPlayer.addWaypoint(newWaypoint);
                 }
-                player.sendMessage(ChatColor.GREEN + (privateWaypoint ? Main.plugin.getLanguageManager().getString("created-private-waypoint") : Main.plugin.getLanguageManager().getString("created-public-waypoint")) + " " + ChatColor.BOLD + fullWaypointName);
+                player.sendMessage(ChatColor.GREEN + (privateWaypoint ? Main.getPlugin().getLanguageManager().getString("created-private-waypoint") : Main.getPlugin().getLanguageManager().getString("created-public-waypoint")) + " " + ChatColor.BOLD + fullWaypointName);
                 GUIs.waypointIconPickerMenu(player, newWaypoint, null);
                 return true;
             }

@@ -21,7 +21,7 @@ public class InventoryListener implements Listener {
     //prevent players from taking items in GUI menus
     @EventHandler
     public void onItemClick(InventoryClickEvent e) {
-        InventoryGUI gui = Main.menuManager.getMenuByPlayerUUID(e.getWhoClicked().getUniqueId());
+        InventoryGUI gui = Main.getMenuManager().getMenuByPlayerUUID(e.getWhoClicked().getUniqueId());
         if (gui != null && e.getWhoClicked().equals(gui.getPlayer()) && e.getCurrentItem() != null && e.getView().getTitle().equals(gui.getName())) {
             InventoryGUIButton button = gui.getButtons().get(e.getRawSlot());
             if (button != null) {

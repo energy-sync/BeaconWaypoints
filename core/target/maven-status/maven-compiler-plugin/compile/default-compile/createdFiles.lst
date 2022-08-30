@@ -1,4 +1,5 @@
 com\github\dawsonvilamaa\beaconwaypoint\listeners\WorldListener.class
+com\github\dawsonvilamaa\beaconwaypoint\MathHelper.class
 com\github\dawsonvilamaa\beaconwaypoint\waypoints\Waypoint.class
 com\github\dawsonvilamaa\beaconwaypoint\waypoints\WaypointManager.class
 com\github\dawsonvilamaa\beaconwaypoint\Metrics$SimplePie.class

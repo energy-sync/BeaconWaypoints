@@ -14,6 +14,7 @@ created-public-waypoint: Created the public waypoint
 current-version: Current version
 delete-waypoint: Delete Waypoint
 download-link: Download link
+insufficient-xp: You do not have enough XP to teleport to that waypoint. Additional XP points required
 invalid-name: Waypoint names must be 30 characters or fewer and can only contain letters, numbers, spaces, underscores, and hyphens.
 name-taken: There is already a public waypoint of that name
 new-version-available: A new version of Beacon Waypoints is available!
@@ -23,6 +24,7 @@ no-command-permission: You don't have permission to use that command
 no-private-waypoint-permission: You don't have permission to create private waypoints
 no-waypoint-permission: You don't have permission to create waypoints
 not-owner: Only the owner of this beacon can create a public waypoint
+payment-mode-not-found: Payment mode not recognized, defaulting to "none"
 previous-page: Previous Page
 private-list-full: Private waypoint list is full!
 private-name-taken: There is already a private waypoint of that name
