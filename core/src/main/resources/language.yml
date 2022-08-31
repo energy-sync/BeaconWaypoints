@@ -14,6 +14,7 @@ created-public-waypoint: Created the public waypoint
 current-version: Current version
 delete-waypoint: Delete Waypoint
 download-link: Download link
+insufficient-money: You do not have enough money to teleport to that waypoint. Additional money required
 insufficient-xp: You do not have enough XP to teleport to that waypoint. Additional XP points required
 invalid-name: Waypoint names must be 30 characters or fewer and can only contain letters, numbers, spaces, underscores, and hyphens.
 name-taken: There is already a public waypoint of that name

@@ -131,7 +131,7 @@ public class GUIs {
                             if (!config.contains("disable-group-teleporting"))
                                 config.set("disable-group-teleporting", false);
                             if (Waypoint.checkPaymentRequirements(player, waypoint, publicWaypoint))
-                                Waypoint.teleport(waypoint, publicWaypoint, config.getBoolean("disable-group-teleporting") ? player : null);
+                                Waypoint.teleport(waypoint, publicWaypoint, player, config.getBoolean("disable-group-teleporting"));
                         }
                     }
                 });
@@ -189,7 +189,7 @@ public class GUIs {
                         else {
                             if (!config.contains("disable-group-teleporting"))
                                 config.set("disable-group-teleporting", false);
-                            Waypoint.teleport(waypoint, privateWaypoint, config.getBoolean("disable-group-teleporting") ? player : null);
+                            Waypoint.teleport(waypoint, privateWaypoint, player, config.getBoolean("disable-group-teleporting"));
                         }
                     }
                 });

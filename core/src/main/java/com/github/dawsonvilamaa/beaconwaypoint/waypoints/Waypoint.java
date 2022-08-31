@@ -1,5 +1,7 @@
 package com.github.dawsonvilamaa.beaconwaypoint.waypoints;
 
+import com.earth2me.essentials.IEssentials;
+import com.earth2me.essentials.User;
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import com.github.dawsonvilamaa.beaconwaypoint.MathHelper;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -18,6 +20,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.json.simple.JSONObject;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -145,9 +148,10 @@ public class Waypoint implements Cloneable {
     /**
      * @param startWaypoint
      * @param destinationWaypoint
-     * @param player              If group teleporting is enabled, set to null, otherwise set to the player who is teleporting
+     * @param player
+     * @param groupTeleporting
      */
-    public static void teleport(Waypoint startWaypoint, Waypoint destinationWaypoint, Player player) {
+    public static void teleport(Waypoint startWaypoint, Waypoint destinationWaypoint, Player player, boolean groupTeleporting) {
         FileConfiguration config = Main.getPlugin().getConfig();
 
         if (!config.contains("instant-teleport"))
@@ -195,7 +199,7 @@ public class Waypoint implements Cloneable {
 
                 //get all entities on the beacon
                 Objects.requireNonNull(Bukkit.getWorld(startWaypoint.getWorldName())).getNearbyEntities(startLoc, 0.5, 0.5, 0.5).forEach(entity -> {
-                    if (entity.getType() == EntityType.PLAYER && (player == null || entity.getUniqueId().equals(player.getUniqueId()))) {
+                    if (entity.getType() == EntityType.PLAYER && (!groupTeleporting || entity.getUniqueId().equals(player.getUniqueId()))) {
                         WaypointPlayer waypointPlayer = Main.getWaypointManager().getPlayer(entity.getUniqueId());
                         if (waypointPlayer == null) {
                             Main.getWaypointManager().addPlayer(entity.getUniqueId());
@@ -261,6 +265,9 @@ public class Waypoint implements Cloneable {
                                         entity.teleport(tpLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
                                         entity.setVelocity(new Vector(0, -2, 0));
                                         ((LivingEntity) entity).removePotionEffect(PotionEffectType.LEVITATION);
+
+                                        //player pays fee
+                                        pay(player, startWaypoint, destinationWaypoint);
 
                                         //keep players in destination beam
                                         new BukkitRunnable() {
@@ -343,7 +350,7 @@ public class Waypoint implements Cloneable {
     }
 
     /**
-     * Checks if the player needs to pay to teleport, checks if they have enough to pay, deducts if applicable, and returns whether the payment succeeded
+     * Checks if the player needs to pay to teleport, checks if they have enough to pay, and returns whether the player can afford it
      * @param player
      * @param startWaypoint
      * @param destinationWaypoint
@@ -359,7 +366,9 @@ public class Waypoint implements Cloneable {
         if (paymentMode.equals("none"))
             return true;
 
-        int cost = (int) Math.round(config.getDouble(paymentMode + "-cost-per-chunk") * Math.pow(MathHelper.distance2D(startWaypoint.getCoord(), destinationWaypoint.getCoord()), config.getDouble("cost-multiplier")));
+        int cost = calculateCost(startWaypoint, destinationWaypoint, paymentMode, config.getDouble(paymentMode + "-cost-per-chunk"), config.getDouble("cost-multiplier"));
+
+        Bukkit.broadcastMessage("Cost per chunk: " + config.getDouble(paymentMode + "-cost-per-chunk") + "\nChunk distance: " + MathHelper.distance2D(startWaypoint.getCoord(), destinationWaypoint.getCoord()) + "\nMultiplier: " + config.getDouble("cost-multiplier") + "\nCost: " + cost);
 
         switch (paymentMode) {
             case "xp":
@@ -369,15 +378,68 @@ public class Waypoint implements Cloneable {
                     player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("insufficient-xp") + ": " + pointsNeeded);
                     return false;
                 }
-                MathHelper.setXp(player, -cost);
                 return true;
 
             case "money":
-                return false;
+                IEssentials essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
+                User essentialsUser = essentials.getUser(player);
+                BigDecimal currentMoney = essentialsUser.getMoney();
+                BigDecimal moneyNeeded = currentMoney.subtract(BigDecimal.valueOf(cost)).multiply(BigDecimal.valueOf(-1));
+                if (moneyNeeded.compareTo(BigDecimal.ZERO) > 0) {
+                    player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("insufficient-money") + ": " + moneyNeeded);
+                    return false;
+                }
+                return true;
 
             default:
                 return true;
         }
+    }
+
+    /**
+     * Deducts the XP, money, or items from the player when they teleport
+     * @param player
+     * @param startWaypoint
+     * @param destinationWaypoint
+     */
+    public static void pay(Player player, Waypoint startWaypoint, Waypoint destinationWaypoint) {
+        FileConfiguration config = Main.getPlugin().getConfig();
+        String paymentMode = config.getString("payment-mode");
+        int cost = calculateCost(startWaypoint, destinationWaypoint, paymentMode, config.getDouble(paymentMode + "-cost-per-chunk"), config.getDouble("cost-multiplier"));
+        switch (paymentMode) {
+            case "xp":
+                MathHelper.setXp(player, -cost);
+                break;
+
+            case "money":
+                IEssentials essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
+                User essentialsUser = essentials.getUser(player);
+                essentialsUser.takeMoney(BigDecimal.valueOf(cost));
+                break;
+        }
+    }
+
+    /**
+     * Calculates the cost of teleportation based on config settings
+     * @param startWaypoint
+     * @param destinationWaypoint
+     * @param paymentMode
+     * @param costPerChunk
+     * @param costMultiplier
+     * @return cost
+     */
+    public static int calculateCost(Waypoint startWaypoint, Waypoint destinationWaypoint, String paymentMode, double costPerChunk, double costMultiplier) {
+        if (paymentMode.equals("xp") || paymentMode.equals("money") || paymentMode.equals("item") || paymentMode.equals("money") || paymentMode.equals("none")) {
+            if (costPerChunk < 0)
+                costPerChunk = 0;
+            if (costMultiplier < 0)
+                costMultiplier = 0;
+            int cost = (int) Math.round(costPerChunk * Math.pow(MathHelper.distance2D(startWaypoint.getCoord(), destinationWaypoint.getCoord()), costMultiplier));
+            if (cost < 0)
+                cost = 0;
+            return cost;
+        }
+        else return 0;
     }
 
     /**
