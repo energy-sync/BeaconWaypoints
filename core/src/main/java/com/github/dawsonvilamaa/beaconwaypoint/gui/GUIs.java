@@ -124,14 +124,28 @@ public class GUIs {
                     player.closeInventory();
                     if (player.getLocation().distance(waypoint.getCoord().getLocation()) <= 5.5) {
                         if (Main.getWaypointManager().getPublicWaypoint(coord) == null)
-                            player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("waypoint-does-not-exist"));
+                            player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("waypoint-does-not-exist"));
                         else if (publicWaypoint.getBeaconStatus() == 0)
-                            player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("beacon-obstructed"));
+                            player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("beacon-obstructed"));
                         else {
                             if (!config.contains("disable-group-teleporting"))
                                 config.set("disable-group-teleporting", false);
-                            if (Waypoint.checkPaymentRequirements(player, waypoint, publicWaypoint))
+                            int costPerChunk;
+                            String paymentMode = config.getString("payment-mode");
+                            if (paymentMode != null) {
+                                if (paymentMode.equals("xp"))
+                                    costPerChunk = config.getInt("xp-cost-per-chunk");
+                                else if (paymentMode.equals("money"))
+                                    costPerChunk = config.getInt("money-cost-per-chunk");
+                                else costPerChunk = 0;
+                            }
+                            else {
+                                costPerChunk = 0;
+                                paymentMode = "none";
+                            }
+                            if (Waypoint.checkPaymentRequirements(player, waypoint, publicWaypoint, Waypoint.calculateCost(waypoint, publicWaypoint, paymentMode, costPerChunk, config.getDouble("cost-multiplier"))))
                                 Waypoint.teleport(waypoint, publicWaypoint, player, config.getBoolean("disable-group-teleporting"));
+                            else player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("insufficient-payment"));
                         }
                     }
                 });

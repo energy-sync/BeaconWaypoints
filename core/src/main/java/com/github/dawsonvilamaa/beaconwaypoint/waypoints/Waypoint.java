@@ -8,12 +8,14 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -21,9 +23,7 @@ import org.bukkit.util.Vector;
 import org.json.simple.JSONObject;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class Waypoint implements Cloneable {
     private String name;
@@ -258,44 +258,49 @@ public class Waypoint implements Cloneable {
                                     } else {
                                         this.cancel();
 
-                                        //teleport player to new beam
-                                        tpLoc.setDirection(entity.getLocation().getDirection());
-                                        if (ncpLoaded)
-                                            NCPExemptionManager.unexempt(entity.getUniqueId(), CheckType.MOVING_CREATIVEFLY);
-                                        entity.teleport(tpLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
-                                        entity.setVelocity(new Vector(0, -2, 0));
-                                        ((LivingEntity) entity).removePotionEffect(PotionEffectType.LEVITATION);
-
                                         //player pays fee
-                                        pay(player, startWaypoint, destinationWaypoint);
+                                        if (pay(player, startWaypoint, destinationWaypoint)) {
+                                            //teleport player to new beam
+                                            tpLoc.setDirection(entity.getLocation().getDirection());
+                                            if (ncpLoaded)
+                                                NCPExemptionManager.unexempt(entity.getUniqueId(), CheckType.MOVING_CREATIVEFLY);
+                                            entity.teleport(tpLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                                            entity.setVelocity(new Vector(0, -2, 0));
+                                            ((LivingEntity) entity).removePotionEffect(PotionEffectType.LEVITATION);
 
-                                        //keep players in destination beam
-                                        new BukkitRunnable() {
-                                            int time = 0;
+                                            //keep players in destination beam
+                                            new BukkitRunnable() {
+                                                int time = 0;
 
-                                            @Override
-                                            public void run() {
-                                                if (entity.getLocation().getY() > destinationWaypoint.getCoord().getY() + 1) {
-                                                    Location destinationBeamLoc = new Location(destinationCoord.getLocation().getWorld(), tpLoc.getX(), entity.getLocation().getY(), tpLoc.getZ());
-                                                    if (entity.getLocation().distance(destinationBeamLoc) > 0.125) {
-                                                        destinationBeamLoc.setDirection(entity.getLocation().getDirection());
-                                                        entity.teleport(destinationBeamLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
-                                                        entity.setVelocity(new Vector(0, -2, 0));
-                                                    }
-                                                    time++;
+                                                @Override
+                                                public void run() {
+                                                    if (entity.getLocation().getY() > destinationWaypoint.getCoord().getY() + 1) {
+                                                        Location destinationBeamLoc = new Location(destinationCoord.getLocation().getWorld(), tpLoc.getX(), entity.getLocation().getY(), tpLoc.getZ());
+                                                        if (entity.getLocation().distance(destinationBeamLoc) > 0.125) {
+                                                            destinationBeamLoc.setDirection(entity.getLocation().getDirection());
+                                                            entity.teleport(destinationBeamLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
+                                                            entity.setVelocity(new Vector(0, -2, 0));
+                                                        }
+                                                        time++;
 
-                                                    //let player go if they are stuck after 30 seconds
-                                                    if (time >= 80) {
-                                                        ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 255, false, false));
+                                                        //let player go if they are stuck after 30 seconds
+                                                        if (time >= 80) {
+                                                            ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 255, false, false));
+                                                            Objects.requireNonNull(finalWaypointPlayer).setTeleporting(false);
+                                                            this.cancel();
+                                                        }
+                                                    } else {
                                                         Objects.requireNonNull(finalWaypointPlayer).setTeleporting(false);
                                                         this.cancel();
                                                     }
-                                                } else {
-                                                    Objects.requireNonNull(finalWaypointPlayer).setTeleporting(false);
-                                                    this.cancel();
                                                 }
-                                            }
-                                        }.runTaskTimer(Main.getPlugin(), 0, 5);
+                                            }.runTaskTimer(Main.getPlugin(), 0, 5);
+                                        }
+                                        else {
+                                            player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("insufficient-payment"));
+                                            entity.setVelocity(new Vector(0, -2, 0));
+                                            ((LivingEntity) entity).removePotionEffect(PotionEffectType.LEVITATION);
+                                        }
                                     }
                                 }
                             }.runTaskTimer(Main.getPlugin(), 0, 5);
@@ -350,62 +355,21 @@ public class Waypoint implements Cloneable {
     }
 
     /**
-     * Checks if the player needs to pay to teleport, checks if they have enough to pay, and returns whether the player can afford it
+     * Deducts the XP or money from the player when they teleport
      * @param player
      * @param startWaypoint
      * @param destinationWaypoint
-     * @return
+     * @return Whether the player still meets payment requirements right before teleporting
      */
-    public static boolean checkPaymentRequirements(Player player, Waypoint startWaypoint, Waypoint destinationWaypoint) {
+    public static boolean pay(Player player, Waypoint startWaypoint, Waypoint destinationWaypoint) {
         FileConfiguration config = Main.getPlugin().getConfig();
         String paymentMode = config.getString("payment-mode");
-        if (!(paymentMode.equals("xp") || paymentMode.equals("money") || paymentMode.equals("item") || paymentMode.equals("money") || paymentMode.equals("none"))) {
-            Bukkit.getLogger().warning(Main.getLanguageManager().getString("payment-mode-not-found"));
-            paymentMode = "none";
-        }
-        if (paymentMode.equals("none"))
-            return true;
 
         int cost = calculateCost(startWaypoint, destinationWaypoint, paymentMode, config.getDouble(paymentMode + "-cost-per-chunk"), config.getDouble("cost-multiplier"));
 
-        Bukkit.broadcastMessage("Cost per chunk: " + config.getDouble(paymentMode + "-cost-per-chunk") + "\nChunk distance: " + MathHelper.distance2D(startWaypoint.getCoord(), destinationWaypoint.getCoord()) + "\nMultiplier: " + config.getDouble("cost-multiplier") + "\nCost: " + cost);
+        if (!checkPaymentRequirements(player, startWaypoint, destinationWaypoint, cost))
+            return false;
 
-        switch (paymentMode) {
-            case "xp":
-                int currentXp = MathHelper.getXpPoints(player);
-                int pointsNeeded = -(currentXp - cost);
-                if (pointsNeeded > 0) {
-                    player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("insufficient-xp") + ": " + pointsNeeded);
-                    return false;
-                }
-                return true;
-
-            case "money":
-                IEssentials essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
-                User essentialsUser = essentials.getUser(player);
-                BigDecimal currentMoney = essentialsUser.getMoney();
-                BigDecimal moneyNeeded = currentMoney.subtract(BigDecimal.valueOf(cost)).multiply(BigDecimal.valueOf(-1));
-                if (moneyNeeded.compareTo(BigDecimal.ZERO) > 0) {
-                    player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("insufficient-money") + ": " + moneyNeeded);
-                    return false;
-                }
-                return true;
-
-            default:
-                return true;
-        }
-    }
-
-    /**
-     * Deducts the XP, money, or items from the player when they teleport
-     * @param player
-     * @param startWaypoint
-     * @param destinationWaypoint
-     */
-    public static void pay(Player player, Waypoint startWaypoint, Waypoint destinationWaypoint) {
-        FileConfiguration config = Main.getPlugin().getConfig();
-        String paymentMode = config.getString("payment-mode");
-        int cost = calculateCost(startWaypoint, destinationWaypoint, paymentMode, config.getDouble(paymentMode + "-cost-per-chunk"), config.getDouble("cost-multiplier"));
         switch (paymentMode) {
             case "xp":
                 MathHelper.setXp(player, -cost);
@@ -417,10 +381,156 @@ public class Waypoint implements Cloneable {
                 essentialsUser.takeMoney(BigDecimal.valueOf(cost));
                 break;
         }
+
+        List<?> requiredItems = config.getList("required-items");
+        double costMultiplier = config.getDouble("cost-multiplier");
+        if (requiredItems != null && requiredItems.size() > 0) {
+            for (Object o : requiredItems) {
+                HashMap<String, Object> item = (HashMap<String, Object>) o;
+                Object requiredMaterialObj = item.get("item");
+                if (requiredMaterialObj == null)
+                    continue;
+                Material requiredMaterial = Material.getMaterial(requiredMaterialObj.toString());
+                Object nameObj = item.get("name");
+                String requiredName = nameObj != null ? nameObj.toString() : "";
+                Object requiredAmountObj = item.get("amount");
+                int requiredAmount = requiredAmountObj != null ? Integer.parseInt(requiredAmountObj.toString()) : 1;
+                Object useMultiplierObj = item.get("use-multiplier");
+                boolean useMultiplier = useMultiplierObj != null ? Boolean.parseBoolean(useMultiplierObj.toString()) : false;
+                Object consumeItemObj = item.get("consume");
+                boolean consumeItem = consumeItemObj != null ? Boolean.parseBoolean(consumeItemObj.toString()) : false;
+
+                int itemCost = calculateCost(startWaypoint, destinationWaypoint, requiredAmount, useMultiplier ? costMultiplier : 0);
+                Bukkit.broadcastMessage("Item cost: " + itemCost);
+                boolean matchName = requiredName != null;
+                for (int invIndex = 0; invIndex < player.getInventory().getContents().length; invIndex++) {
+                    ItemStack invItem = player.getInventory().getItem(invIndex);
+                    if (invItem == null)
+                        continue;
+                    if (invItem.getType() == requiredMaterial && (!matchName || invItem.getItemMeta().getDisplayName().equals(requiredName))) {
+                        int slotAmount = invItem.getAmount();
+                        if (itemCost > slotAmount) {
+                            itemCost -= slotAmount;
+                            if (consumeItem)
+                                player.getInventory().setItem(invIndex, null);
+                        }
+                        else {
+                            int newSlotAmount = slotAmount - itemCost;
+                            itemCost = 0;
+                            if (consumeItem)
+                                invItem.setAmount(newSlotAmount);
+                        }
+                    }
+                }
+            }
+
+            return cost <= 0;
+        }
+
+        return true;
     }
 
     /**
-     * Calculates the cost of teleportation based on config settings
+     * Checks if the player needs to pay to teleport, checks if they have enough to pay, and returns whether the player can afford it
+     * @param player
+     * @param startWaypoint
+     * @param destinationWaypoint
+     * @return
+     */
+    public static boolean checkPaymentRequirements(Player player, Waypoint startWaypoint, Waypoint destinationWaypoint, int costPerChunk) {
+        FileConfiguration config = Main.getPlugin().getConfig();
+        boolean xpOrMoneyRequirementMet = true;
+        double distance = MathHelper.distance2D(startWaypoint.getCoord(), destinationWaypoint.getCoord());
+
+        String paymentMode = config.getString("payment-mode");
+        if (!(paymentMode.equals("xp") || paymentMode.equals("item") || paymentMode.equals("money") || paymentMode.equals("none"))) {
+            Bukkit.getLogger().warning(Main.getLanguageManager().getString("payment-mode-not-found"));
+            paymentMode = "none";
+        }
+        if (!paymentMode.equals("none")) {
+            Bukkit.broadcastMessage("Cost per chunk: " + config.getDouble(paymentMode + "-cost-per-chunk") + "\nChunk distance: " + distance + "\nMultiplier: " + config.getDouble("cost-multiplier") + "\nCost: " + costPerChunk);
+
+            switch (paymentMode) {
+                case "xp":
+                    int currentXp = MathHelper.getXpPoints(player);
+                    int pointsNeeded = -(currentXp - costPerChunk);
+                    if (pointsNeeded > 0) {
+                        player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("insufficient-xp") + ": " + pointsNeeded);
+                        xpOrMoneyRequirementMet = false;
+                    }
+                    break;
+
+                case "money":
+                    IEssentials essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
+                    User essentialsUser = essentials.getUser(player);
+                    BigDecimal currentMoney = essentialsUser.getMoney();
+                    BigDecimal moneyNeeded = currentMoney.subtract(BigDecimal.valueOf(costPerChunk)).multiply(BigDecimal.valueOf(-1));
+                    if (moneyNeeded.compareTo(BigDecimal.ZERO) > 0) {
+                        player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("insufficient-money") + ": " + moneyNeeded);
+                        xpOrMoneyRequirementMet = false;
+                    }
+                    break;
+            }
+        }
+
+        return xpOrMoneyRequirementMet && checkRequiredItems(player, startWaypoint, destinationWaypoint);
+    }
+
+    /**
+     * Checks if the player has the required items to teleport specified in the config
+     * @param player
+     * @return Whether player has the required items
+     */
+    public static boolean checkRequiredItems(Player player, Waypoint startWaypoint, Waypoint destinationWaypoint) {
+        FileConfiguration config = Main.getPlugin().getConfig();
+        List<?> requiredItems = config.getList("required-items");
+        if (requiredItems != null && requiredItems.size() == 0)
+            return true;
+
+        boolean hasRequiredItems = true;
+        double costMultiplier = config.getDouble("cost-multiplier");
+        for (Object o : requiredItems) {
+            HashMap<String, Object> item = (HashMap<String, Object>) o;
+            Object requiredMaterialObj = item.get("item");
+            if (requiredMaterialObj == null)
+                continue;
+            Material requiredMaterial = Material.valueOf(requiredMaterialObj.toString());
+            Object nameObj = item.get("name");
+            String requiredName = nameObj != null ? nameObj.toString() : "";
+            Object useMultiplierObj = item.get("use-multiplier");
+            boolean useMultiplier = useMultiplierObj != null ? Boolean.parseBoolean(useMultiplierObj.toString()) : false;
+            Object requiredAmountObj = item.get("amount");
+            int requiredAmount = requiredAmountObj != null ? Integer.parseInt(requiredAmountObj.toString()) : 1;
+            int itemCost = calculateCost(startWaypoint, destinationWaypoint, requiredAmount, useMultiplier ? costMultiplier : 0);
+
+            Bukkit.broadcastMessage("Required: " + itemCost);
+            int count = 0;
+            boolean matchName = requiredName != null;
+            for (ItemStack invItem : player.getInventory().getContents()) {
+                if (invItem == null)
+                    continue;
+                if (invItem.getType() == requiredMaterial) {
+                    if (!matchName || invItem.getItemMeta().getDisplayName().equals(requiredName)) {
+                        count += invItem.getAmount();
+                        Bukkit.broadcastMessage(invItem.getType() + " count: " + count);
+                    }
+                }
+            }
+
+            if (count < itemCost) {
+                Bukkit.broadcastMessage(item.get("item") + " not found");
+                hasRequiredItems = false;
+            }
+            else {
+                Bukkit.broadcastMessage(item.get("item") + " found");
+            }
+        }
+
+        return hasRequiredItems;
+    }
+
+    /**
+     * Calculates the cost of teleportation for XP and money costs based on config settings
      * @param startWaypoint
      * @param destinationWaypoint
      * @param paymentMode
@@ -440,6 +550,25 @@ public class Waypoint implements Cloneable {
             return cost;
         }
         else return 0;
+    }
+
+    /**
+     * Calculates the cost of teleportation for required items based on config settings
+     * @param startWaypoint
+     * @param destinationWaypoint
+     * @param costPerChunk
+     * @param costMultiplier
+     * @return cost
+     */
+    public static int calculateCost(Waypoint startWaypoint, Waypoint destinationWaypoint, int costPerChunk, double costMultiplier) {
+        if (costPerChunk < 0)
+            costPerChunk = 0;
+        if (costMultiplier < 0)
+            costMultiplier = 0;
+        int cost = (int) Math.round(costPerChunk * Math.pow(MathHelper.distance2D(startWaypoint.getCoord(), destinationWaypoint.getCoord()), costMultiplier));
+        if (cost < 0)
+            cost = 0;
+        return cost;
     }
 
     /**

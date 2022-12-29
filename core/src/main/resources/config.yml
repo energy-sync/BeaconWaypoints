@@ -59,22 +59,22 @@ money-cost-per-chunk: 0
 cost-multiplier: 0
 
 # Require players to have a specific item with a specific name to teleport.
-# If the item does not need a specific name (ex. custom items), then use "none".
-# The amount of the item the player needs in their inventory can be set.
-# If you do not want the cost multiplier to affect item amounts needed, set use-multiplier to false.
+# If the item does not need a specific name (ex. custom items), then remove the "name" field.
+# The amount of the item the player needs in their inventory can be set with the "amount" field.
+# If you do not want the cost multiplier to affect item amounts needed, set "use-multiplier" to false.
 # This could be useful if you require a certain amount of an item but also want an XP payment based on distance.
-# You can set the item(s) to be consumed or let the player keep it (ex. teleport spell item)
+# You can set the item(s) to be consumed or let the player keep it with the "consume" field (ex. teleport spell item)
+#
 # Example for requiring either an ender pearl that is consumed and uses the cost multiplier
-# or a gold nugget named "Teleport Token" that is not consumed and does not use the cost multiplier:
+# or a gold nugget named "Teleport Token" with gold text that is not consumed and does not use the cost multiplier:
 #
 # required-items:
 #   - item: ENDER_PEARL
-#     name: none
 #     amount: 1
 #     use-multiplier: true
 #     consume: true
 #   - item: GOLD_NUGGET
-#     name: Teleport Token
+#     name: §6Teleport Token
 #     amount: 1
 #     use-multiplier: false
 #     consume: false
@@ -89,11 +89,6 @@ disallowed-items:
 
 # check for required and disallowed items in shulker boxes
 check-shulker-boxes: true
-
-# Consume the item(s) needed for teleportation
-# For example, if players require a "teleportation spell scroll" to use waypoints,
-# then set this to false to let them keep the scroll.
-consume-items: false
 
 # Discovery mode will only show public waypoints that have been "discovered" by the player.
 # A player discovers a waypoint by interacting with the beacon associated with it
