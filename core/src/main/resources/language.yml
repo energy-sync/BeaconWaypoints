@@ -14,6 +14,7 @@ created-public-waypoint: Created the public waypoint
 current-version: Current version
 delete-waypoint: Delete Waypoint
 download-link: Download link
+has-banned-items: You cannot teleport because you have these items in your inventory
 insufficient-money: You do not have enough money to teleport to that waypoint. Additional money required
 insufficient-payment: You do not have sufficient payment to teleport there
 insufficient-xp: You do not have enough XP to teleport to that waypoint. Additional XP points required

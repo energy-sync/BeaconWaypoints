@@ -4,7 +4,7 @@
     - required items (done)
     - config options (done)
     - search through shulker boxes (done)
-- banned items config option
+- banned items config option (done)
 - put cost to tp in waypoints menu in tooltip
 - add "discovery mode" that only shows beacons a player has interacted with
 - make sure to account for if config options are not in config.yml

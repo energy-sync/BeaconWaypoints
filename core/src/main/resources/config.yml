@@ -82,10 +82,10 @@ required-items:
 
 # Prevent players from teleporting if they have certain items in their inventory
 # Example:
-# disallowed-items:
+# banned-items:
 #   - SHULKER_BOX
 #   - TNT
-disallowed-items:
+banned-items:
 
 # check for required and disallowed items in shulker boxes
 check-shulker-boxes: true

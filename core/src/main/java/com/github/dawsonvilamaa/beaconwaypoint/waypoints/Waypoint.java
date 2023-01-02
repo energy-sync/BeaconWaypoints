@@ -532,19 +532,37 @@ public class Waypoint implements Cloneable {
             int requiredAmount = requiredAmountObj != null ? Integer.parseInt(requiredAmountObj.toString()) : 1;
             int itemCost = calculateCost(startWaypoint, destinationWaypoint, requiredAmount, useMultiplier ? costMultiplier : 0);
 
+            List<?> bannedItems = config.getList("banned-items");
+
             Bukkit.broadcastMessage(requiredMaterial + " required: " + itemCost);
             int count = 0;
             boolean matchName = requiredName != null;
+            StringBuilder bannedItemsMsg = new StringBuilder(Main.getLanguageManager().getString("has-banned-items") + ": ");
+            boolean hasBannedItems = false;
+
             //check inventory for required items
             for (ItemStack invItem : player.getInventory().getContents()) {
                 if (invItem == null)
                     continue;
-                if (invItem.getType() == requiredMaterial) {
-                    if (!matchName || invItem.getItemMeta().getDisplayName().equals(requiredName)) {
-                        count += invItem.getAmount();
-                        Bukkit.broadcastMessage(invItem.getType() + " count: " + count);
+
+                //check for banned items
+                boolean thisItemBanned = false;
+                for (Object bannedItem : bannedItems) {
+                    if (invItem.getType().toString().equals(bannedItem.toString())) {
+                        hasBannedItems = true;
+                        thisItemBanned = true;
+                        if (!bannedItemsMsg.toString().contains(invItem.getType().toString()))
+                            bannedItemsMsg.append(invItem.getType()).append(", ");
                     }
                 }
+                if (thisItemBanned)
+                    continue;
+
+                if (invItem.getType() == requiredMaterial && (!matchName || invItem.getItemMeta().getDisplayName().equals(requiredName))) {
+                    count += invItem.getAmount();
+                    Bukkit.broadcastMessage(invItem.getType() + " count: " + count);
+                }
+
                 //check shulker boxes for items
                 else if (invItem.getType() == Material.SHULKER_BOX) {
                     BlockStateMeta itemMeta = (BlockStateMeta) invItem.getItemMeta();
@@ -552,12 +570,31 @@ public class Waypoint implements Cloneable {
                     for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
                         if (shulkerItem == null)
                             continue;
+
+                        //check for banned items
+                        thisItemBanned = false;
+                        for (Object bannedItem : bannedItems) {
+                            if (shulkerItem.getType().toString().equals(bannedItem.toString())) {
+                                hasBannedItems = true;
+                                thisItemBanned = true;
+                                if (!bannedItemsMsg.toString().contains(shulkerItem.getType().toString()))
+                                    bannedItemsMsg.append(shulkerItem.getType()).append(", ");
+                            }
+                        }
+                        if (thisItemBanned)
+                            continue;
+
                         if (shulkerItem.getType() == requiredMaterial && (!matchName || shulkerItem.getItemMeta().getDisplayName().equals(requiredName))) {
                             count += shulkerItem.getAmount();
                             Bukkit.broadcastMessage(shulkerItem.getType() + " count: " + count);
                         }
                     }
                 }
+            }
+
+            if (hasBannedItems) {
+                player.sendMessage(ChatColor.RED + bannedItemsMsg.substring(0, bannedItemsMsg.length() - 2));
+                return false;
             }
 
             if (count < itemCost) {
