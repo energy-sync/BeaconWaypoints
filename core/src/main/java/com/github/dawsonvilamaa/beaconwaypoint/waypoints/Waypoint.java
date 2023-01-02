@@ -2,6 +2,7 @@ package com.github.dawsonvilamaa.beaconwaypoint.waypoints;
 
 import com.earth2me.essentials.IEssentials;
 import com.earth2me.essentials.User;
+import com.github.dawsonvilamaa.beaconwaypoint.LanguageManager;
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import com.github.dawsonvilamaa.beaconwaypoint.MathHelper;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -10,6 +11,7 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -23,10 +25,7 @@ import org.bukkit.util.Vector;
 import org.json.simple.JSONObject;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class Waypoint implements Cloneable {
     private String name;
@@ -472,7 +471,7 @@ public class Waypoint implements Cloneable {
         double distance = MathHelper.distance2D(startWaypoint.getCoord(), destinationWaypoint.getCoord());
 
         String paymentMode = config.getString("payment-mode");
-        if (!(paymentMode.equals("xp") || paymentMode.equals("item") || paymentMode.equals("money") || paymentMode.equals("none"))) {
+        if (!(paymentMode.equals("xp") || paymentMode.equals("money") || paymentMode.equals("none"))) {
             Bukkit.getLogger().warning(Main.getLanguageManager().getString("payment-mode-not-found"));
             paymentMode = "none";
         }
@@ -649,6 +648,87 @@ public class Waypoint implements Cloneable {
         if (cost < 0)
             cost = 0;
         return cost;
+    }
+
+    /**
+     * Creates a description for a waypoint based on its properties
+     * @param startWaypoint
+     * @param destinationWaypoint
+     * @return description
+     */
+    public static String getWaypointDescription(Waypoint startWaypoint, Waypoint destinationWaypoint) {
+        StringBuilder description = new StringBuilder(ChatColor.RESET + "" + ChatColor.WHITE);
+        FileConfiguration config = Main.getPlugin().getConfig();
+        YamlConfiguration languageManager = Main.getLanguageManager();
+        WaypointCoord startCoord = startWaypoint.getCoord();
+        WaypointCoord destinationCoord = destinationWaypoint.getCoord();
+
+        String paymentMode = config.getString("payment-mode");
+        if (!(paymentMode.equals("xp") || paymentMode.equals("money") || paymentMode.equals("none"))) {
+            Bukkit.getLogger().warning(Main.getLanguageManager().getString("payment-mode-not-found"));
+            paymentMode = "none";
+        }
+        List<?> requiredItems = config.getList("required-items");
+        if ((requiredItems != null && requiredItems.size() > 0) || !paymentMode.equals("none"))
+            description.append(ChatColor.YELLOW).append(languageManager.getString("cost")).append(": \n");
+
+        //xp or money payment
+        if (!paymentMode.equals("none")) {
+            switch (paymentMode) {
+                case "xp":
+                    description.append(ChatColor.WHITE).append(calculateCost(startWaypoint, destinationWaypoint, config.getInt("xp-cost-per-chunk"), config.getDouble("cost-multiplier"))).append(" XP\n");
+                    break;
+
+                case "money":
+                    description.append(ChatColor.WHITE).append("$").append(calculateCost(startWaypoint, destinationWaypoint, config.getInt("money-cost-per-chunk"), config.getDouble("cost-multiplier"))).append("\n");
+                    break;
+            }
+        }
+
+        //required items
+        if (requiredItems != null && requiredItems.size() > 0) {
+            ArrayList<String> consumedItemsList = new ArrayList<>();
+            ArrayList<String> requiredItemsList = new ArrayList<>();
+            double costMultiplier = config.getDouble("cost-multiplier");
+            for (Object o : requiredItems) {
+                HashMap<String, Object> item = (HashMap<String, Object>) o;
+                Object requiredMaterialObj = item.get("item");
+                if (requiredMaterialObj == null)
+                    continue;
+                Material requiredMaterial = Material.valueOf(requiredMaterialObj.toString());
+                Object nameObj = item.get("name");
+                String requiredName = nameObj != null ? nameObj.toString() : null;
+                Object useMultiplierObj = item.get("use-multiplier");
+                boolean useMultiplier = useMultiplierObj != null ? Boolean.parseBoolean(useMultiplierObj.toString()) : false;
+                Object requiredAmountObj = item.get("amount");
+                int requiredAmount = requiredAmountObj != null ? Integer.parseInt(requiredAmountObj.toString()) : 1;
+                Object consumeItemObj = item.get("consume");
+                boolean consumeItem = consumeItemObj != null ? Boolean.parseBoolean(consumeItemObj.toString()) : false;
+                int itemCost = calculateCost(startWaypoint, destinationWaypoint, requiredAmount, useMultiplier ? costMultiplier : 0);
+
+                String itemStr = itemCost + "x ";
+                if (requiredName == null)
+                    itemStr += requiredMaterial;
+                else itemStr += requiredName;
+                if (consumeItem)
+                    consumedItemsList.add(itemStr);
+                else requiredItemsList.add(itemStr);
+            }
+
+            for (String item : consumedItemsList)
+                description.append(ChatColor.WHITE).append(item).append("\n");
+
+            if (requiredItemsList.size() > 0)
+                description.append(ChatColor.YELLOW).append(languageManager.getString("required-items")).append(":\n");
+            for (String item : requiredItemsList)
+                description.append(ChatColor.WHITE).append(item).append("\n");
+        }
+
+        //distance
+        description.append(ChatColor.GRAY).append(languageManager.getString("distance")).append(": ").append(Math.round(MathHelper.distance2D(startCoord, destinationCoord))).append(" ").append(languageManager.getString("chunks")).append(" (").append(destinationCoord.getX()).append(", ").append(destinationCoord.getY()).append(", ").append(destinationCoord.getZ()).append(")\n");
+        description.append(ChatColor.GRAY).append(languageManager.getString("owner")).append(": ").append(Bukkit.getOfflinePlayer(destinationWaypoint.getOwnerUUID()).getName()).append("\n");
+        description.append(ChatColor.DARK_GRAY).append(ChatColor.ITALIC).append(destinationWaypoint.getCoord().getWorldName());
+        return description.toString();
     }
 
     /**

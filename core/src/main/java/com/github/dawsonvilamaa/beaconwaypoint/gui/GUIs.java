@@ -119,7 +119,7 @@ public class GUIs {
         for (Waypoint publicWaypoint : Main.getWaypointManager().getPublicWaypointsSortedAlphabetically()) {
             if (!publicWaypoint.getCoord().equals(waypoint.getCoord())) {
                 WaypointCoord coord = publicWaypoint.getCoord();
-                InventoryGUIButton waypointButton = new InventoryGUIButton(gui.getGUI(), publicWaypoint.getName(), ChatColor.GRAY + "" + coord.getX() + ", " + coord.getY() + ", " + coord.getZ() + "\n" + ChatColor.DARK_GRAY + Bukkit.getOfflinePlayer(publicWaypoint.getOwnerUUID()).getName() + "\n" + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + publicWaypoint.getCoord().getWorldName(), publicWaypoint.getIcon());
+                InventoryGUIButton waypointButton = new InventoryGUIButton(gui.getGUI(), publicWaypoint.getName(), Waypoint.getWaypointDescription(waypoint, publicWaypoint), publicWaypoint.getIcon());
                 waypointButton.setOnClick(e -> {
                     player.closeInventory();
                     if (player.getLocation().distance(waypoint.getCoord().getLocation()) <= 5.5) {
