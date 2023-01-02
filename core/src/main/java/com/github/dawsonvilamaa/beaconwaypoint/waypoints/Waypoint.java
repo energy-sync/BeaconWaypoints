@@ -8,14 +8,14 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -23,7 +23,10 @@ import org.bukkit.util.Vector;
 import org.json.simple.JSONObject;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 public class Waypoint implements Cloneable {
     private String name;
@@ -403,22 +406,48 @@ public class Waypoint implements Cloneable {
                 int itemCost = calculateCost(startWaypoint, destinationWaypoint, requiredAmount, useMultiplier ? costMultiplier : 0);
                 Bukkit.broadcastMessage("Item cost: " + itemCost);
                 boolean matchName = requiredName != null;
-                for (int invIndex = 0; invIndex < player.getInventory().getContents().length; invIndex++) {
-                    ItemStack invItem = player.getInventory().getItem(invIndex);
-                    if (invItem == null)
-                        continue;
-                    if (invItem.getType() == requiredMaterial && (!matchName || invItem.getItemMeta().getDisplayName().equals(requiredName))) {
-                        int slotAmount = invItem.getAmount();
-                        if (itemCost > slotAmount) {
-                            itemCost -= slotAmount;
-                            if (consumeItem)
-                                player.getInventory().setItem(invIndex, null);
+                //check inventory for required items
+                if (consumeItem) {
+                    for (int invIndex = 0; invIndex < player.getInventory().getContents().length; invIndex++) {
+                        ItemStack invItem = player.getInventory().getItem(invIndex);
+                        if (invItem == null)
+                            continue;
+                        //check shulker boxes for items
+                        if (invItem.getType() == Material.SHULKER_BOX) {
+                            ItemStack newShulkerBox = invItem.clone();
+                            BlockStateMeta itemMeta = (BlockStateMeta) newShulkerBox.getItemMeta();
+                            ShulkerBox shulker = (ShulkerBox) itemMeta.getBlockState();
+                            for (int shulkerIndex = 0; shulkerIndex < shulker.getInventory().getContents().length; shulkerIndex++) {
+                                ItemStack shulkerItem = shulker.getInventory().getItem(shulkerIndex);
+                                if (shulkerItem == null)
+                                    continue;
+                                int slotAmount = shulkerItem.getAmount();
+                                if (itemCost > slotAmount) {
+                                    itemCost -= slotAmount;
+                                    shulker.getInventory().setItem(shulkerIndex, null);
+                                }
+                                else {
+                                    int newSlotAmount = slotAmount - itemCost;
+                                    itemCost = 0;
+                                    shulkerItem.setAmount(newSlotAmount);
+                                    shulker.getInventory().setItem(shulkerIndex, shulkerItem);
+                                }
+                                itemMeta.setBlockState(shulker);
+                                newShulkerBox.setItemMeta(itemMeta);
+                                player.getInventory().setItem(invIndex, newShulkerBox);
+                            }
                         }
-                        else {
-                            int newSlotAmount = slotAmount - itemCost;
-                            itemCost = 0;
-                            if (consumeItem)
+                        if (invItem.getType() == requiredMaterial && (!matchName || invItem.getItemMeta().getDisplayName().equals(requiredName))) {
+                            int slotAmount = invItem.getAmount();
+                            if (itemCost > slotAmount) {
+                                itemCost -= slotAmount;
+                                player.getInventory().setItem(invIndex, null);
+                            }
+                            else {
+                                int newSlotAmount = slotAmount - itemCost;
+                                itemCost = 0;
                                 invItem.setAmount(newSlotAmount);
+                            }
                         }
                     }
                 }
@@ -503,9 +532,10 @@ public class Waypoint implements Cloneable {
             int requiredAmount = requiredAmountObj != null ? Integer.parseInt(requiredAmountObj.toString()) : 1;
             int itemCost = calculateCost(startWaypoint, destinationWaypoint, requiredAmount, useMultiplier ? costMultiplier : 0);
 
-            Bukkit.broadcastMessage("Required: " + itemCost);
+            Bukkit.broadcastMessage(requiredMaterial + " required: " + itemCost);
             int count = 0;
             boolean matchName = requiredName != null;
+            //check inventory for required items
             for (ItemStack invItem : player.getInventory().getContents()) {
                 if (invItem == null)
                     continue;
@@ -513,6 +543,19 @@ public class Waypoint implements Cloneable {
                     if (!matchName || invItem.getItemMeta().getDisplayName().equals(requiredName)) {
                         count += invItem.getAmount();
                         Bukkit.broadcastMessage(invItem.getType() + " count: " + count);
+                    }
+                }
+                //check shulker boxes for items
+                else if (invItem.getType() == Material.SHULKER_BOX) {
+                    BlockStateMeta itemMeta = (BlockStateMeta) invItem.getItemMeta();
+                    ShulkerBox shulker = (ShulkerBox) itemMeta.getBlockState();
+                    for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
+                        if (shulkerItem == null)
+                            continue;
+                        if (shulkerItem.getType() == requiredMaterial && (!matchName || shulkerItem.getItemMeta().getDisplayName().equals(requiredName))) {
+                            count += shulkerItem.getAmount();
+                            Bukkit.broadcastMessage(shulkerItem.getType() + " count: " + count);
+                        }
                     }
                 }
             }
