@@ -169,14 +169,7 @@ public class Main extends JavaPlugin {
 
         //save player waypoints
         for (WaypointPlayer waypointPlayer : waypointManager.getWaypointPlayers().values()) {
-            JSONObject playerData = new JSONObject();
-            playerData.put("uuid", waypointPlayer.getUUID().toString());
-
-            JSONArray jsonPlayerWaypoints = new JSONArray();
-            for (Waypoint waypoint : waypointPlayer.getWaypoints().values())
-                if (waypoint != null)
-                    jsonPlayerWaypoints.add(waypoint.toJSON());
-            playerData.put("waypoints", jsonPlayerWaypoints);
+            JSONObject playerData = waypointPlayer.toJSON();
 
             FileWriter playerWaypointFile = null;
             try {

@@ -2,7 +2,6 @@ package com.github.dawsonvilamaa.beaconwaypoint.waypoints;
 
 import com.earth2me.essentials.IEssentials;
 import com.earth2me.essentials.User;
-import com.github.dawsonvilamaa.beaconwaypoint.LanguageManager;
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import com.github.dawsonvilamaa.beaconwaypoint.MathHelper;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -22,6 +21,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.math.BigDecimal;
@@ -33,6 +33,7 @@ public class Waypoint implements Cloneable {
     private Material icon;
     private UUID ownerUUID;
     private boolean isWaypoint;
+    private ArrayList<UUID> playersDiscovered;
 
     /**
      * @param ownerUUID
@@ -43,6 +44,7 @@ public class Waypoint implements Cloneable {
         this.icon = Material.BEACON;
         this.ownerUUID = ownerUUID;
         this.isWaypoint = false;
+        this.playersDiscovered = new ArrayList<>();
     }
 
     /**
@@ -59,6 +61,12 @@ public class Waypoint implements Cloneable {
         this.icon = Material.valueOf(jsonWaypoint.get("icon").toString());
         this.ownerUUID = UUID.fromString(jsonWaypoint.get("ownerUUID").toString());
         this.isWaypoint = Boolean.parseBoolean(jsonWaypoint.get("isWaypoint").toString());
+        JSONArray jsonPlayersDiscovered = (JSONArray) jsonWaypoint.get("playersDiscovered");
+        this.playersDiscovered = new ArrayList<>();
+        if (jsonPlayersDiscovered != null) {
+            for (Object jsonPlayer : jsonPlayersDiscovered)
+                this.playersDiscovered.add(UUID.fromString((String) jsonPlayer));
+        }
     }
 
     /**
@@ -357,6 +365,23 @@ public class Waypoint implements Cloneable {
     }
 
     /**
+     * Adds a player to the list of players that have discovered this waypoint
+     * @param player
+     */
+    public void addPlayerDiscovered(Player player) {
+        this.playersDiscovered.add(player.getUniqueId());
+    }
+
+    /**
+     * Checks if a player has discovered this waypoint
+     * @param player
+     * @return True if the player has discovered this waypoint, false if not
+     */
+    public boolean playerDiscoveredWaypoint(Player player) {
+        return this.playersDiscovered.contains(player.getUniqueId());
+    }
+
+    /**
      * Deducts the XP or money from the player when they teleport
      * @param player
      * @param startWaypoint
@@ -512,7 +537,7 @@ public class Waypoint implements Cloneable {
     public static boolean checkRequiredItems(Player player, Waypoint startWaypoint, Waypoint destinationWaypoint) {
         FileConfiguration config = Main.getPlugin().getConfig();
         List<?> requiredItems = config.getList("required-items");
-        if (requiredItems != null && requiredItems.size() == 0)
+        if (requiredItems == null || requiredItems.size() == 0)
             return true;
 
         boolean hasRequiredItems = true;
@@ -744,6 +769,10 @@ public class Waypoint implements Cloneable {
         jsonWaypoint.put("icon", this.icon.toString());
         jsonWaypoint.put("ownerUUID", this.ownerUUID.toString());
         jsonWaypoint.put("isWaypoint", String.valueOf(this.isWaypoint));
+        JSONArray jsonPlayersDiscovered = new JSONArray();
+        for (UUID uuid : this.playersDiscovered)
+            jsonPlayersDiscovered.add(uuid.toString());
+        jsonWaypoint.put("playersDiscovered", jsonPlayersDiscovered);
         return jsonWaypoint;
     }
 

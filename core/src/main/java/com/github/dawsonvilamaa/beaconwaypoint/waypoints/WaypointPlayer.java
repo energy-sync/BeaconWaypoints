@@ -84,4 +84,18 @@ public class WaypointPlayer {
     public void setTeleporting(boolean isTeleporting) {
         this.isTeleporting = isTeleporting;
     }
+
+    /**
+     * @return jsonWaypointPlayer
+     */
+    public JSONObject toJSON() {
+        JSONObject playerData = new JSONObject();
+        playerData.put("uuid", this.uuid.toString());
+        JSONArray jsonPlayerWaypoints = new JSONArray();
+        for (Waypoint waypoint : this.waypoints.values())
+            if (waypoint != null)
+                jsonPlayerWaypoints.add(waypoint.toJSON());
+        playerData.put("waypoints", jsonPlayerWaypoints);
+        return playerData;
+    }
 }

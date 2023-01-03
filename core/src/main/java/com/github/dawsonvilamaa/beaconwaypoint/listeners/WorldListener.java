@@ -155,14 +155,22 @@ public class WorldListener implements Listener {
     public void onPlayerInteract(PlayerInteractEvent e) {
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getHand() == EquipmentSlot.HAND && Objects.requireNonNull(e.getClickedBlock()).getType() == Material.BEACON && !e.getPlayer().isSneaking()) {
             //check if player has permission to use waypoints
-            if (e.getPlayer().hasPermission("BeaconWaypoints.useWaypoints")) {
+            Player player = e.getPlayer();
+            if (player.hasPermission("BeaconWaypoints.useWaypoints")) {
                 WaypointCoord waypointCoord = new WaypointCoord(e.getClickedBlock().getLocation());
                 Waypoint waypoint = Main.getWaypointManager().getPublicWaypoint(waypointCoord);
                 if (waypoint == null)
-                    waypoint = Main.getWaypointManager().getPrivateWaypoint(e.getPlayer().getUniqueId(), waypointCoord);
+                    waypoint = Main.getWaypointManager().getPrivateWaypoint(player.getUniqueId(), waypointCoord);
                 if (waypoint != null) {
                     e.setCancelled(true);
-                    GUIs.beaconMenu(e.getPlayer(), waypoint);
+                    if (Main.getPlugin().getConfig().getBoolean("discovery-mode")) {
+                        //discovery mode
+                        if (!waypoint.playerDiscoveredWaypoint(player)) {
+                            waypoint.addPlayerDiscovered(player);
+                            player.sendMessage(ChatColor.GREEN + Main.getLanguageManager().getString("discovered-waypoint") + ": " + ChatColor.BOLD + waypoint.getName());
+                        }
+                    }
+                    GUIs.beaconMenu(player, waypoint);
                 }
             }
         }

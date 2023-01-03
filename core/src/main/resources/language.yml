@@ -15,6 +15,7 @@ created-private-waypoint: Created the private waypoint
 created-public-waypoint: Created the public waypoint
 current-version: Current version
 delete-waypoint: Delete Waypoint
+discovered-waypoint: Discovered waypoint
 distance: Distance
 download-link: Download link
 has-banned-items: You cannot teleport because you have these items in your inventory

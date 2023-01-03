@@ -87,9 +87,6 @@ required-items:
 #   - TNT
 banned-items:
 
-# check for required and disallowed items in shulker boxes
-check-shulker-boxes: true
-
 # Discovery mode will only show public waypoints that have been "discovered" by the player.
 # A player discovers a waypoint by interacting with the beacon associated with it
 discovery-mode: false

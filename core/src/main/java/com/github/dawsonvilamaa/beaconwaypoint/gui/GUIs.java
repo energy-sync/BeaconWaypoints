@@ -116,8 +116,9 @@ public class GUIs {
         MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, "Public Waypoints", numRows, previousGUI);
 
         //add buttons for all public waypoints
+        boolean discoveryModeEnabled = config.getBoolean("discovery-mode");
         for (Waypoint publicWaypoint : Main.getWaypointManager().getPublicWaypointsSortedAlphabetically()) {
-            if (!publicWaypoint.getCoord().equals(waypoint.getCoord())) {
+            if ((!discoveryModeEnabled || publicWaypoint.playerDiscoveredWaypoint(player)) && !publicWaypoint.getCoord().equals(waypoint.getCoord())) {
                 WaypointCoord coord = publicWaypoint.getCoord();
                 InventoryGUIButton waypointButton = new InventoryGUIButton(gui.getGUI(), publicWaypoint.getName(), Waypoint.getWaypointDescription(waypoint, publicWaypoint), publicWaypoint.getIcon());
                 waypointButton.setOnClick(e -> {
