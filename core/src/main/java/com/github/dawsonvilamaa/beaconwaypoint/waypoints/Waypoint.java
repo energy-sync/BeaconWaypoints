@@ -164,11 +164,7 @@ public class Waypoint implements Cloneable {
     public static void teleport(Waypoint startWaypoint, Waypoint destinationWaypoint, Player player, boolean groupTeleporting) {
         FileConfiguration config = Main.getPlugin().getConfig();
 
-        if (!config.contains("instant-teleport"))
-            config.set("instant-teleport", false);
         boolean instantTeleport = config.getBoolean("instant-teleport");
-        if (!config.contains("disable-animations"))
-            config.set("disable-animations", false);
         boolean disableAnimations = config.getBoolean("disable-animations");
         if (!config.contains("launch-player"))
             config.set("launch-player", true);
@@ -391,6 +387,8 @@ public class Waypoint implements Cloneable {
     public static boolean pay(Player player, Waypoint startWaypoint, Waypoint destinationWaypoint) {
         FileConfiguration config = Main.getPlugin().getConfig();
         String paymentMode = config.getString("payment-mode");
+        if (paymentMode == null)
+            paymentMode = "none";
 
         int cost = calculateCost(startWaypoint, destinationWaypoint, paymentMode, config.getDouble(paymentMode + "-cost-per-chunk"), config.getDouble("cost-multiplier"));
 
@@ -404,8 +402,10 @@ public class Waypoint implements Cloneable {
 
             case "money":
                 IEssentials essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
-                User essentialsUser = essentials.getUser(player);
-                essentialsUser.takeMoney(BigDecimal.valueOf(cost));
+                if (essentials != null) {
+                    User essentialsUser = essentials.getUser(player);
+                    essentialsUser.takeMoney(BigDecimal.valueOf(cost));
+                }
                 break;
         }
 
@@ -515,12 +515,14 @@ public class Waypoint implements Cloneable {
 
                 case "money":
                     IEssentials essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
-                    User essentialsUser = essentials.getUser(player);
-                    BigDecimal currentMoney = essentialsUser.getMoney();
-                    BigDecimal moneyNeeded = currentMoney.subtract(BigDecimal.valueOf(costPerChunk)).multiply(BigDecimal.valueOf(-1));
-                    if (moneyNeeded.compareTo(BigDecimal.ZERO) > 0) {
-                        player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("insufficient-money") + ": " + moneyNeeded);
-                        xpOrMoneyRequirementMet = false;
+                    if (essentials != null) {
+                        User essentialsUser = essentials.getUser(player);
+                        BigDecimal currentMoney = essentialsUser.getMoney();
+                        BigDecimal moneyNeeded = currentMoney.subtract(BigDecimal.valueOf(costPerChunk)).multiply(BigDecimal.valueOf(-1));
+                        if (moneyNeeded.compareTo(BigDecimal.ZERO) > 0) {
+                            player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("insufficient-money") + ": " + moneyNeeded);
+                            xpOrMoneyRequirementMet = false;
+                        }
                     }
                     break;
             }
@@ -557,6 +559,8 @@ public class Waypoint implements Cloneable {
             int itemCost = calculateCost(startWaypoint, destinationWaypoint, requiredAmount, useMultiplier ? costMultiplier : 0);
 
             List<?> bannedItems = config.getList("banned-items");
+            if (bannedItems == null)
+                bannedItems = new ArrayList<String>();
 
             Bukkit.broadcastMessage(requiredMaterial + " required: " + itemCost);
             int count = 0;
@@ -693,8 +697,11 @@ public class Waypoint implements Cloneable {
             Bukkit.getLogger().warning(Main.getLanguageManager().getString("payment-mode-not-found"));
             paymentMode = "none";
         }
+        IEssentials essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
+        if (paymentMode.equals("money") && essentials == null)
+            paymentMode = "none";
         List<?> requiredItems = config.getList("required-items");
-        if ((requiredItems != null && requiredItems.size() > 0) || !paymentMode.equals("none"))
+        if (requiredItems != null && requiredItems.size() > 0 || !paymentMode.equals("none"))
             description.append(ChatColor.YELLOW).append(languageManager.getString("cost")).append(": \n");
 
         //xp or money payment
@@ -705,7 +712,8 @@ public class Waypoint implements Cloneable {
                     break;
 
                 case "money":
-                    description.append(ChatColor.WHITE).append("$").append(calculateCost(startWaypoint, destinationWaypoint, config.getInt("money-cost-per-chunk"), config.getDouble("cost-multiplier"))).append("\n");
+                    if (essentials != null)
+                        description.append(ChatColor.WHITE).append("$").append(calculateCost(startWaypoint, destinationWaypoint, config.getInt("money-cost-per-chunk"), config.getDouble("cost-multiplier"))).append("\n");
                     break;
             }
         }

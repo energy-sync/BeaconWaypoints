@@ -6,10 +6,10 @@
     - search through shulker boxes (done)
 - banned items config option (done)
 - put cost to tp in waypoints menu in tooltip (done)
-- add "discovery mode" that only shows beacons a player has interacted with
-- make sure to account for if config options are not in config.yml
-- send warning if essentials is not installed and ignore money payment if so
-- change versioning to 1.6.0
+- add "discovery mode" that only shows beacons a player has interacted with (done)
+- make sure to account for if config options are not in config.yml (done)
+- send warning if essentials is not installed and ignore money payment if so (done)
+- change versioning to 1.6.0 (done)
 - add option to pin waypoints to the top of the list (needs permission)
 - make back buttons consistent (change to left arrow player head)
 - add 1.19.3 support

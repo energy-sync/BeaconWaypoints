@@ -1,5 +1,6 @@
 package com.github.dawsonvilamaa.beaconwaypoint;
 
+import com.earth2me.essentials.IEssentials;
 import com.github.dawsonvilamaa.beaconwaypoint.gui.MenuManager;
 import com.github.dawsonvilamaa.beaconwaypoint.listeners.InventoryListener;
 import com.github.dawsonvilamaa.beaconwaypoint.listeners.WorldListener;
@@ -100,6 +101,11 @@ public class Main extends JavaPlugin {
                         + ChatColor.WHITE +languageManager.getString("download-link") + ": " + ChatColor.UNDERLINE + "https://www.spigotmc.org/resources/beaconwaypoints.99866\n"
                         + ChatColor.RESET + "=======================================================================");
         });
+
+        //check if EssentialsX is installed
+        IEssentials essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
+        if (essentials == null)
+            this.getLogger().warning("EssentialsX is not installed, ignoring Essentials money cost for teleporting.");
     }
 
     @Override

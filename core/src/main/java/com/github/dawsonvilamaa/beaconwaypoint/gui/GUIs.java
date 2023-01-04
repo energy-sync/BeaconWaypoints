@@ -129,8 +129,6 @@ public class GUIs {
                         else if (publicWaypoint.getBeaconStatus() == 0)
                             player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("beacon-obstructed"));
                         else {
-                            if (!config.contains("disable-group-teleporting"))
-                                config.set("disable-group-teleporting", false);
                             int costPerChunk;
                             String paymentMode = config.getString("payment-mode");
                             if (paymentMode != null) {
@@ -202,8 +200,6 @@ public class GUIs {
                         else if (privateWaypoint.getBeaconStatus() == 0)
                             player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("beacon-obstructed"));
                         else {
-                            if (!config.contains("disable-group-teleporting"))
-                                config.set("disable-group-teleporting", false);
                             Waypoint.teleport(waypoint, privateWaypoint, player, config.getBoolean("disable-group-teleporting"));
                         }
                     }
