@@ -26,7 +26,7 @@ permissions:
     description: Allows players to break beacons that have waypoints
     default: true
   BeaconWaypoints.manageAllWaypoints:
-    description: Allows players to edit or remove all public waypoints and corresponding beacons
+    description: Allows players to edit, remove, and pin all public waypoints and corresponding beacons
     default: op
   BeaconWaypoints.reload:
     description: Allows players to reload the config

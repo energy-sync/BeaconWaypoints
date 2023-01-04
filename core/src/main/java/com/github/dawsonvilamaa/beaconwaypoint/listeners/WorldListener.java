@@ -98,7 +98,7 @@ public class WorldListener implements Listener {
                 }
             }
             else {
-                //remove public waypoint
+                //remove public/pinned waypoint
                 Waypoint publicWaypoint = Main.getWaypointManager().getPublicWaypoint(waypointCoord);
                 if (publicWaypoint != null) {
                     Main.getWaypointManager().removePublicWaypoint(waypointCoord);
@@ -158,7 +158,9 @@ public class WorldListener implements Listener {
             Player player = e.getPlayer();
             if (player.hasPermission("BeaconWaypoints.useWaypoints")) {
                 WaypointCoord waypointCoord = new WaypointCoord(e.getClickedBlock().getLocation());
-                Waypoint waypoint = Main.getWaypointManager().getPublicWaypoint(waypointCoord);
+                Waypoint waypoint = Main.getWaypointManager().getPinnedWaypoint(waypointCoord);
+                if (waypoint == null)
+                    waypoint = Main.getWaypointManager().getPublicWaypoint(waypointCoord);
                 if (waypoint == null)
                     waypoint = Main.getWaypointManager().getPrivateWaypoint(player.getUniqueId(), waypointCoord);
                 if (waypoint != null) {

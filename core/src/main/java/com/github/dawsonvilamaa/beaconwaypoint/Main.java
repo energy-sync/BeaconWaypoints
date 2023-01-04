@@ -22,15 +22,12 @@ import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 public class Main extends JavaPlugin {
     private static Main plugin;
-    private static YamlConfiguration languageManager;
+    private static LanguageManager languageManager;
     private static WaypointManager waypointManager;
     private static MenuManager menuManager;
     private static VersionWrapper versionWrapper;
@@ -121,8 +118,12 @@ public class Main extends JavaPlugin {
         JSONParser parser = new JSONParser();
         try {
             JSONArray jsonWaypoints = (JSONArray) parser.parse(new FileReader("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json"));
-            for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonWaypoints)
-                waypointManager.addPublicWaypoint(new Waypoint(jsonWaypoint));
+            for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonWaypoints) {
+                Waypoint waypoint = new Waypoint(jsonWaypoint);
+                if (waypoint.isPinned())
+                    waypointManager.addPinnedWaypoint(waypoint);
+                else waypointManager.addPublicWaypoint(new Waypoint(jsonWaypoint));
+            }
         } catch(IOException | ParseException e) {
             getLogger().info(e.getMessage());
         }
@@ -155,7 +156,9 @@ public class Main extends JavaPlugin {
     public void saveData() {
         //save public waypoints
         JSONArray jsonWaypoints = new JSONArray();
-        for (Waypoint waypoint : waypointManager.getPublicWaypoints().values())
+        Collection<Waypoint> allPublicWaypoints = waypointManager.getPinnedWaypointsSortedAlphabetically();
+        allPublicWaypoints.addAll(waypointManager.getPublicWaypointsSortedAlphabetically());
+        for (Waypoint waypoint : allPublicWaypoints)
             if (waypoint != null) jsonWaypoints.add(waypoint.toJSON());
 
         FileWriter waypointFile = null;
@@ -220,7 +223,7 @@ public class Main extends JavaPlugin {
         Reader configStream = new InputStreamReader(getResource("language.yml"), StandardCharsets.UTF_8);
         YamlConfiguration defaultLanguageConfig = YamlConfiguration.loadConfiguration(configStream);
         languageConfig.setDefaults(defaultLanguageConfig);
-        languageManager = defaultLanguageConfig;
+        languageManager = new LanguageManager(defaultLanguageConfig);
 
         if (!new File(getDataFolder(), "language.yml").exists()) {
             try {
@@ -231,7 +234,7 @@ public class Main extends JavaPlugin {
             }
         }
         else
-            languageManager = languageConfig;
+            languageManager = new LanguageManager(languageConfig);
     }
 
     /**
@@ -244,7 +247,7 @@ public class Main extends JavaPlugin {
     /**
      * @return languageManager
      */
-    public static YamlConfiguration getLanguageManager() {
+    public static LanguageManager getLanguageManager() {
         return languageManager;
     }
 

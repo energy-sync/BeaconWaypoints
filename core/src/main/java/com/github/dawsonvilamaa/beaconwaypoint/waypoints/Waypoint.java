@@ -2,6 +2,7 @@ package com.github.dawsonvilamaa.beaconwaypoint.waypoints;
 
 import com.earth2me.essentials.IEssentials;
 import com.earth2me.essentials.User;
+import com.github.dawsonvilamaa.beaconwaypoint.LanguageManager;
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import com.github.dawsonvilamaa.beaconwaypoint.MathHelper;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -33,6 +34,7 @@ public class Waypoint implements Cloneable {
     private Material icon;
     private UUID ownerUUID;
     private boolean isWaypoint;
+    private boolean pinned;
     private ArrayList<UUID> playersDiscovered;
 
     /**
@@ -44,6 +46,7 @@ public class Waypoint implements Cloneable {
         this.icon = Material.BEACON;
         this.ownerUUID = ownerUUID;
         this.isWaypoint = false;
+        this.pinned = false;
         this.playersDiscovered = new ArrayList<>();
     }
 
@@ -61,6 +64,8 @@ public class Waypoint implements Cloneable {
         this.icon = Material.valueOf(jsonWaypoint.get("icon").toString());
         this.ownerUUID = UUID.fromString(jsonWaypoint.get("ownerUUID").toString());
         this.isWaypoint = Boolean.parseBoolean(jsonWaypoint.get("isWaypoint").toString());
+        Object jsonPinned = (Object) jsonWaypoint.get("pinned");
+        this.pinned = jsonPinned == null ? false : Boolean.parseBoolean(jsonWaypoint.get("pinned").toString());
         JSONArray jsonPlayersDiscovered = (JSONArray) jsonWaypoint.get("playersDiscovered");
         this.playersDiscovered = new ArrayList<>();
         if (jsonPlayersDiscovered != null) {
@@ -153,6 +158,22 @@ public class Waypoint implements Cloneable {
      */
     public void setIsWaypoint(boolean isWaypoint) {
         this.isWaypoint = isWaypoint;
+    }
+
+    /**
+     * Returns whether this waypoint is pinned in the public list
+     * @return pinned
+     */
+    public boolean isPinned() {
+        return pinned;
+    }
+
+    /**
+     * Sets whether this waypoint is pinned in the public list
+     * @param pinned
+     */
+    public void setPinned(boolean pinned) {
+        this.pinned = pinned;
     }
 
     /**
@@ -375,6 +396,22 @@ public class Waypoint implements Cloneable {
      */
     public boolean playerDiscoveredWaypoint(Player player) {
         return this.playersDiscovered.contains(player.getUniqueId());
+    }
+
+    /**
+     * Returns a list of UUIDs for players who discovered this waypoint
+     * @return playersDiscovered
+     */
+    public ArrayList<UUID> getPlayersDiscovered() {
+        return playersDiscovered;
+    }
+
+    /**
+     * Sets the list of UUIDs for players who discovered this waypoint
+     * @param playersDiscovered
+     */
+    public void setPlayersDiscovered(ArrayList<UUID> playersDiscovered) {
+        this.playersDiscovered = (ArrayList<UUID>) playersDiscovered.clone();
     }
 
     /**
@@ -688,7 +725,7 @@ public class Waypoint implements Cloneable {
     public static String getWaypointDescription(Waypoint startWaypoint, Waypoint destinationWaypoint) {
         StringBuilder description = new StringBuilder(ChatColor.RESET + "" + ChatColor.WHITE);
         FileConfiguration config = Main.getPlugin().getConfig();
-        YamlConfiguration languageManager = Main.getLanguageManager();
+        LanguageManager languageManager = Main.getLanguageManager();
         WaypointCoord startCoord = startWaypoint.getCoord();
         WaypointCoord destinationCoord = destinationWaypoint.getCoord();
 
@@ -758,9 +795,9 @@ public class Waypoint implements Cloneable {
         }
 
         //distance
-        description.append(ChatColor.GRAY).append(languageManager.getString("distance")).append(": ").append(Math.round(MathHelper.distance2D(startCoord, destinationCoord))).append(" ").append(languageManager.getString("chunks")).append(" (").append(destinationCoord.getX()).append(", ").append(destinationCoord.getY()).append(", ").append(destinationCoord.getZ()).append(")\n");
+        description.append(ChatColor.GRAY).append(languageManager.getString("distance")).append(": ").append(Math.round(MathHelper.distance2D(startCoord, destinationCoord))).append(" ").append(languageManager.getString("chunks")).append("\n");
         description.append(ChatColor.GRAY).append(languageManager.getString("owner")).append(": ").append(Bukkit.getOfflinePlayer(destinationWaypoint.getOwnerUUID()).getName()).append("\n");
-        description.append(ChatColor.DARK_GRAY).append(ChatColor.ITALIC).append(destinationWaypoint.getCoord().getWorldName());
+        description.append(ChatColor.DARK_GRAY).append(ChatColor.ITALIC).append(destinationWaypoint.getCoord().getWorldName()).append(" (").append(destinationCoord.getX()).append(", ").append(destinationCoord.getY()).append(", ").append(destinationCoord.getZ()).append(")");
         return description.toString();
     }
 
@@ -777,6 +814,7 @@ public class Waypoint implements Cloneable {
         jsonWaypoint.put("icon", this.icon.toString());
         jsonWaypoint.put("ownerUUID", this.ownerUUID.toString());
         jsonWaypoint.put("isWaypoint", String.valueOf(this.isWaypoint));
+        jsonWaypoint.put("pinned", String.valueOf(this.pinned));
         JSONArray jsonPlayersDiscovered = new JSONArray();
         for (UUID uuid : this.playersDiscovered)
             jsonPlayersDiscovered.add(uuid.toString());
@@ -789,6 +827,8 @@ public class Waypoint implements Cloneable {
         clonedWaypoint.setName(this.name);
         clonedWaypoint.setIcon(this.icon);
         clonedWaypoint.setIsWaypoint(this.isWaypoint);
+        clonedWaypoint.setPinned(this.pinned);
+        clonedWaypoint.setPlayersDiscovered(this.playersDiscovered);
         return clonedWaypoint;
     }
 

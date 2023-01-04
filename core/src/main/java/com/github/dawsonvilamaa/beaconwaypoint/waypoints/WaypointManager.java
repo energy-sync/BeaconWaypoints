@@ -6,11 +6,13 @@ import java.util.*;
 
 public class WaypointManager {
     private HashMap<WaypointCoord, Waypoint> publicWaypoints;
+    private HashMap<WaypointCoord, Waypoint> pinnedWaypoints;
     private HashMap<UUID, WaypointPlayer> waypointPlayers;
     private HashMap<WaypointCoord, Waypoint> inactiveWaypoints;
 
     public WaypointManager() {
         publicWaypoints = new HashMap<>();
+        pinnedWaypoints = new HashMap<>();
         waypointPlayers = new HashMap<>();
         inactiveWaypoints = new HashMap<>();
     }
@@ -28,7 +30,32 @@ public class WaypointManager {
      * @param coord
      */
     public Waypoint removePublicWaypoint(WaypointCoord coord) {
-        return this.publicWaypoints.remove(coord);
+        Waypoint waypoint = pinnedWaypoints.remove(coord);
+        if (waypoint == null)
+            return publicWaypoints.remove(coord);
+        return waypoint;
+    }
+
+    /**
+     * Adds a waypoint to the pinned group
+     * @param waypoint
+     */
+    public void pinWaypoint(Waypoint waypoint) {
+        WaypointCoord coord = waypoint.getCoord();
+        this.pinnedWaypoints.put(coord, this.publicWaypoints.get(coord));
+        this.publicWaypoints.remove(coord);
+        this.pinnedWaypoints.get(coord).setPinned(true);
+    }
+
+    /**
+     * Removes a waypoint from the pinned group
+     * @param waypoint
+     */
+    public void unpinWaypoint(Waypoint waypoint) {
+        WaypointCoord coord = waypoint.getCoord();
+        this.publicWaypoints.put(coord, this.pinnedWaypoints.get(coord));
+        this.pinnedWaypoints.remove(coord);
+        this.publicWaypoints.get(coord).setPinned(false);
     }
 
     /**
@@ -59,7 +86,10 @@ public class WaypointManager {
      * @param coord
      */
     public Waypoint getPublicWaypoint(WaypointCoord coord) {
-        return publicWaypoints.get(coord);
+        Waypoint waypoint = pinnedWaypoints.get(coord);
+        if (waypoint == null)
+            return publicWaypoints.get(coord);
+        return waypoint;
     }
 
     /**
@@ -82,10 +112,41 @@ public class WaypointManager {
      * Returns a collection of all public waypoints sorted alphabetically
      * @return waypoints
      */
-    public List<Waypoint> getPublicWaypointsSortedAlphabetically() {
-        List<Waypoint> sortedWaypoints = new ArrayList<>(publicWaypoints.values());
-        Collections.sort(sortedWaypoints, Comparator.comparing(Waypoint::getLowerCaseName));
-        return sortedWaypoints;
+    public Collection<Waypoint> getPublicWaypointsSortedAlphabetically() {
+        return sortWaypointsAlphabetically(this.publicWaypoints.values());
+    }
+
+    /**
+     * Add a waypoint to the pinned list
+     * @param waypoint
+     */
+    public void addPinnedWaypoint(Waypoint waypoint) {
+        pinnedWaypoints.put(waypoint.getCoord(), waypoint);
+    }
+
+    /**
+     * Returns a waypoint from the pinned waypoint list
+     * @param coord
+     * @return
+     */
+    public Waypoint getPinnedWaypoint(WaypointCoord coord) {
+        return pinnedWaypoints.get(coord);
+    }
+
+    /**
+     * Returns a HashMap of all pinned waypoints
+     * @return pinnedWaypoints
+     */
+    public HashMap<WaypointCoord, Waypoint> getPinnedWaypoints() {
+        return pinnedWaypoints;
+    }
+
+    /**
+     * Returns a collection of all pinned waypoints sorted alphabetically
+     * @return
+     */
+    public Collection<Waypoint> getPinnedWaypointsSortedAlphabetically() {
+        return sortWaypointsAlphabetically(this.pinnedWaypoints.values());
     }
 
     /**
@@ -152,9 +213,7 @@ public class WaypointManager {
      * @return waypoints
      */
     public Collection<Waypoint> getPrivateWaypointsSortedAlphabetically(UUID uuid) {
-        List<Waypoint> sortedWaypoints = new ArrayList<>(waypointPlayers.get(uuid).getWaypoints().values());
-        sortedWaypoints.sort(Comparator.comparing(Waypoint::getName));
-        return sortedWaypoints;
+        return sortWaypointsAlphabetically(waypointPlayers.get(uuid).getWaypoints().values());
     }
 
     /**
@@ -185,6 +244,17 @@ public class WaypointManager {
      */
     public Waypoint getInactiveWaypoint(WaypointCoord coord) {
         return this.inactiveWaypoints.get(coord);
+    }
+
+    /**
+     * Sorts a collection of waypoints alphabetically
+     * @param waypoints
+     * @return
+     */
+    public Collection<Waypoint> sortWaypointsAlphabetically(Collection<Waypoint> waypoints) {
+        List<Waypoint> sortedWaypoints = new ArrayList<>(waypoints);
+        sortedWaypoints.sort(Comparator.comparing(Waypoint::getName));
+        return sortedWaypoints;
     }
 
     /**

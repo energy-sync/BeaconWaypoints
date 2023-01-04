@@ -14,6 +14,7 @@
 - make back buttons consistent (change to left arrow player head)
 - add 1.19.3 support
 - allow any characters / add option for alphanumeric names only
+- make language and waypoint manager calls consistent
 
 MAYBE:
 - move static functions in Waypoint class to WaypointHelper class

@@ -33,6 +33,8 @@ no-waypoint-permission: You don't have permission to create waypoints
 not-owner: Only the owner of this beacon can create a public waypoint
 owner: Owner
 payment-mode-not-found: Payment mode not recognized, defaulting to "none"
+pinned: pinned
+pin-waypoint: Pin waypoint
 previous-page: Previous Page
 private-list-full: Private waypoint list is full!
 private-name-taken: There is already a private waypoint of that name
@@ -45,6 +47,7 @@ removed-private-waypoint: Removed private waypoint
 removed-public-waypoint: Removed public waypoint
 required-items: Required Items
 stand-on-beacon: You must be standing on a beacon to set a waypoint
+unpin-waypoint: Unpin waypoint
 updated-version: Updated version
 waypoint-does-not-exist: That waypoint doesn't exist!
 waypoint-icon-not-found: Could not add waypoint icon. No item found for
