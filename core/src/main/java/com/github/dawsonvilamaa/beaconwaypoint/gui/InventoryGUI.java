@@ -118,8 +118,12 @@ public class InventoryGUI implements Listener, InventoryHolder {
      * @return
      */
     public InventoryGUIButton setButton(int slot, InventoryGUIButton button) {
-        this.inventory.setItem(slot, button.getItem());
-        this.buttons.put(slot, button);
+        if (button == null)
+            this.inventory.setItem(slot, null);
+        else {
+            this.inventory.setItem(slot, button.getItem());
+            this.buttons.put(slot, button);
+        }
         return button;
     }
 

@@ -6,14 +6,17 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class MathHelper {
-    public static double distance2D(WaypointCoord loc1, WaypointCoord loc2) {
-        return distance2D(loc1.getLocation(), loc2.getLocation());
+    public static double distance2D(WaypointCoord loc1, WaypointCoord loc2, boolean chunk) {
+        return distance2D(loc1.getLocation(), loc2.getLocation(), chunk);
     }
 
-    public static double distance2D(Location loc1, Location loc2) {
-        Chunk chunk1 = loc1.getChunk();
-        Chunk chunk2 = loc2.getChunk();
-        return distance2D(chunk1.getX(), chunk1.getZ(), chunk2.getX(), chunk2.getZ());
+    public static double distance2D(Location loc1, Location loc2, boolean chunk) {
+        if (chunk) {
+            Chunk chunk1 = loc1.getChunk();
+            Chunk chunk2 = loc2.getChunk();
+            return distance2D(chunk1.getX(), chunk1.getZ(), chunk2.getX(), chunk2.getZ());
+        }
+        else return distance2D(loc1.getX(), loc1.getZ(), loc2.getX(), loc2.getZ());
     }
 
     public static double distance2D(double x1, double y1, double x2, double y2) {

@@ -45,13 +45,16 @@ allow-beacon-break-by-owner: true
 # The value for each is only used when that mode is specified.
 # If you want the cost to be the same at any distance, then set that value below
 # and set cost-multiplier to 0.
+# If a player is teleporting between dimensions, it will charge the dimension price.
 # Money mode uses the currency from the EssentialsX plugin
 # Modes: none, xp, money
 payment-mode: none
 
 xp-cost-per-chunk: 0
+xp-cost-dimension: 0
 
 money-cost-per-chunk: 0
+money-cost-dimension: 0
 
 # This value changes the cost of travel based on distance.
 # The formula used is cost*(distance^multiplier), and the multiplier must be at least 0
@@ -59,11 +62,13 @@ money-cost-per-chunk: 0
 # Between 0 and 1: cost increases slower with distance
 # 1: cost increases linearly
 # Above 1: cost increases faster with distance
+# This does not affect the price of teleporting between dimensions.
 cost-multiplier: 0
 
 # Require players to have a specific item with a specific name to teleport.
 # If the item does not need a specific name (ex. custom items), then remove the "name" field.
 # The amount of the item the player needs in their inventory can be set with the "amount" field.
+# The amount of the item the player needs in their inventory to travel between dimensions can be set with the "amount-dimension" field.
 # If you do not want the cost multiplier to affect item amounts needed, set "use-multiplier" to false.
 # This could be useful if you require a certain amount of an item but also want an XP payment based on distance.
 # You can set the item(s) to be consumed or let the player keep it with the "consume" field (ex. teleport spell item)
@@ -74,6 +79,7 @@ cost-multiplier: 0
 # required-items:
 #   - item: ENDER_PEARL
 #     amount: 1
+#     dimension-amount: 10
 #     use-multiplier: true
 #     consume: true
 #   - item: GOLD_NUGGET
@@ -93,9 +99,6 @@ banned-items:
 # Discovery mode will only show public waypoints that have been "discovered" by the player.
 # A player discovers a waypoint by interacting with the beacon associated with it
 discovery-mode: false
-
-# Allow players to share private waypoints with others
-allow-sharing: true
 
 # Allow waypoints to be created in any world
 allow-all-worlds: true

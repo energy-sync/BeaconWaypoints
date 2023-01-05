@@ -154,7 +154,6 @@ public class GUIs {
                             }
                             if (WaypointHelper.checkPaymentRequirements(player, waypoint, publicWaypoint, WaypointHelper.calculateCost(waypoint, publicWaypoint, paymentMode, costPerChunk, config.getDouble("cost-multiplier"))))
                                 WaypointHelper.teleport(waypoint, publicWaypoint, player, config.getBoolean("disable-group-teleporting"));
-                            else player.sendMessage(ChatColor.RED + languageManager.getString("insufficient-payment"));
                         }
                     }
                 });
@@ -203,7 +202,7 @@ public class GUIs {
         for (Waypoint privateWaypoint : waypointManager.getPrivateWaypointsSortedAlphabetically(player.getUniqueId())) {
             if (!privateWaypoint.getCoord().equals(waypoint.getCoord())) {
                 WaypointCoord coord = privateWaypoint.getCoord();
-                InventoryGUIButton waypointButton = new InventoryGUIButton(gui.getGUI(), privateWaypoint.getName(), ChatColor.GRAY + "" + coord.getX() + ", " + coord.getY() + ", " + coord.getZ() + "\n" + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + privateWaypoint.getCoord().getWorldName(), privateWaypoint.getIcon());
+                InventoryGUIButton waypointButton = new InventoryGUIButton(gui.getGUI(), privateWaypoint.getName(), WaypointHelper.getWaypointDescription(waypoint, privateWaypoint), privateWaypoint.getIcon());
                 waypointButton.setOnClick(e -> {
                     player.closeInventory();
                     if (player.getLocation().distance(waypoint.getCoord().getLocation()) <= 5.5) {
@@ -212,7 +211,21 @@ public class GUIs {
                         else if (privateWaypoint.getBeaconStatus() == 0)
                             player.sendMessage(ChatColor.RED + languageManager.getString("beacon-obstructed"));
                         else {
-                            WaypointHelper.teleport(waypoint, privateWaypoint, player, config.getBoolean("disable-group-teleporting"));
+                            int costPerChunk;
+                            String paymentMode = config.getString("payment-mode");
+                            if (paymentMode != null) {
+                                if (paymentMode.equals("xp"))
+                                    costPerChunk = config.getInt("xp-cost-per-chunk");
+                                else if (paymentMode.equals("money"))
+                                    costPerChunk = config.getInt("money-cost-per-chunk");
+                                else costPerChunk = 0;
+                            }
+                            else {
+                                costPerChunk = 0;
+                                paymentMode = "none";
+                            }
+                            if (WaypointHelper.checkPaymentRequirements(player, waypoint, privateWaypoint, WaypointHelper.calculateCost(waypoint, privateWaypoint, paymentMode, costPerChunk, config.getDouble("cost-multiplier"))))
+                                WaypointHelper.teleport(waypoint, privateWaypoint, player, config.getBoolean("disable-group-teleporting"));
                         }
                     }
                 });

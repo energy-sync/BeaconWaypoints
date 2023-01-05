@@ -44,7 +44,7 @@ public class LanguageManager {
     public String getString(String key) {
         String string = messages.get(key);
         if (string == null) {
-            Bukkit.getLogger().warning("Missing language entry for \"" + key + "\", using default");
+            Main.getPlugin().getLogger().warning("Missing language entry for \"" + key + "\", using default");
             return defaults.getString(key);
         }
         return string;

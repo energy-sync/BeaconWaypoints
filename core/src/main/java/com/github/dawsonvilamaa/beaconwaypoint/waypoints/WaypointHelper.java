@@ -10,6 +10,7 @@ import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
 import org.bukkit.*;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -178,7 +179,6 @@ public class WaypointHelper {
                                             }.runTaskTimer(plugin, 0, 5);
                                         }
                                         else {
-                                            player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("insufficient-payment"));
                                             entity.setVelocity(new Vector(0, -2, 0));
                                             ((LivingEntity) entity).removePotionEffect(PotionEffectType.LEVITATION);
                                         }
@@ -237,13 +237,18 @@ public class WaypointHelper {
                 String requiredName = nameObj != null ? nameObj.toString() : "";
                 Object requiredAmountObj = item.get("amount");
                 int requiredAmount = requiredAmountObj != null ? Integer.parseInt(requiredAmountObj.toString()) : 1;
+                Object requiredDimensionAmountObj = item.get("dimension-amount");
+                int requiredDimensionAmount = requiredDimensionAmountObj != null ? Integer.parseInt(requiredDimensionAmountObj.toString()) : 1;
                 Object useMultiplierObj = item.get("use-multiplier");
                 boolean useMultiplier = useMultiplierObj != null ? Boolean.parseBoolean(useMultiplierObj.toString()) : false;
                 Object consumeItemObj = item.get("consume");
                 boolean consumeItem = consumeItemObj != null ? Boolean.parseBoolean(consumeItemObj.toString()) : false;
-
-                int itemCost = calculateCost(startWaypoint, destinationWaypoint, requiredAmount, useMultiplier ? costMultiplier : 0);
+                int itemCost;
+                if (requiredDimensionAmountObj != null && !startWaypoint.getWorldName().equals(destinationWaypoint.getWorldName()))
+                    itemCost = requiredDimensionAmount;
+                else itemCost = calculateCost(startWaypoint, destinationWaypoint, requiredAmount, useMultiplier ? costMultiplier : 0);
                 Bukkit.broadcastMessage("Item cost: " + itemCost);
+
                 boolean matchName = requiredName != null;
                 //check inventory for required items
                 if (consumeItem) {
@@ -292,7 +297,8 @@ public class WaypointHelper {
                 }
             }
 
-            return cost <= 0;
+            Bukkit.broadcastMessage("cost <= 0: " + (cost <= 0) + "\ncost: " + cost);
+            //return cost <= 0;
         }
 
         return true;
@@ -310,7 +316,7 @@ public class WaypointHelper {
         LanguageManager languageManager = Main.getLanguageManager();
 
         boolean xpOrMoneyRequirementMet = true;
-        double distance = MathHelper.distance2D(startWaypoint.getCoord(), destinationWaypoint.getCoord());
+        double distance = MathHelper.distance2D(startWaypoint.getCoord(), destinationWaypoint.getCoord(), true);
 
         String paymentMode = config.getString("payment-mode");
         if (!(paymentMode.equals("xp") || paymentMode.equals("money") || paymentMode.equals("none"))) {
@@ -337,7 +343,7 @@ public class WaypointHelper {
                         BigDecimal currentMoney = essentialsUser.getMoney();
                         BigDecimal moneyNeeded = currentMoney.subtract(BigDecimal.valueOf(costPerChunk)).multiply(BigDecimal.valueOf(-1));
                         if (moneyNeeded.compareTo(BigDecimal.ZERO) > 0) {
-                            player.sendMessage(ChatColor.RED + languageManager.getString("insufficient-money") + ": " + moneyNeeded);
+                            player.sendMessage(ChatColor.RED + languageManager.getString("insufficient-money") + ": $" + moneyNeeded);
                             xpOrMoneyRequirementMet = false;
                         }
                     }
@@ -373,7 +379,12 @@ public class WaypointHelper {
             boolean useMultiplier = useMultiplierObj != null ? Boolean.parseBoolean(useMultiplierObj.toString()) : false;
             Object requiredAmountObj = item.get("amount");
             int requiredAmount = requiredAmountObj != null ? Integer.parseInt(requiredAmountObj.toString()) : 1;
-            int itemCost = calculateCost(startWaypoint, destinationWaypoint, requiredAmount, useMultiplier ? costMultiplier : 0);
+            Object requiredDimensionAmountObj = item.get("dimension-amount");
+            int requiredDimensionAmount = requiredDimensionAmountObj != null ? Integer.parseInt(requiredDimensionAmountObj.toString()) : 1;
+            int itemCost;
+            if (requiredDimensionAmountObj != null && !startWaypoint.getWorldName().equals(destinationWaypoint.getWorldName()))
+                itemCost = requiredDimensionAmount;
+            else itemCost = calculateCost(startWaypoint, destinationWaypoint, requiredAmount, useMultiplier ? costMultiplier : 0);
 
             List<?> bannedItems = config.getList("banned-items");
             if (bannedItems == null)
@@ -451,6 +462,8 @@ public class WaypointHelper {
             }
         }
 
+        if (!hasRequiredItems)
+            player.sendMessage(ChatColor.RED + Main.getLanguageManager().getString("insufficient-items"));
         return hasRequiredItems;
     }
 
@@ -464,12 +477,21 @@ public class WaypointHelper {
      * @return cost
      */
     public static int calculateCost(Waypoint startWaypoint, Waypoint destinationWaypoint, String paymentMode, double costPerChunk, double costMultiplier) {
-        if (paymentMode.equals("xp") || paymentMode.equals("money") || paymentMode.equals("item") || paymentMode.equals("money") || paymentMode.equals("none")) {
+        if (paymentMode.equals("xp") || paymentMode.equals("money") || paymentMode.equals("none")) {
+            if (!startWaypoint.getCoord().getWorldName().equals(destinationWaypoint.getCoord().getWorldName())) {
+                FileConfiguration config = Main.getPlugin().getConfig();
+                if (paymentMode.equals("xp"))
+                    return config.getInt("xp-cost-dimension");
+                else if (paymentMode.equals("money"))
+                    return config.getInt("money-cost-dimension");
+                else return 0;
+            }
+
             if (costPerChunk < 0)
                 costPerChunk = 0;
             if (costMultiplier < 0)
                 costMultiplier = 0;
-            int cost = (int) Math.round(costPerChunk * Math.pow(MathHelper.distance2D(startWaypoint.getCoord(), destinationWaypoint.getCoord()), costMultiplier));
+            int cost = (int) Math.round(costPerChunk * Math.pow(MathHelper.distance2D(startWaypoint.getCoord(), destinationWaypoint.getCoord(), true), costMultiplier));
             if (cost < 0)
                 cost = 0;
             return cost;
@@ -490,7 +512,7 @@ public class WaypointHelper {
             costPerChunk = 0;
         if (costMultiplier < 0)
             costMultiplier = 0;
-        int cost = (int) Math.round(costPerChunk * Math.pow(MathHelper.distance2D(startWaypoint.getCoord(), destinationWaypoint.getCoord()), costMultiplier));
+        int cost = (int) Math.round(costPerChunk * Math.pow(MathHelper.distance2D(startWaypoint.getCoord(), destinationWaypoint.getCoord(), true), costMultiplier));
         if (cost < 0)
             cost = 0;
         return cost;
@@ -523,16 +545,11 @@ public class WaypointHelper {
 
         //xp or money payment
         if (!paymentMode.equals("none")) {
-            switch (paymentMode) {
-                case "xp":
-                    description.append(ChatColor.WHITE).append(calculateCost(startWaypoint, destinationWaypoint, config.getInt("xp-cost-per-chunk"), config.getDouble("cost-multiplier"))).append(" XP\n");
-                    break;
-
-                case "money":
-                    if (essentials != null)
-                        description.append(ChatColor.WHITE).append("$").append(calculateCost(startWaypoint, destinationWaypoint, config.getInt("money-cost-per-chunk"), config.getDouble("cost-multiplier"))).append("\n");
-                    break;
-            }
+            description.append(ChatColor.WHITE);
+            if (paymentMode.equals("xp"))
+                description.append(calculateCost(startWaypoint, destinationWaypoint, "xp", config.getInt("xp-cost-per-chunk"), config.getDouble("cost-multiplier"))).append(" XP\n");
+            else if (paymentMode.equals("money") && essentials != null)
+                description.append("$").append(calculateCost(startWaypoint, destinationWaypoint, "money", config.getInt("money-cost-per-chunk"), config.getDouble("cost-multiplier"))).append("\n");
         }
 
         //required items
@@ -552,10 +569,14 @@ public class WaypointHelper {
                 boolean useMultiplier = useMultiplierObj != null ? Boolean.parseBoolean(useMultiplierObj.toString()) : false;
                 Object requiredAmountObj = item.get("amount");
                 int requiredAmount = requiredAmountObj != null ? Integer.parseInt(requiredAmountObj.toString()) : 1;
+                Object requiredDimensionAmountObj = item.get("dimension-amount");
+                int requiredDimensionAmount = requiredDimensionAmountObj != null ? Integer.parseInt(requiredDimensionAmountObj.toString()) : 1;
                 Object consumeItemObj = item.get("consume");
                 boolean consumeItem = consumeItemObj != null ? Boolean.parseBoolean(consumeItemObj.toString()) : false;
-                int itemCost = calculateCost(startWaypoint, destinationWaypoint, requiredAmount, useMultiplier ? costMultiplier : 0);
-
+                int itemCost;
+                if (requiredDimensionAmountObj != null && !startCoord.getWorldName().equals(destinationCoord.getWorldName()))
+                    itemCost = requiredDimensionAmount;
+                else itemCost = calculateCost(startWaypoint, destinationWaypoint, requiredAmount, useMultiplier ? costMultiplier : 0);
                 String itemStr = itemCost + "x ";
                 if (requiredName == null)
                     itemStr += requiredMaterial;
@@ -575,7 +596,8 @@ public class WaypointHelper {
         }
 
         //distance
-        description.append(ChatColor.GRAY).append(languageManager.getString("distance")).append(": ").append(Math.round(MathHelper.distance2D(startCoord, destinationCoord))).append(" ").append(languageManager.getString("chunks")).append("\n");
+        if (startCoord.getWorldName().equals(destinationCoord.getWorldName()))
+            description.append(ChatColor.GRAY).append(languageManager.getString("distance")).append(": ").append(Math.round(MathHelper.distance2D(startCoord, destinationCoord, false))).append(" ").append(languageManager.getString("blocks")).append("\n");
         description.append(ChatColor.GRAY).append(languageManager.getString("owner")).append(": ").append(Bukkit.getOfflinePlayer(destinationWaypoint.getOwnerUUID()).getName()).append("\n");
         description.append(ChatColor.DARK_GRAY).append(ChatColor.ITALIC).append(destinationWaypoint.getCoord().getWorldName()).append(" (").append(destinationCoord.getX()).append(", ").append(destinationCoord.getY()).append(", ").append(destinationCoord.getZ()).append(")");
         return description.toString();

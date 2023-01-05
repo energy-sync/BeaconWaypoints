@@ -1,6 +1,7 @@
 already-exists-at-location: A waypoint already exists at that location
 back: Back
 beacon-obstructed: The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.
+blocks: blocks
 cancel: Cancel
 cannot-check-for-update: Unable to check for updates
 cannot-save-default-language-config: Could not save default language config!
@@ -8,7 +9,6 @@ config-reloaded: BeaconWaypoints config reloaded!
 confirm-delete: Confirm Delete
 change-beacon-effect: Change beacon effect
 change-icon: Change Icon
-chunks: chunks
 click-to-download: Click here to download
 cost: Cost
 created-private-waypoint: Created the private waypoint
@@ -19,8 +19,8 @@ discovered-waypoint: Discovered waypoint
 distance: Distance
 download-link: Download link
 has-banned-items: You cannot teleport because you have these items in your inventory
+insufficient-items: You are missing items that are required to teleport
 insufficient-money: You do not have enough money to teleport to that waypoint. Additional money required
-insufficient-payment: You do not have sufficient payment to teleport there
 insufficient-xp: You do not have enough XP to teleport to that waypoint. Additional XP points required
 invalid-name: Waypoint names must be 30 characters or fewer
 invalid-name-alphanumeric: Waypoint names must be 30 characters or fewer and can only contain letters, numbers, spaces, underscores, and hyphens.

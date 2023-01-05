@@ -81,6 +81,7 @@ public class MultiPageInventoryGUI {
                 this.previousGUI.showMenu();
             });
             gui.setButton(this.bottomRowSlot, backButton);
+            gui.setButton(0, null);
         }
 
         //previous page button
