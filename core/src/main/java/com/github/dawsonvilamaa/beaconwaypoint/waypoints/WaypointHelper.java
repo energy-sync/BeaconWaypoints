@@ -320,7 +320,6 @@ public class WaypointHelper {
             paymentMode = "none";
         }
         if (!paymentMode.equals("none")) {
-
             switch (paymentMode) {
                 case "xp":
                     int currentXp = MathHelper.getXpPoints(player);
