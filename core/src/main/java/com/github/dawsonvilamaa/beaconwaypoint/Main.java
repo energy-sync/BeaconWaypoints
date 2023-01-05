@@ -22,6 +22,8 @@ import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -117,7 +119,8 @@ public class Main extends JavaPlugin {
         //read data from public file
         JSONParser parser = new JSONParser();
         try {
-            JSONArray jsonWaypoints = (JSONArray) parser.parse(new FileReader("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json"));
+            //JSONArray jsonWaypoints = (JSONArray) parser.parse(new FileReader("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json"));
+            JSONArray jsonWaypoints = (JSONArray) parser.parse(new InputStreamReader(Files.newInputStream(Paths.get("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json")), StandardCharsets.UTF_8));
             for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonWaypoints) {
                 Waypoint waypoint = new Waypoint(jsonWaypoint);
                 if (waypoint.isPinned())
@@ -161,9 +164,10 @@ public class Main extends JavaPlugin {
         for (Waypoint waypoint : allPublicWaypoints)
             if (waypoint != null) jsonWaypoints.add(waypoint.toJSON());
 
-        FileWriter waypointFile = null;
+        Writer waypointFile = null;
         try {
-            waypointFile = new FileWriter("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json");
+            //waypointFile = new FileWriter("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json");
+            waypointFile = new OutputStreamWriter(Files.newOutputStream(Paths.get("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json")), StandardCharsets.UTF_8);
             waypointFile.write(jsonWaypoints.toJSONString());
         } catch(IOException e) {
             getLogger().info(e.getMessage());

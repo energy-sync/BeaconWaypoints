@@ -22,7 +22,8 @@ has-banned-items: You cannot teleport because you have these items in your inven
 insufficient-money: You do not have enough money to teleport to that waypoint. Additional money required
 insufficient-payment: You do not have sufficient payment to teleport there
 insufficient-xp: You do not have enough XP to teleport to that waypoint. Additional XP points required
-invalid-name: Waypoint names must be 30 characters or fewer and can only contain letters, numbers, spaces, underscores, and hyphens.
+invalid-name: Waypoint names must be 30 characters or fewer
+invalid-name-alphanumeric: Waypoint names must be 30 characters or fewer and can only contain letters, numbers, spaces, underscores, and hyphens.
 name-taken: There is already a public waypoint of that name
 new-version-available: A new version of Beacon Waypoints is available!
 next-page: Next Page

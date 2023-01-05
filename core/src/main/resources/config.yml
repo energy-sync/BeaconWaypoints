@@ -8,6 +8,9 @@ max-public-waypoints: 100
 # The maximum amount of private waypoints that each player can have
 max-private-waypoints: 30
 
+# Force waypoint names to be alphanumeric when they are created
+force-alphanumeric-names: false
+
 # The number of rows the public waypoint selection menu will show per page, not including the row for page navigation
 # Range: 1-5
 public-waypoint-menu-rows: 3

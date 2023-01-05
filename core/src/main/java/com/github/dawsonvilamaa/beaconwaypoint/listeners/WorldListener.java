@@ -1,10 +1,12 @@
 package com.github.dawsonvilamaa.beaconwaypoint.listeners;
 
+import com.github.dawsonvilamaa.beaconwaypoint.LanguageManager;
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import com.github.dawsonvilamaa.beaconwaypoint.UpdateChecker;
 import com.github.dawsonvilamaa.beaconwaypoint.gui.GUIs;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.Waypoint;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointCoord;
+import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointManager;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointPlayer;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -37,20 +39,23 @@ public class WorldListener implements Listener {
     //adds players to waypointPlayers map when they join if they are already not in the map
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
-        WaypointPlayer waypointPlayer = Main.getWaypointManager().getPlayer(e.getPlayer().getUniqueId());
+        Main plugin = Main.getPlugin();
+        WaypointManager waypointManager = Main.getWaypointManager();
+        LanguageManager languageManager = Main.getLanguageManager();
+        WaypointPlayer waypointPlayer = waypointManager.getPlayer(e.getPlayer().getUniqueId());
 
         //add if not in map
         if (waypointPlayer == null)
-            Main.getWaypointManager().addPlayer(e.getPlayer().getUniqueId());
+            waypointManager.addPlayer(e.getPlayer().getUniqueId());
 
         //if player is op, check for updates
         if (e.getPlayer().isOp()) {
-            new UpdateChecker(Main.getPlugin(), 99866).getVersion(version -> {
-                if (!Main.getPlugin().getDescription().getVersion().equals(version)) {
-                    e.getPlayer().sendMessage(ChatColor.AQUA + Main.getPlugin().getLanguageManager().getString("new-version-available") + "\n" +
-                            ChatColor.YELLOW + Main.getPlugin().getLanguageManager().getString("current-version") + ": " + Main.getPlugin().getDescription().getVersion() + "\n" +
-                            Main.getPlugin().getLanguageManager().getString("updated-version") + ": " + version);
-                    TextComponent textComponent = new TextComponent(net.md_5.bungee.api.ChatColor.YELLOW + "" + net.md_5.bungee.api.ChatColor.UNDERLINE + Main.getPlugin().getLanguageManager().getString("click-to-download"));
+            new UpdateChecker(plugin, 99866).getVersion(version -> {
+                if (!plugin.getDescription().getVersion().equals(version)) {
+                    e.getPlayer().sendMessage(ChatColor.AQUA + languageManager.getString("new-version-available") + "\n" +
+                            ChatColor.YELLOW + languageManager.getString("current-version") + ": " + plugin.getDescription().getVersion() + "\n" +
+                            languageManager.getString("updated-version") + ": " + version);
+                    TextComponent textComponent = new TextComponent(net.md_5.bungee.api.ChatColor.YELLOW + "" + net.md_5.bungee.api.ChatColor.UNDERLINE + languageManager.getString("click-to-download"));
                     textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/beaconwaypoints.99866/"));
                     e.getPlayer().spigot().sendMessage(textComponent);
                 }
@@ -72,11 +77,13 @@ public class WorldListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
         if (e.getBlock().getType() == Material.BEACON) {
+            WaypointManager waypointManager = Main.getWaypointManager();
+            LanguageManager languageManager = Main.getLanguageManager();
             WaypointCoord waypointCoord = new WaypointCoord(e.getBlock().getLocation());
 
             //check if player has permission to break waypoint beacons and if the beacon has waypoints
-            Waypoint publicWaypoint1 = Main.getWaypointManager().getPublicWaypoint(waypointCoord);
-            List<Waypoint> privateWaypoints = Main.getWaypointManager().getPrivateWaypointsAtCoord(waypointCoord);
+            Waypoint publicWaypoint1 = waypointManager.getPublicWaypoint(waypointCoord);
+            List<Waypoint> privateWaypoints = waypointManager.getPrivateWaypointsAtCoord(waypointCoord);
             boolean ownsWaypoint = true;
             if (publicWaypoint1 != null && !publicWaypoint1.getOwnerUUID().equals(e.getPlayer().getUniqueId()))
                 ownsWaypoint = false;
@@ -93,33 +100,33 @@ public class WorldListener implements Listener {
                 if (!config.contains("allow-beacon-break-by-owner"))
                     config.set("allow-beacon-break-by-owner", true);
                 if (!(ownsWaypoint && config.getBoolean("allow-beacon-break-by-owner"))) {
-                    e.getPlayer().sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("no-break-permission"));
+                    e.getPlayer().sendMessage(ChatColor.RED + languageManager.getString("no-break-permission"));
                     e.setCancelled(true);
                 }
             }
             else {
                 //remove public/pinned waypoint
-                Waypoint publicWaypoint = Main.getWaypointManager().getPublicWaypoint(waypointCoord);
+                Waypoint publicWaypoint = waypointManager.getPublicWaypoint(waypointCoord);
                 if (publicWaypoint != null) {
-                    Main.getWaypointManager().removePublicWaypoint(waypointCoord);
-                    e.getPlayer().sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("removed-public-waypoint") + " " + ChatColor.BOLD + publicWaypoint.getName());
+                    waypointManager.removePublicWaypoint(waypointCoord);
+                    e.getPlayer().sendMessage(ChatColor.RED + languageManager.getString("removed-public-waypoint") + " " + ChatColor.BOLD + publicWaypoint.getName());
                 }
 
                 //remove private waypoint
-                for (WaypointPlayer waypointPlayer : Main.getWaypointManager().getWaypointPlayers().values()) {
-                    Waypoint privateWaypoint = Main.getWaypointManager().getPrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
+                for (WaypointPlayer waypointPlayer : waypointManager.getWaypointPlayers().values()) {
+                    Waypoint privateWaypoint = waypointManager.getPrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
                     if (privateWaypoint != null) {
-                        Main.getWaypointManager().removePrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
+                        waypointManager.removePrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
                         Player player = Bukkit.getPlayer(waypointPlayer.getUUID());
                         if (player != null)
-                            player.sendMessage(ChatColor.RED + Main.getPlugin().getLanguageManager().getString("removed-private-waypoint") + " " + ChatColor.BOLD + privateWaypoint.getName());
+                            player.sendMessage(ChatColor.RED + languageManager.getString("removed-private-waypoint") + " " + ChatColor.BOLD + privateWaypoint.getName());
                     }
                 }
 
                 //remove inactive waypoint
-                Waypoint inactiveWaypoint = Main.getWaypointManager().getInactiveWaypoint(waypointCoord);
+                Waypoint inactiveWaypoint = waypointManager.getInactiveWaypoint(waypointCoord);
                 if (inactiveWaypoint != null)
-                    Main.getWaypointManager().removeInactiveWaypoint(waypointCoord);
+                    waypointManager.removeInactiveWaypoint(waypointCoord);
             }
         }
     }
@@ -128,25 +135,26 @@ public class WorldListener implements Listener {
     @EventHandler
     public void onBlockPhysics(BlockPhysicsEvent e) {
         if (e.getBlock().getType() == Material.AIR) {
+            WaypointManager waypointManager = Main.getWaypointManager();
             WaypointCoord waypointCoord = new WaypointCoord(e.getBlock().getLocation());
 
             //remove public waypoint
-            Waypoint publicWaypoint = Main.getWaypointManager().getPublicWaypoint(waypointCoord);
+            Waypoint publicWaypoint = waypointManager.getPublicWaypoint(waypointCoord);
             if (publicWaypoint != null) {
-                Main.getWaypointManager().removePublicWaypoint(waypointCoord);
+                waypointManager.removePublicWaypoint(waypointCoord);
             }
 
             //remove private waypoint
-            for (WaypointPlayer waypointPlayer : Main.getWaypointManager().getWaypointPlayers().values()) {
-                Waypoint privateWaypoint = Main.getWaypointManager().getPrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
+            for (WaypointPlayer waypointPlayer : waypointManager.getWaypointPlayers().values()) {
+                Waypoint privateWaypoint = waypointManager.getPrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
                 if (privateWaypoint != null)
-                    Main.getWaypointManager().removePrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
+                    waypointManager.removePrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
             }
 
             //remove inactive waypoint
-            Waypoint inactiveWaypoint = Main.getWaypointManager().getInactiveWaypoint(waypointCoord);
+            Waypoint inactiveWaypoint = waypointManager.getInactiveWaypoint(waypointCoord);
             if (inactiveWaypoint != null)
-                Main.getWaypointManager().removeInactiveWaypoint(waypointCoord);
+                waypointManager.removeInactiveWaypoint(waypointCoord);
         }
     }
 
@@ -157,12 +165,13 @@ public class WorldListener implements Listener {
             //check if player has permission to use waypoints
             Player player = e.getPlayer();
             if (player.hasPermission("BeaconWaypoints.useWaypoints")) {
+                WaypointManager waypointManager = Main.getWaypointManager();
                 WaypointCoord waypointCoord = new WaypointCoord(e.getClickedBlock().getLocation());
-                Waypoint waypoint = Main.getWaypointManager().getPinnedWaypoint(waypointCoord);
+                Waypoint waypoint = waypointManager.getPinnedWaypoint(waypointCoord);
                 if (waypoint == null)
-                    waypoint = Main.getWaypointManager().getPublicWaypoint(waypointCoord);
+                    waypoint = waypointManager.getPublicWaypoint(waypointCoord);
                 if (waypoint == null)
-                    waypoint = Main.getWaypointManager().getPrivateWaypoint(player.getUniqueId(), waypointCoord);
+                    waypoint = waypointManager.getPrivateWaypoint(player.getUniqueId(), waypointCoord);
                 if (waypoint != null) {
                     e.setCancelled(true);
                     if (Main.getPlugin().getConfig().getBoolean("discovery-mode")) {

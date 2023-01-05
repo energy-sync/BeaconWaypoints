@@ -10,14 +10,14 @@
 - make sure to account for if config options are not in config.yml (done)
 - send warning if essentials is not installed and ignore money payment if so (done)
 - change versioning to 1.6.0 (done)
-- add option to pin waypoints to the top of the list (needs permission)
-- make back buttons consistent (change to left arrow player head)
-- add 1.19.3 support
-- allow any characters / add option for alphanumeric names only
-- make language and waypoint manager calls consistent
+- add option to pin waypoints to the top of the list (done)
+- make back buttons consistent (change to left arrow player head) (done)
+- add 1.19.3 support (done)
+- allow any characters / add option for alphanumeric names only (done)
+- make language, config, and waypoint manager calls consistent (done)
+- move static functions in Waypoint class to WaypointHelper class (done)
 
 MAYBE:
-- move static functions in Waypoint class to WaypointHelper class
 - share private waypoints with other players
 - add a GUI option for creating beacons
     - clicking on a beacon without a waypoint has option for creating one in the menu

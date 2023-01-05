@@ -4,20 +4,17 @@ import com.github.dawsonvilamaa.beaconwaypoint.LanguageManager;
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.Waypoint;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointCoord;
+import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointHelper;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 
 public class GUIs {
 
@@ -29,7 +26,7 @@ public class GUIs {
 
         //add waypoint icons
         if (!config.contains("waypoint-icons"))
-            config.set("waypoint-icons", Waypoint.DEFAULT_WAYPOINT_ICONS);
+            config.set("waypoint-icons", WaypointHelper.DEFAULT_WAYPOINT_ICONS);
         for (String iconStr : config.getStringList("waypoint-icons")) {
             try {
                 Material icon = Material.valueOf(iconStr);
@@ -133,7 +130,7 @@ public class GUIs {
                 String waypointName = publicWaypoint.getName();
                 if (publicWaypoint.isPinned())
                     waypointName += " " + ChatColor.GREEN + "(" + languageManager.getString("pinned") + ")";
-                InventoryGUIButton waypointButton = new InventoryGUIButton(gui.getGUI(), waypointName, Waypoint.getWaypointDescription(waypoint, publicWaypoint), publicWaypoint.getIcon());
+                InventoryGUIButton waypointButton = new InventoryGUIButton(gui.getGUI(), waypointName, WaypointHelper.getWaypointDescription(waypoint, publicWaypoint), publicWaypoint.getIcon());
                 waypointButton.setOnClick(e -> {
                     player.closeInventory();
                     if (player.getLocation().distance(waypoint.getCoord().getLocation()) <= 5.5) {
@@ -155,8 +152,8 @@ public class GUIs {
                                 costPerChunk = 0;
                                 paymentMode = "none";
                             }
-                            if (Waypoint.checkPaymentRequirements(player, waypoint, publicWaypoint, Waypoint.calculateCost(waypoint, publicWaypoint, paymentMode, costPerChunk, config.getDouble("cost-multiplier"))))
-                                Waypoint.teleport(waypoint, publicWaypoint, player, config.getBoolean("disable-group-teleporting"));
+                            if (WaypointHelper.checkPaymentRequirements(player, waypoint, publicWaypoint, WaypointHelper.calculateCost(waypoint, publicWaypoint, paymentMode, costPerChunk, config.getDouble("cost-multiplier"))))
+                                WaypointHelper.teleport(waypoint, publicWaypoint, player, config.getBoolean("disable-group-teleporting"));
                             else player.sendMessage(ChatColor.RED + languageManager.getString("insufficient-payment"));
                         }
                     }
@@ -215,7 +212,7 @@ public class GUIs {
                         else if (privateWaypoint.getBeaconStatus() == 0)
                             player.sendMessage(ChatColor.RED + languageManager.getString("beacon-obstructed"));
                         else {
-                            Waypoint.teleport(waypoint, privateWaypoint, player, config.getBoolean("disable-group-teleporting"));
+                            WaypointHelper.teleport(waypoint, privateWaypoint, player, config.getBoolean("disable-group-teleporting"));
                         }
                     }
                 });
@@ -250,13 +247,14 @@ public class GUIs {
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 2);
 
         //back button
-        InventoryGUIButton backButton = new InventoryGUIButton(gui, languageManager.getString("back"), null, Material.PLAYER_HEAD);
+        InventoryGUIButton backButton = new InventoryGUIButton(gui, null, null, Material.PLAYER_HEAD);
         org.bukkit.inventory.ItemStack skull = new org.bukkit.inventory.ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
         skullMeta.setOwner("MHF_ArrowLeft");
         skull.setItemMeta(skullMeta);
         backButton.setItem(skull);
-        backButton.setName(ChatColor.WHITE + "Back");
+        backButton.setName(ChatColor.WHITE + languageManager.getString("back"));
+        backButton.setDescription(ChatColor.DARK_GRAY + previousGUI.getTitle());
 
         backButton.setOnClick(e -> {
             previousGUI.showMenu();
