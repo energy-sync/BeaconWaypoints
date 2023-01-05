@@ -247,7 +247,6 @@ public class WaypointHelper {
                 if (requiredDimensionAmountObj != null && !startWaypoint.getWorldName().equals(destinationWaypoint.getWorldName()))
                     itemCost = requiredDimensionAmount;
                 else itemCost = calculateCost(startWaypoint, destinationWaypoint, requiredAmount, useMultiplier ? costMultiplier : 0);
-                Bukkit.broadcastMessage("Item cost: " + itemCost);
 
                 boolean matchName = requiredName != null;
                 //check inventory for required items
@@ -296,9 +295,6 @@ public class WaypointHelper {
                     }
                 }
             }
-
-            Bukkit.broadcastMessage("cost <= 0: " + (cost <= 0) + "\ncost: " + cost);
-            //return cost <= 0;
         }
 
         return true;
@@ -324,8 +320,6 @@ public class WaypointHelper {
             paymentMode = "none";
         }
         if (!paymentMode.equals("none")) {
-            Bukkit.broadcastMessage("Cost per chunk: " + config.getDouble(paymentMode + "-cost-per-chunk") + "\nChunk distance: " + distance + "\nMultiplier: " + config.getDouble("cost-multiplier") + "\nCost: " + costPerChunk);
-
             switch (paymentMode) {
                 case "xp":
                     int currentXp = MathHelper.getXpPoints(player);
@@ -390,7 +384,6 @@ public class WaypointHelper {
             if (bannedItems == null)
                 bannedItems = new ArrayList<String>();
 
-            Bukkit.broadcastMessage(requiredMaterial + " required: " + itemCost);
             int count = 0;
             boolean matchName = requiredName != null;
             StringBuilder bannedItemsMsg = new StringBuilder(Main.getLanguageManager().getString("has-banned-items") + ": ");
@@ -414,10 +407,8 @@ public class WaypointHelper {
                 if (thisItemBanned)
                     continue;
 
-                if (invItem.getType() == requiredMaterial && (!matchName || invItem.getItemMeta().getDisplayName().equals(requiredName))) {
+                if (invItem.getType() == requiredMaterial && (!matchName || invItem.getItemMeta().getDisplayName().equals(requiredName)))
                     count += invItem.getAmount();
-                    Bukkit.broadcastMessage(invItem.getType() + " count: " + count);
-                }
 
                 //check shulker boxes for items
                 else if (invItem.getType() == Material.SHULKER_BOX) {
@@ -440,10 +431,8 @@ public class WaypointHelper {
                         if (thisItemBanned)
                             continue;
 
-                        if (shulkerItem.getType() == requiredMaterial && (!matchName || shulkerItem.getItemMeta().getDisplayName().equals(requiredName))) {
+                        if (shulkerItem.getType() == requiredMaterial && (!matchName || shulkerItem.getItemMeta().getDisplayName().equals(requiredName)))
                             count += shulkerItem.getAmount();
-                            Bukkit.broadcastMessage(shulkerItem.getType() + " count: " + count);
-                        }
                     }
                 }
             }
@@ -453,13 +442,8 @@ public class WaypointHelper {
                 return false;
             }
 
-            if (count < itemCost) {
-                Bukkit.broadcastMessage(item.get("item") + " not found");
+            if (count < itemCost)
                 hasRequiredItems = false;
-            }
-            else {
-                Bukkit.broadcastMessage(item.get("item") + " found");
-            }
         }
 
         if (!hasRequiredItems)
