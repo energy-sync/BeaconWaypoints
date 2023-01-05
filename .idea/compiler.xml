@@ -7,23 +7,19 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="1_17_R1" />
+        <module name="1_16_R1" />
+        <module name="1_18_R2" />
         <module name="core" />
         <module name="VersionWrapper" />
-        <module name="1_18_R2" />
-        <module name="1_16_R1" />
         <module name="1_18_R1" />
+        <module name="1_19_R2" />
         <module name="1_19_R1" />
         <module name="1_14_R1" />
         <module name="1_15_R1" />
-        <module name="Build" />
         <module name="1_16_R2" />
+        <module name="Build" />
         <module name="1_16_R3" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="1_14_4_R1" target="8" />
-      <module name="1_17_1_R1" target="17" />
-      <module name="1_19_R2" target="17" />
-    </bytecodeTargetLevel>
   </component>
 </project>

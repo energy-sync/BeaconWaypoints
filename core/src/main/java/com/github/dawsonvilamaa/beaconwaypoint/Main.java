@@ -1,5 +1,6 @@
 package com.github.dawsonvilamaa.beaconwaypoint;
 
+import com.earth2me.essentials.IEssentials;
 import com.github.dawsonvilamaa.beaconwaypoint.gui.MenuManager;
 import com.github.dawsonvilamaa.beaconwaypoint.listeners.InventoryListener;
 import com.github.dawsonvilamaa.beaconwaypoint.listeners.WorldListener;
@@ -21,18 +22,17 @@ import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 public class Main extends JavaPlugin {
-    public static Main plugin;
-    private static YamlConfiguration languageManager;
-    public static WaypointManager waypointManager;
-    public static MenuManager menuManager;
-    public static VersionWrapper version;
+    private static Main plugin;
+    private static LanguageManager languageManager;
+    private static WaypointManager waypointManager;
+    private static MenuManager menuManager;
+    private static VersionWrapper versionWrapper;
 
     private final WorldListener worldListener = new WorldListener();
     private final InventoryListener inventoryListener = new InventoryListener(this);
@@ -51,7 +51,7 @@ public class Main extends JavaPlugin {
         menuManager = new MenuManager();
 
         //get version wrapper
-        version = new VersionMatcher().match();
+        versionWrapper = new VersionMatcher().match();
 
         //bStats
         Metrics metrics = new Metrics(this, 14276);
@@ -100,6 +100,11 @@ public class Main extends JavaPlugin {
                         + ChatColor.WHITE +languageManager.getString("download-link") + ": " + ChatColor.UNDERLINE + "https://www.spigotmc.org/resources/beaconwaypoints.99866\n"
                         + ChatColor.RESET + "=======================================================================");
         });
+
+        //check if EssentialsX is installed
+        IEssentials essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
+        if (essentials == null)
+            this.getLogger().warning("EssentialsX is not installed, ignoring Essentials money cost for teleporting.");
     }
 
     @Override
@@ -114,9 +119,14 @@ public class Main extends JavaPlugin {
         //read data from public file
         JSONParser parser = new JSONParser();
         try {
-            JSONArray jsonWaypoints = (JSONArray) parser.parse(new FileReader("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json"));
-            for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonWaypoints)
-                waypointManager.addPublicWaypoint(new Waypoint(jsonWaypoint));
+            //JSONArray jsonWaypoints = (JSONArray) parser.parse(new FileReader("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json"));
+            JSONArray jsonWaypoints = (JSONArray) parser.parse(new InputStreamReader(Files.newInputStream(Paths.get("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json")), StandardCharsets.UTF_8));
+            for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonWaypoints) {
+                Waypoint waypoint = new Waypoint(jsonWaypoint);
+                if (waypoint.isPinned())
+                    waypointManager.addPinnedWaypoint(waypoint);
+                else waypointManager.addPublicWaypoint(new Waypoint(jsonWaypoint));
+            }
         } catch(IOException | ParseException e) {
             getLogger().info(e.getMessage());
         }
@@ -149,12 +159,15 @@ public class Main extends JavaPlugin {
     public void saveData() {
         //save public waypoints
         JSONArray jsonWaypoints = new JSONArray();
-        for (Waypoint waypoint : waypointManager.getPublicWaypoints().values())
+        Collection<Waypoint> allPublicWaypoints = waypointManager.getPinnedWaypointsSortedAlphabetically();
+        allPublicWaypoints.addAll(waypointManager.getPublicWaypointsSortedAlphabetically());
+        for (Waypoint waypoint : allPublicWaypoints)
             if (waypoint != null) jsonWaypoints.add(waypoint.toJSON());
 
-        FileWriter waypointFile = null;
+        Writer waypointFile = null;
         try {
-            waypointFile = new FileWriter("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json");
+            //waypointFile = new FileWriter("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json");
+            waypointFile = new OutputStreamWriter(Files.newOutputStream(Paths.get("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json")), StandardCharsets.UTF_8);
             waypointFile.write(jsonWaypoints.toJSONString());
         } catch(IOException e) {
             getLogger().info(e.getMessage());
@@ -169,14 +182,7 @@ public class Main extends JavaPlugin {
 
         //save player waypoints
         for (WaypointPlayer waypointPlayer : waypointManager.getWaypointPlayers().values()) {
-            JSONObject playerData = new JSONObject();
-            playerData.put("uuid", waypointPlayer.getUUID().toString());
-
-            JSONArray jsonPlayerWaypoints = new JSONArray();
-            for (Waypoint waypoint : waypointPlayer.getWaypoints().values())
-                if (waypoint != null)
-                    jsonPlayerWaypoints.add(waypoint.toJSON());
-            playerData.put("waypoints", jsonPlayerWaypoints);
+            JSONObject playerData = waypointPlayer.toJSON();
 
             FileWriter playerWaypointFile = null;
             try {
@@ -221,7 +227,7 @@ public class Main extends JavaPlugin {
         Reader configStream = new InputStreamReader(getResource("language.yml"), StandardCharsets.UTF_8);
         YamlConfiguration defaultLanguageConfig = YamlConfiguration.loadConfiguration(configStream);
         languageConfig.setDefaults(defaultLanguageConfig);
-        languageManager = defaultLanguageConfig;
+        languageManager = new LanguageManager(defaultLanguageConfig);
 
         if (!new File(getDataFolder(), "language.yml").exists()) {
             try {
@@ -232,13 +238,41 @@ public class Main extends JavaPlugin {
             }
         }
         else
-            languageManager = languageConfig;
+            languageManager = new LanguageManager(languageConfig);
+    }
+
+    /**
+     * @return plugin
+     */
+    public static Main getPlugin() {
+        return plugin;
     }
 
     /**
      * @return languageManager
      */
-    public YamlConfiguration getLanguageManager() {
+    public static LanguageManager getLanguageManager() {
         return languageManager;
+    }
+
+    /**
+     * @return waypointManager
+     */
+    public static WaypointManager getWaypointManager() {
+        return waypointManager;
+    }
+
+    /**
+     * @return menuManager
+     */
+    public static MenuManager getMenuManager() {
+        return menuManager;
+    }
+
+    /**
+     * @return versionWrapper
+     */
+    public static VersionWrapper getVersionWrapper() {
+        return versionWrapper;
     }
 }

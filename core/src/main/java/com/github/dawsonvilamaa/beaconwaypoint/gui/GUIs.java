@@ -1,8 +1,11 @@
 package com.github.dawsonvilamaa.beaconwaypoint.gui;
 
+import com.github.dawsonvilamaa.beaconwaypoint.LanguageManager;
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.Waypoint;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointCoord;
+import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointHelper;
+import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -11,22 +14,20 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.Collection;
 
 public class GUIs {
 
     //shows all icons for waypoints
     public static void waypointIconPickerMenu(Player player, Waypoint waypoint, InventoryGUI previousGUI) {
-        FileConfiguration config = Main.plugin.getConfig();
+        FileConfiguration config = Main.getPlugin().getConfig();
 
         MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, "Waypoint Icon", 5, previousGUI);
 
         //add waypoint icons
         if (!config.contains("waypoint-icons"))
-            config.set("waypoint-icons", Waypoint.DEFAULT_WAYPOINT_ICONS);
-        for (String iconStr : Main.plugin.getConfig().getStringList("waypoint-icons")) {
+            config.set("waypoint-icons", WaypointHelper.DEFAULT_WAYPOINT_ICONS);
+        for (String iconStr : config.getStringList("waypoint-icons")) {
             try {
                 Material icon = Material.valueOf(iconStr);
                 InventoryGUIButton iconButton = new InventoryGUIButton(gui.getGUI(), null, null, icon);
@@ -36,7 +37,7 @@ public class GUIs {
                 });
                 gui.addButton(iconButton);
             } catch (IllegalArgumentException e) {
-                Bukkit.getLogger().warning(Main.plugin.getLanguageManager().getString("waypoint-icon-not-found") + " " + iconStr);
+                Bukkit.getLogger().warning(Main.getLanguageManager().getString("waypoint-icon-not-found") + " " + iconStr);
             }
         }
 
@@ -45,29 +46,31 @@ public class GUIs {
 
     //menu that opens when player clicks on a beacon, giving a choice between regular beacon menu, public waypoints, or private waypoints
     public static void beaconMenu(Player player, Waypoint waypoint) {
+        LanguageManager languageManager = Main.getLanguageManager();
+
         InventoryGUI gui = new InventoryGUI(player, "Waypoint: " + waypoint.getName(), 1, true);
 
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 3);
 
         //vanilla beacon menu button
-        InventoryGUIButton vanillaBeaconButton = new InventoryGUIButton(gui, ChatColor.RESET + Main.plugin.getLanguageManager().getString("change-beacon-effect"), null, Material.BEACON);
+        InventoryGUIButton vanillaBeaconButton = new InventoryGUIButton(gui, ChatColor.RESET + languageManager.getString("change-beacon-effect"), null, Material.BEACON);
         vanillaBeaconButton.setOnClick(e -> {
             //opens the vanilla beacon menu using NMS, IDK how it managed to work, but I'll take it
             Block beacon = player.getWorld().getBlockAt(waypoint.getCoord().getLocation());
-            Main.version.openBeaconMenu(beacon, player);
+            Main.getVersionWrapper().openBeaconMenu(beacon, player);
         });
         gui.addButton(vanillaBeaconButton);
 
         boolean canUsePrivateWaypoints = player.hasPermission("BeaconWaypoints.usePrivateWaypoints");
 
         //public waypoints button
-        InventoryGUIButton publicWaypointsButton = new InventoryGUIButton(gui, Main.plugin.getLanguageManager().getString("public-waypoints"), null, Material.FILLED_MAP);
+        InventoryGUIButton publicWaypointsButton = new InventoryGUIButton(gui, languageManager.getString("public-waypoints"), null, Material.FILLED_MAP);
         publicWaypointsButton.setOnClick(f -> {
             int beaconStatus = waypoint.getBeaconStatus();
             if (beaconStatus != 0)
                 publicWaypointsMenu(player, waypoint, gui);
             else {
-                player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("beacon-obstructed"));
+                player.sendMessage(ChatColor.RED + languageManager.getString("beacon-obstructed"));
                 player.closeInventory();
             }
         });
@@ -80,13 +83,13 @@ public class GUIs {
 
         //private waypoints button
         if (canUsePrivateWaypoints) {
-            InventoryGUIButton privateWaypointsButton = new InventoryGUIButton(gui, Main.plugin.getLanguageManager().getString("private-waypoints"), null, Material.TRIPWIRE_HOOK);
+            InventoryGUIButton privateWaypointsButton = new InventoryGUIButton(gui, languageManager.getString("private-waypoints"), null, Material.TRIPWIRE_HOOK);
             privateWaypointsButton.setOnClick(f -> {
                 int beaconStatus = waypoint.getBeaconStatus();
                 if (beaconStatus != 0)
                     privateWaypointsMenu(player, waypoint, gui);
                 else {
-                    player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("beacon-obstructed"));
+                    player.sendMessage(ChatColor.RED + languageManager.getString("beacon-obstructed"));
                     player.closeInventory();
                 }
             });
@@ -100,7 +103,9 @@ public class GUIs {
 
     //shows all public waypoints
     public static void publicWaypointsMenu(Player player, Waypoint waypoint, InventoryGUI previousGUI) {
-        FileConfiguration config = Main.plugin.getConfig();
+        FileConfiguration config = Main.getPlugin().getConfig();
+        WaypointManager waypointManager = Main.getWaypointManager();
+        LanguageManager languageManager = Main.getLanguageManager();
 
         int numRows = 0;
         if (!config.contains("public-waypoint-menu-rows"))
@@ -116,21 +121,39 @@ public class GUIs {
         MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, "Public Waypoints", numRows, previousGUI);
 
         //add buttons for all public waypoints
-        for (Waypoint publicWaypoint : Main.waypointManager.getPublicWaypointsSortedAlphabetically()) {
-            if (!publicWaypoint.getCoord().equals(waypoint.getCoord())) {
+        boolean discoveryModeEnabled = config.getBoolean("discovery-mode");
+        Collection<Waypoint> allPublicWaypoints = waypointManager.getPinnedWaypointsSortedAlphabetically();
+        allPublicWaypoints.addAll(waypointManager.getPublicWaypointsSortedAlphabetically());
+        for (Waypoint publicWaypoint : allPublicWaypoints) {
+            if ((!discoveryModeEnabled || publicWaypoint.playerDiscoveredWaypoint(player)) && !publicWaypoint.getCoord().equals(waypoint.getCoord())) {
                 WaypointCoord coord = publicWaypoint.getCoord();
-                InventoryGUIButton waypointButton = new InventoryGUIButton(gui.getGUI(), publicWaypoint.getName(), ChatColor.GRAY + "" + coord.getX() + ", " + coord.getY() + ", " + coord.getZ() + "\n" + ChatColor.DARK_GRAY + Bukkit.getOfflinePlayer(publicWaypoint.getOwnerUUID()).getName() + "\n" + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + publicWaypoint.getCoord().getWorldName(), publicWaypoint.getIcon());
+                String waypointName = publicWaypoint.getName();
+                if (publicWaypoint.isPinned())
+                    waypointName += " " + ChatColor.GREEN + "(" + languageManager.getString("pinned") + ")";
+                InventoryGUIButton waypointButton = new InventoryGUIButton(gui.getGUI(), waypointName, WaypointHelper.getWaypointDescription(waypoint, publicWaypoint), publicWaypoint.getIcon());
                 waypointButton.setOnClick(e -> {
                     player.closeInventory();
                     if (player.getLocation().distance(waypoint.getCoord().getLocation()) <= 5.5) {
-                        if (Main.waypointManager.getPublicWaypoint(coord) == null)
-                            player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("waypoint-does-not-exist"));
+                        if (waypointManager.getPublicWaypoint(coord) == null)
+                            player.sendMessage(ChatColor.RED + languageManager.getString("waypoint-does-not-exist"));
                         else if (publicWaypoint.getBeaconStatus() == 0)
-                            player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("beacon-obstructed"));
+                            player.sendMessage(ChatColor.RED + languageManager.getString("beacon-obstructed"));
                         else {
-                            if (!config.contains("disable-group-teleporting"))
-                                config.set("disable-group-teleporting", false);
-                            Waypoint.teleport(waypoint, publicWaypoint, config.getBoolean("disable-group-teleporting") ? player : null);
+                            int costPerChunk;
+                            String paymentMode = config.getString("payment-mode");
+                            if (paymentMode != null) {
+                                if (paymentMode.equals("xp"))
+                                    costPerChunk = config.getInt("xp-cost-per-chunk");
+                                else if (paymentMode.equals("money"))
+                                    costPerChunk = config.getInt("money-cost-per-chunk");
+                                else costPerChunk = 0;
+                            }
+                            else {
+                                costPerChunk = 0;
+                                paymentMode = "none";
+                            }
+                            if (WaypointHelper.checkPaymentRequirements(player, waypoint, publicWaypoint, WaypointHelper.calculateCost(waypoint, publicWaypoint, paymentMode, costPerChunk, config.getDouble("cost-multiplier"))))
+                                WaypointHelper.teleport(waypoint, publicWaypoint, player, config.getBoolean("disable-group-teleporting"));
                         }
                     }
                 });
@@ -146,9 +169,9 @@ public class GUIs {
         gui.showMenu();
 
         //options button for this waypoint
-        Waypoint thisWaypoint = Main.waypointManager.getPublicWaypoint(waypoint.getCoord());
+        Waypoint thisWaypoint = waypointManager.getPublicWaypoint(waypoint.getCoord());
         if (thisWaypoint != null && (waypoint.getOwnerUUID().equals(player.getUniqueId()) || player.hasPermission("manageAllWaypoints"))) {
-            InventoryGUIButton optionsButton = new InventoryGUIButton(gui.getGUI(), Main.plugin.getLanguageManager().getString("public-waypoint-options"), null, thisWaypoint.getIcon());
+            InventoryGUIButton optionsButton = new InventoryGUIButton(gui.getGUI(), languageManager.getString("public-waypoint-options"), null, thisWaypoint.getIcon());
             optionsButton.setOnClick(e -> {
                 waypointOptionsMenu(player, thisWaypoint, waypoint, gui.getGUI(), true);
             });
@@ -158,7 +181,9 @@ public class GUIs {
 
     //shows all private waypoints
     public static void privateWaypointsMenu(Player player, Waypoint waypoint, InventoryGUI previousGUI) {
-        FileConfiguration config = Main.plugin.getConfig();
+        FileConfiguration config = Main.getPlugin().getConfig();
+        WaypointManager waypointManager = Main.getWaypointManager();
+        LanguageManager languageManager = Main.getLanguageManager();
 
         int numRows = 0;
         if (!config.contains("private-waypoint-menu-rows"))
@@ -174,21 +199,33 @@ public class GUIs {
         MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, "Private Waypoints", numRows, previousGUI);
 
         //add buttons for all private waypoints
-        for (Waypoint privateWaypoint : Main.waypointManager.getPrivateWaypointsSortedAlphabetically(player.getUniqueId())) {
+        for (Waypoint privateWaypoint : waypointManager.getPrivateWaypointsSortedAlphabetically(player.getUniqueId())) {
             if (!privateWaypoint.getCoord().equals(waypoint.getCoord())) {
                 WaypointCoord coord = privateWaypoint.getCoord();
-                InventoryGUIButton waypointButton = new InventoryGUIButton(gui.getGUI(), privateWaypoint.getName(), ChatColor.GRAY + "" + coord.getX() + ", " + coord.getY() + ", " + coord.getZ() + "\n" + ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + privateWaypoint.getCoord().getWorldName(), privateWaypoint.getIcon());
+                InventoryGUIButton waypointButton = new InventoryGUIButton(gui.getGUI(), privateWaypoint.getName(), WaypointHelper.getWaypointDescription(waypoint, privateWaypoint), privateWaypoint.getIcon());
                 waypointButton.setOnClick(e -> {
                     player.closeInventory();
                     if (player.getLocation().distance(waypoint.getCoord().getLocation()) <= 5.5) {
-                        if (Main.waypointManager.getPrivateWaypoint(player.getUniqueId(), coord) == null)
-                            player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("waypoint-does-not-exist"));
+                        if (waypointManager.getPrivateWaypoint(player.getUniqueId(), coord) == null)
+                            player.sendMessage(ChatColor.RED + languageManager.getString("waypoint-does-not-exist"));
                         else if (privateWaypoint.getBeaconStatus() == 0)
-                            player.sendMessage(ChatColor.RED + Main.plugin.getLanguageManager().getString("beacon-obstructed"));
+                            player.sendMessage(ChatColor.RED + languageManager.getString("beacon-obstructed"));
                         else {
-                            if (!config.contains("disable-group-teleporting"))
-                                config.set("disable-group-teleporting", false);
-                            Waypoint.teleport(waypoint, privateWaypoint, config.getBoolean("disable-group-teleporting") ? player : null);
+                            int costPerChunk;
+                            String paymentMode = config.getString("payment-mode");
+                            if (paymentMode != null) {
+                                if (paymentMode.equals("xp"))
+                                    costPerChunk = config.getInt("xp-cost-per-chunk");
+                                else if (paymentMode.equals("money"))
+                                    costPerChunk = config.getInt("money-cost-per-chunk");
+                                else costPerChunk = 0;
+                            }
+                            else {
+                                costPerChunk = 0;
+                                paymentMode = "none";
+                            }
+                            if (WaypointHelper.checkPaymentRequirements(player, waypoint, privateWaypoint, WaypointHelper.calculateCost(waypoint, privateWaypoint, paymentMode, costPerChunk, config.getDouble("cost-multiplier"))))
+                                WaypointHelper.teleport(waypoint, privateWaypoint, player, config.getBoolean("disable-group-teleporting"));
                         }
                     }
                 });
@@ -204,9 +241,9 @@ public class GUIs {
         gui.showMenu();
 
         //options button for this waypoint
-        Waypoint thisWaypoint = Main.waypointManager.getPrivateWaypoint(player.getUniqueId(), waypoint.getCoord());
+        Waypoint thisWaypoint = waypointManager.getPrivateWaypoint(player.getUniqueId(), waypoint.getCoord());
         if (thisWaypoint != null && (waypoint.getOwnerUUID().equals(player.getUniqueId()) || player.hasPermission("manageAllWaypoints"))) {
-            InventoryGUIButton optionsButton = new InventoryGUIButton(gui.getGUI(), Main.plugin.getLanguageManager().getString("private-waypoint-options"), null, thisWaypoint.getIcon());
+            InventoryGUIButton optionsButton = new InventoryGUIButton(gui.getGUI(), languageManager.getString("private-waypoint-options"), null, thisWaypoint.getIcon());
             optionsButton.setOnClick(e -> {
                 waypointOptionsMenu(player, thisWaypoint, waypoint, gui.getGUI(), false);
             });
@@ -216,18 +253,21 @@ public class GUIs {
 
     //right click options menu for waypoint
     public static void waypointOptionsMenu(Player player, Waypoint selectedWaypoint, Waypoint originalWaypoint, InventoryGUI previousGUI, boolean publicMenu) {
+        LanguageManager languageManager = Main.getLanguageManager();
+
         InventoryGUI gui = new InventoryGUI(player, "Options: " + selectedWaypoint.getName(), 1, true);
 
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 2);
 
         //back button
-        InventoryGUIButton backButton = new InventoryGUIButton(gui, Main.plugin.getLanguageManager().getString("back"), null, Material.PLAYER_HEAD);
+        InventoryGUIButton backButton = new InventoryGUIButton(gui, null, null, Material.PLAYER_HEAD);
         org.bukkit.inventory.ItemStack skull = new org.bukkit.inventory.ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
         skullMeta.setOwner("MHF_ArrowLeft");
         skull.setItemMeta(skullMeta);
         backButton.setItem(skull);
-        backButton.setName(ChatColor.WHITE + "Back");
+        backButton.setName(ChatColor.WHITE + languageManager.getString("back"));
+        backButton.setDescription(ChatColor.DARK_GRAY + previousGUI.getTitle());
 
         backButton.setOnClick(e -> {
             previousGUI.showMenu();
@@ -237,7 +277,7 @@ public class GUIs {
         gui.addButton(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE));
 
         //change icon button
-        InventoryGUIButton changeIconButton = new InventoryGUIButton(gui, Main.plugin.getLanguageManager().getString("change-icon"), null, Material.PAINTING);
+        InventoryGUIButton changeIconButton = new InventoryGUIButton(gui, languageManager.getString("change-icon"), null, Material.PAINTING);
         changeIconButton.setOnClick(e -> {
             waypointIconPickerMenu(player, selectedWaypoint, gui);
         });
@@ -246,25 +286,46 @@ public class GUIs {
         gui.addButton(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE));
 
         //delete waypoint button
-        InventoryGUIButton deleteButton = new InventoryGUIButton(gui, Main.plugin.getLanguageManager().getString("delete-waypoint"), null, Material.LAVA_BUCKET);
+        InventoryGUIButton deleteButton = new InventoryGUIButton(gui, languageManager.getString("delete-waypoint"), null, Material.LAVA_BUCKET);
         deleteButton.setOnClick(e -> {
             confirmDeleteWaypointMenu(player, selectedWaypoint, originalWaypoint, gui, publicMenu);
         });
         gui.addButton(deleteButton);
 
-        gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 2);
+        gui.addButton(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE));
+
+        //pin/unpin button
+        if (publicMenu && player.hasPermission("BeaconWaypoints.manageAllWaypoints")) {
+            WaypointManager waypointManager = Main.getWaypointManager();
+            InventoryGUIButton pinButton = new InventoryGUIButton(gui, selectedWaypoint.isPinned() ? languageManager.getString("unpin-waypoint") : languageManager.getString("pin-waypoint"), null, Material.NETHER_STAR);
+            pinButton.setOnClick(e -> {
+                if (selectedWaypoint.isPinned()) {
+                    waypointManager.unpinWaypoint(selectedWaypoint);
+                    pinButton.setName(languageManager.getString("pin-waypoint"));
+                }
+                else {
+                    waypointManager.pinWaypoint(selectedWaypoint);
+                    pinButton.setName(languageManager.getString("unpin-waypoint"));
+                }
+            });
+            gui.addButton(pinButton);
+        }
+        else gui.addButton(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE));
 
         gui.showMenu();
     }
 
     //confirms deletion of a waypoint
     public static void confirmDeleteWaypointMenu(Player player, Waypoint selectedWaypoint, Waypoint originalWaypoint, InventoryGUI previousGUI, boolean publicMenu) {
+        WaypointManager waypointManager = Main.getWaypointManager();
+        LanguageManager languageManager = Main.getLanguageManager();
+
         InventoryGUI gui = new InventoryGUI(player, "Confirm Waypoint Delete", 1, true);
 
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 2);
 
         //cancel button
-        InventoryGUIButton cancelButton = new InventoryGUIButton(gui, ChatColor.RED + Main.plugin.getLanguageManager().getString("cancel"), null, Material.RED_STAINED_GLASS_PANE);
+        InventoryGUIButton cancelButton = new InventoryGUIButton(gui, ChatColor.RED + languageManager.getString("cancel"), null, Material.RED_STAINED_GLASS_PANE);
         cancelButton.setOnClick(e -> {
             previousGUI.showMenu();
         });
@@ -279,12 +340,12 @@ public class GUIs {
         gui.addButton(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE));
 
         //confirm button
-        InventoryGUIButton confirmButton = new InventoryGUIButton(gui, Main.plugin.getLanguageManager().getString("confirm-delete"), null, Material.LIME_STAINED_GLASS_PANE);
+        InventoryGUIButton confirmButton = new InventoryGUIButton(gui, languageManager.getString("confirm-delete"), null, Material.LIME_STAINED_GLASS_PANE);
         confirmButton.setOnClick(e -> {
             if (publicMenu)
-                Main.waypointManager.removePublicWaypoint(selectedWaypoint.getCoord());
-            else Main.waypointManager.removePrivateWaypoint(player.getUniqueId(), selectedWaypoint.getCoord());
-            player.sendMessage(ChatColor.GREEN + (publicMenu ? Main.plugin.getLanguageManager().getString("removed-public-waypoint") : Main.plugin.getLanguageManager().getString("removed-private-waypoint")) + " " + ChatColor.BOLD + selectedWaypoint.getName());
+                waypointManager.removePublicWaypoint(selectedWaypoint.getCoord());
+            else waypointManager.removePrivateWaypoint(player.getUniqueId(), selectedWaypoint.getCoord());
+            player.sendMessage(ChatColor.GREEN + (publicMenu ? languageManager.getString("removed-public-waypoint") : languageManager.getString("removed-private-waypoint")) + " " + ChatColor.BOLD + selectedWaypoint.getName());
             player.closeInventory();
         });
         gui.addButton(confirmButton);

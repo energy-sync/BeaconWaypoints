@@ -1,5 +1,6 @@
 package com.github.dawsonvilamaa.beaconwaypoint.gui;
 
+import com.github.dawsonvilamaa.beaconwaypoint.LanguageManager;
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -62,20 +63,30 @@ public class MultiPageInventoryGUI {
      * @param page
      */
     public void showPage(int page) {
+        LanguageManager languageManager = Main.getLanguageManager();
+
         this.gui = new InventoryGUI(this.player, this.title, this.numRows + 1, true);
 
         //back button if previous GUI was provided
         if (this.previousGUI != null) {
-            InventoryGUIButton backButton  = new InventoryGUIButton(this.gui, ChatColor.WHITE + Main.plugin.getLanguageManager().getString("back"), ChatColor.DARK_GRAY + this.previousGUI.getTitle(), Material.BARRIER);
+            InventoryGUIButton backButton  = new InventoryGUIButton(this.gui, null, null, Material.PLAYER_HEAD);
+            ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
+            SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
+            skullMeta.setOwner("MHF_ArrowLeft");
+            skull.setItemMeta(skullMeta);
+            backButton.setItem(skull);
+            backButton.setName(ChatColor.WHITE + languageManager.getString("back"));
+            backButton.setDescription(ChatColor.DARK_GRAY + this.previousGUI.getTitle());
             backButton.setOnClick(e -> {
                 this.previousGUI.showMenu();
             });
             gui.setButton(this.bottomRowSlot, backButton);
+            gui.setButton(0, null);
         }
 
         //previous page button
         if (page > 0) {
-            InventoryGUIButton previousButton = new InventoryGUIButton(gui, Main.plugin.getLanguageManager().getString("previous-page"), null, Material.PLAYER_HEAD);
+            InventoryGUIButton previousButton = new InventoryGUIButton(gui, languageManager.getString("previous-page"), null, Material.PLAYER_HEAD);
             ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
             SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
             //skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString("a68f0b64-8d14-4000-a95f-4b9ba14f8df9"))); //MHF_ArrowLeft
@@ -95,7 +106,7 @@ public class MultiPageInventoryGUI {
 
         //next page button
         if (this.buttons.size() > (page + 1) * this.numRows * 9) {
-            InventoryGUIButton nextButton = new InventoryGUIButton(gui, Main.plugin.getLanguageManager().getString("next-page"), null, Material.PLAYER_HEAD);
+            InventoryGUIButton nextButton = new InventoryGUIButton(gui, languageManager.getString("next-page"), null, Material.PLAYER_HEAD);
             ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
             SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
             //skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString("50c8510b-5ea0-4d60-be9a-7d542d6cd156"))); //MHF_ArrowRight

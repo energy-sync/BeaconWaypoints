@@ -1,6 +1,7 @@
 already-exists-at-location: A waypoint already exists at that location
 back: Back
 beacon-obstructed: The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.
+blocks: blocks
 cancel: Cancel
 cannot-check-for-update: Unable to check for updates
 cannot-save-default-language-config: Could not save default language config!
@@ -9,12 +10,20 @@ confirm-delete: Confirm Delete
 change-beacon-effect: Change beacon effect
 change-icon: Change Icon
 click-to-download: Click here to download
+cost: Cost
 created-private-waypoint: Created the private waypoint
 created-public-waypoint: Created the public waypoint
 current-version: Current version
 delete-waypoint: Delete Waypoint
+discovered-waypoint: Discovered waypoint
+distance: Distance
 download-link: Download link
-invalid-name: Waypoint names must be 30 characters or fewer and can only contain letters, numbers, spaces, underscores, and hyphens.
+has-banned-items: You cannot teleport because you have these items in your inventory
+insufficient-items: You are missing items that are required to teleport
+insufficient-money: You do not have enough money to teleport to that waypoint. Additional money required
+insufficient-xp: You do not have enough XP to teleport to that waypoint. Additional XP points required
+invalid-name: Waypoint names must be 30 characters or fewer
+invalid-name-alphanumeric: Waypoint names must be 30 characters or fewer and can only contain letters, numbers, spaces, underscores, and hyphens.
 name-taken: There is already a public waypoint of that name
 new-version-available: A new version of Beacon Waypoints is available!
 next-page: Next Page
@@ -23,6 +32,10 @@ no-command-permission: You don't have permission to use that command
 no-private-waypoint-permission: You don't have permission to create private waypoints
 no-waypoint-permission: You don't have permission to create waypoints
 not-owner: Only the owner of this beacon can create a public waypoint
+owner: Owner
+payment-mode-not-found: Payment mode not recognized, defaulting to "none"
+pinned: pinned
+pin-waypoint: Pin waypoint
 previous-page: Previous Page
 private-list-full: Private waypoint list is full!
 private-name-taken: There is already a private waypoint of that name
@@ -33,7 +46,9 @@ public-waypoint-options: Options for this public waypoint
 public-waypoints: Public Waypoints
 removed-private-waypoint: Removed private waypoint
 removed-public-waypoint: Removed public waypoint
+required-items: Required Items
 stand-on-beacon: You must be standing on a beacon to set a waypoint
+unpin-waypoint: Unpin waypoint
 updated-version: Updated version
 waypoint-does-not-exist: That waypoint doesn't exist!
 waypoint-icon-not-found: Could not add waypoint icon. No item found for

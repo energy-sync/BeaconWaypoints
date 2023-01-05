@@ -118,8 +118,12 @@ public class InventoryGUI implements Listener, InventoryHolder {
      * @return
      */
     public InventoryGUIButton setButton(int slot, InventoryGUIButton button) {
-        this.inventory.setItem(slot, button.getItem());
-        this.buttons.put(slot, button);
+        if (button == null)
+            this.inventory.setItem(slot, null);
+        else {
+            this.inventory.setItem(slot, button.getItem());
+            this.buttons.put(slot, button);
+        }
         return button;
     }
 
@@ -157,7 +161,7 @@ public class InventoryGUI implements Listener, InventoryHolder {
      */
     public void setRunnable(BukkitRunnable runnable) {
         this.runnable = runnable;
-        this.runnable.runTaskTimer(Main.plugin, 2, 2);
+        this.runnable.runTaskTimer(Main.getPlugin(), 2, 2);
     }
 
     /**
@@ -171,7 +175,7 @@ public class InventoryGUI implements Listener, InventoryHolder {
      * Opens this GUI for the player
      */
     public void showMenu() {
-        Main.menuManager.addMenu(player.getUniqueId(), this);
+        Main.getMenuManager().addMenu(player.getUniqueId(), this);
         this.player.openInventory(this.inventory);
     }
 

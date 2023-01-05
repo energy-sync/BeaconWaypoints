@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.dawsonvilamaa</groupId>
     <artifactId>BeaconWaypoints</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -17,17 +17,9 @@
         <module>1_18_R1</module>
         <module>1_18_R2</module>
         <module>1_19_R1</module>
+        <module>1_19_R2</module>
         <module>Build</module>
     </modules>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>1.1.1</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
 
     <build>
         <resources>
