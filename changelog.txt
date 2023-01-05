@@ -8,7 +8,10 @@ Changes:
     - EssentialsX money payment
     - Cost multiplier based on distance
     - Cost for teleporting between dimensions
-    - Required items supporting custom names
+    - Required items
+        - Custom names
+        - Optional consuming of items
+        - Checks for items in shulker boxes
 - Added config option for banned items for players to have in order to teleport
 - Added ability to pin public waypoints to the top of the list for players with the BeaconWaypoints.manageAllWaypoints permission
 - Waypoint names no longer need to be alphanumeric, but this can be force in the config file
