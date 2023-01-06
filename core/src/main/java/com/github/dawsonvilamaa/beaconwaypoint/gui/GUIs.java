@@ -21,8 +21,9 @@ public class GUIs {
     //shows all icons for waypoints
     public static void waypointIconPickerMenu(Player player, Waypoint waypoint, InventoryGUI previousGUI) {
         FileConfiguration config = Main.getPlugin().getConfig();
+        LanguageManager languageManager = Main.getLanguageManager();
 
-        MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, "Waypoint Icon", 5, previousGUI);
+        MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, languageManager.getString("waypoint-icon"), 5, previousGUI);
 
         //add waypoint icons
         if (!config.contains("waypoint-icons"))
@@ -37,7 +38,7 @@ public class GUIs {
                 });
                 gui.addButton(iconButton);
             } catch (IllegalArgumentException e) {
-                Bukkit.getLogger().warning(Main.getLanguageManager().getString("waypoint-icon-not-found") + " " + iconStr);
+                Bukkit.getLogger().warning(languageManager.getString("waypoint-icon-not-found") + " " + iconStr);
             }
         }
 
@@ -48,7 +49,7 @@ public class GUIs {
     public static void beaconMenu(Player player, Waypoint waypoint) {
         LanguageManager languageManager = Main.getLanguageManager();
 
-        InventoryGUI gui = new InventoryGUI(player, "Waypoint: " + waypoint.getName(), 1, true);
+        InventoryGUI gui = new InventoryGUI(player, languageManager.getString("waypoint") + ": " + waypoint.getName(), 1, true);
 
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 3);
 
@@ -118,7 +119,7 @@ public class GUIs {
                 numRows = 5;
         }
 
-        MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, "Public Waypoints", numRows, previousGUI);
+        MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, languageManager.getString("public-waypoints"), numRows, previousGUI);
 
         //add buttons for all public waypoints
         boolean discoveryModeEnabled = config.getBoolean("discovery-mode");
@@ -196,7 +197,7 @@ public class GUIs {
                 numRows = 5;
         }
 
-        MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, "Private Waypoints", numRows, previousGUI);
+        MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, languageManager.getString("private-waypoints"), numRows, previousGUI);
 
         //add buttons for all private waypoints
         for (Waypoint privateWaypoint : waypointManager.getPrivateWaypointsSortedAlphabetically(player.getUniqueId())) {
@@ -255,7 +256,7 @@ public class GUIs {
     public static void waypointOptionsMenu(Player player, Waypoint selectedWaypoint, Waypoint originalWaypoint, InventoryGUI previousGUI, boolean publicMenu) {
         LanguageManager languageManager = Main.getLanguageManager();
 
-        InventoryGUI gui = new InventoryGUI(player, "Options: " + selectedWaypoint.getName(), 1, true);
+        InventoryGUI gui = new InventoryGUI(player, languageManager.getString("options") + ": " + selectedWaypoint.getName(), 1, true);
 
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 2);
 
@@ -320,7 +321,7 @@ public class GUIs {
         WaypointManager waypointManager = Main.getWaypointManager();
         LanguageManager languageManager = Main.getLanguageManager();
 
-        InventoryGUI gui = new InventoryGUI(player, "Confirm Waypoint Delete", 1, true);
+        InventoryGUI gui = new InventoryGUI(player, languageManager.getString("confirm-delete"), 1, true);
 
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 2);
 

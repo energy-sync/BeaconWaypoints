@@ -1,6 +1,6 @@
 main: com.github.dawsonvilamaa.beaconwaypoint.Main
 name: BeaconWaypoints
-version: 1.6.0
+version: 1.6.1
 api-version: 1.14
 author: Dawson Vilamaa
 description: Allows players to set fast travel waypoints at beacons
