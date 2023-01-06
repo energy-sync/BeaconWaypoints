@@ -73,6 +73,10 @@ Note: If WorldEdit is used to delete a beacon, the waypoint will not be deleted.
 
 ## Changelog
 
+# 1.6.1
+Changes:
+- Added updater for config.yml and language.yml that loads default values if they are not there
+
 # 1.6.0
 Note: There have been changes to both config.yml and language.yml. The plugin will use defaults for anything that is not in these files, but it is recommended to take a look at the example/default files to see what changed.
 
