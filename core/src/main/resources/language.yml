@@ -32,6 +32,7 @@ no-command-permission: You don't have permission to use that command
 no-private-waypoint-permission: You don't have permission to create private waypoints
 no-waypoint-permission: You don't have permission to create waypoints
 not-owner: Only the owner of this beacon can create a public waypoint
+options: Options
 owner: Owner
 payment-mode-not-found: Payment mode not recognized, defaulting to "none"
 pinned: pinned
@@ -50,6 +51,8 @@ required-items: Required Items
 stand-on-beacon: You must be standing on a beacon to set a waypoint
 unpin-waypoint: Unpin waypoint
 updated-version: Updated version
+waypoint: Waypoint
 waypoint-does-not-exist: That waypoint doesn't exist!
+waypoint-icon: Waypoint Icon
 waypoint-icon-not-found: Could not add waypoint icon. No item found for
 world-not-allowed: You cannot set a waypoint in this world

@@ -49,4 +49,12 @@ public class LanguageManager {
         }
         return string;
     }
+
+    /**
+     * Returns the default language configuration
+     * @return defaults
+     */
+    public YamlConfiguration getDefaults() {
+        return defaults;
+    }
 }
