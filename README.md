@@ -5,7 +5,7 @@
 
 [CurseForge page](https://www.curseforge.com/minecraft/bukkit-plugins/beaconwaypoints)
 
-Supports versions 1.14-1.19.3
+Supports versions 1.14-1.19.4
 
 This plugin uses bStats.
 
@@ -73,11 +73,18 @@ Note: If WorldEdit is used to delete a beacon, the waypoint will not be deleted.
 
 ## Changelog
 
-# 1.6.1
+### 1.6.2
+Changes:
+- Added support for 1.19.4
+
+Fixes:
+- Fixed an issue with WorldGuard where a waypoint would be deleted if a protected block was broken
+
+### 1.6.1
 Changes:
 - Added updater for config.yml and language.yml that loads default values if they are not there
 
-# 1.6.0
+### 1.6.0
 Note: There have been changes to both config.yml and language.yml. The plugin will use defaults for anything that is not in these files, but it is recommended to take a look at the example/default files to see what changed.
 
 Changes:
@@ -100,27 +107,27 @@ Fixes:
 - Fixed minor typos
 - Made the back button consistent in all menus
 
-# 1.5.0
+### 1.5.0
 Changes:
 - Added support for 1.19.1 and 1.19.2 (by changing a single letter lol)
 
-# 1.4.0
+### 1.4.0
 Changes:
 - Added support for 1.19
 - Added language.yml to support custom languages
 
-# 1.3.2
+### 1.3.2
 
 Fixes:
 - Fixed major compatibility bug with NoCheatPlus
 
-# 1.3.1
+### 1.3.1
 
 Fixes:
 - Added compatibility with NoCheatPlus by adding temporary exemptions when a player is teleporting.
 - Added launch-player-height config option to change how high players are launched before teleporting. Anti-cheat plugins might not allow players above a certain height, so this is a way to work around that.
 
-# 1.3.0
+### 1.3.0
 
 Changes:
 - The default waypoint type is now public, so typing out "public" is no longer required when creating a new waypoint
@@ -140,7 +147,7 @@ Bug Fixes:
 - The back arrow player texture for the player skull in the waypoint options menu would not load
 - A waypoint would be removed if a beacon became obstructed and then unobstructed
 
-# 1.2.0
+### 1.2.0
 
 Changes:
 - Added support for versions 1.14-1.17.1 and 1.18.2
@@ -150,7 +157,7 @@ Bug Fixes:
 - config.yml would not be created automatically (bruh moment)
 - Players could activate beacon teleportation if they opened the menu, got moved away, and selected a destination
 
-# 1.1.0
+### 1.1.0
 Changes:
 - Added bStats.
 - Added a config option "disable-group-teleporting" that prevents all players standing on a beacon from teleporting at the same time when it was activated, and instead only teleports the player choosing the destination, when enabled.

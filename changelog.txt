@@ -1,22 +1,5 @@
-Note: There have been changes to both config.yml and language.yml. The plugin will use defaults for anything that is not in these files, but it is recommended to take a look at the example/default files to see what changed.
-
 Changes:
-- Added support for 1.19.3
-- Added Discovery Mode: Players can discover public waypoints by interacting with the beacon and can only teleport between discovered waypoints
-- Added config options for payment to teleport
-    - XP payment
-    - EssentialsX money payment
-    - Cost multiplier based on distance
-    - Cost for teleporting between dimensions
-    - Required items
-        - Custom names
-        - Optional consuming of items
-        - Checks for items in shulker boxes
-- Added config option for banned items for players to have in order to teleport
-- Added ability to pin public waypoints to the top of the list for players with the BeaconWaypoints.manageAllWaypoints permission
-- Waypoint names no longer need to be alphanumeric, but this can be force in the config file
-- Added updater for config.yml and language.yml that loads default values if they are not there
+- Added support for 1.19.4
 
 Fixes:
-- Fixed minor typos
-- Made the back button consistent in all menus
+- Fixed an issue with WorldGuard where a waypoint would be deleted if a protected block was broken
