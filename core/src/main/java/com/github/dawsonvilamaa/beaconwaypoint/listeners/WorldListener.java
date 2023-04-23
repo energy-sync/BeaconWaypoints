@@ -29,6 +29,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
 import java.util.Objects;
@@ -105,28 +106,36 @@ public class WorldListener implements Listener {
                 }
             }
             else {
-                //remove public/pinned waypoint
-                Waypoint publicWaypoint = waypointManager.getPublicWaypoint(waypointCoord);
-                if (publicWaypoint != null) {
-                    waypointManager.removePublicWaypoint(waypointCoord);
-                    e.getPlayer().sendMessage(ChatColor.RED + languageManager.getString("removed-public-waypoint") + " " + ChatColor.BOLD + publicWaypoint.getName());
-                }
+                //wait for one tick to see if plugins like WorldGuard restored the block
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        if (!waypointCoord.getLocation().getBlock().getType().equals(Material.BEACON)) {
+                            //remove public/pinned waypoint
+                            Waypoint publicWaypoint = waypointManager.getPublicWaypoint(waypointCoord);
+                            if (publicWaypoint != null) {
+                                waypointManager.removePublicWaypoint(waypointCoord);
+                                e.getPlayer().sendMessage(ChatColor.RED + languageManager.getString("removed-public-waypoint") + " " + ChatColor.BOLD + publicWaypoint.getName());
+                            }
 
-                //remove private waypoint
-                for (WaypointPlayer waypointPlayer : waypointManager.getWaypointPlayers().values()) {
-                    Waypoint privateWaypoint = waypointManager.getPrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
-                    if (privateWaypoint != null) {
-                        waypointManager.removePrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
-                        Player player = Bukkit.getPlayer(waypointPlayer.getUUID());
-                        if (player != null)
-                            player.sendMessage(ChatColor.RED + languageManager.getString("removed-private-waypoint") + " " + ChatColor.BOLD + privateWaypoint.getName());
+                            //remove private waypoint
+                            for (WaypointPlayer waypointPlayer : waypointManager.getWaypointPlayers().values()) {
+                                Waypoint privateWaypoint = waypointManager.getPrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
+                                if (privateWaypoint != null) {
+                                    waypointManager.removePrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
+                                    Player player = Bukkit.getPlayer(waypointPlayer.getUUID());
+                                    if (player != null)
+                                        player.sendMessage(ChatColor.RED + languageManager.getString("removed-private-waypoint") + " " + ChatColor.BOLD + privateWaypoint.getName());
+                                }
+                            }
+
+                            //remove inactive waypoint
+                            Waypoint inactiveWaypoint = waypointManager.getInactiveWaypoint(waypointCoord);
+                            if (inactiveWaypoint != null)
+                                waypointManager.removeInactiveWaypoint(waypointCoord);
+                        }
                     }
-                }
-
-                //remove inactive waypoint
-                Waypoint inactiveWaypoint = waypointManager.getInactiveWaypoint(waypointCoord);
-                if (inactiveWaypoint != null)
-                    waypointManager.removeInactiveWaypoint(waypointCoord);
+                }.runTaskLater(Main.getPlugin(), 1);
             }
         }
     }
