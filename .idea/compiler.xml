@@ -20,6 +20,7 @@
         <module name="1_16_R2" />
         <module name="Build" />
         <module name="1_16_R3" />
+        <module name="1_20_R1" />
       </profile>
     </annotationProcessing>
   </component>

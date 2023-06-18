@@ -1,5 +1,2 @@
 Changes:
-- Added support for 1.19.4
-
-Fixes:
-- Fixed an issue with WorldGuard where a waypoint would be deleted if a protected block was broken
+- Added support for 1.20 and 1.20.1
