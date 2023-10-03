@@ -73,6 +73,10 @@ Note: If WorldEdit is used to delete a beacon, the waypoint will not be deleted.
 
 ## Changelog
 
+### 1.6.4
+Changes:
+- Added support for 1.20.2
+
 ### 1.6.3
 Changes:
 - Added support for 1.20 and 1.20.1
