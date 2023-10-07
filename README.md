@@ -5,7 +5,7 @@
 
 [CurseForge page](https://www.curseforge.com/minecraft/bukkit-plugins/beaconwaypoints)
 
-Supports versions 1.14-1.20.1
+Supports versions 1.14-1.20.2
 
 This plugin uses bStats.
 
