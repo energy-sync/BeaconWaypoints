@@ -69,14 +69,7 @@ public class MultiPageInventoryGUI {
 
         //back button if previous GUI was provided
         if (this.previousGUI != null) {
-            InventoryGUIButton backButton  = new InventoryGUIButton(this.gui, null, null, Material.PLAYER_HEAD);
-            ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
-            SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-            skullMeta.setOwner("MHF_ArrowLeft");
-            skull.setItemMeta(skullMeta);
-            backButton.setItem(skull);
-            backButton.setName(ChatColor.WHITE + languageManager.getString("back"));
-            backButton.setDescription(ChatColor.DARK_GRAY + this.previousGUI.getTitle());
+            InventoryGUIButton backButton = GUIs.createHeadButton(this.gui, ChatColor.WHITE + languageManager.getString("back"), ChatColor.DARK_GRAY + this.previousGUI.getTitle(), "MHF_ArrowLeft");
             backButton.setOnClick(e -> {
                 this.previousGUI.showMenu();
             });
@@ -86,14 +79,7 @@ public class MultiPageInventoryGUI {
 
         //previous page button
         if (page > 0) {
-            InventoryGUIButton previousButton = new InventoryGUIButton(gui, languageManager.getString("previous-page"), null, Material.PLAYER_HEAD);
-            ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
-            SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-            //skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString("a68f0b64-8d14-4000-a95f-4b9ba14f8df9"))); //MHF_ArrowLeft
-            skullMeta.setOwner("MHF_ArrowLeft"); //much more consistent but deprecated
-            skull.setItemMeta(skullMeta);
-            previousButton.setItem(skull);
-            previousButton.setName("Previous Page");
+            InventoryGUIButton previousButton = GUIs.createHeadButton(gui, languageManager.getString("previous-page"), null, "MHF_ArrowLeft");
             previousButton.setOnClick(e -> {
                 showPage(page - 1);
             });
@@ -102,18 +88,12 @@ public class MultiPageInventoryGUI {
         else gui.removeButton(this.bottomRowSlot + 3);
 
         //compass icon
-        gui.setButton(this.bottomRowSlot + 4, new InventoryGUIButton(gui, null, null, Material.COMPASS));
+        if (this.buttons.size() > this.numRows * 9)
+            gui.setButton(this.bottomRowSlot + 4, new InventoryGUIButton(gui, null, null, Material.COMPASS));
 
         //next page button
         if (this.buttons.size() > (page + 1) * this.numRows * 9) {
-            InventoryGUIButton nextButton = new InventoryGUIButton(gui, languageManager.getString("next-page"), null, Material.PLAYER_HEAD);
-            ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
-            SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-            //skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString("50c8510b-5ea0-4d60-be9a-7d542d6cd156"))); //MHF_ArrowRight
-            skullMeta.setOwner("MHF_ArrowRight"); //much more consistent but deprecated
-            skull.setItemMeta(skullMeta);
-            nextButton.setItem(skull);
-            nextButton.setName("Next Page");
+            InventoryGUIButton nextButton = GUIs.createHeadButton(gui, languageManager.getString("next-page"), null, "MHF_ArrowRight");
             nextButton.setOnClick(e -> {
                 showPage(page + 1);
             });

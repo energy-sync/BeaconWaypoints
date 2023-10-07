@@ -123,8 +123,8 @@ public class WorldListener implements Listener {
                                 Waypoint privateWaypoint = waypointManager.getPrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
                                 if (privateWaypoint != null) {
                                     waypointManager.removePrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
-                                    Player player = Bukkit.getPlayer(waypointPlayer.getUUID());
-                                    if (player != null)
+                                    Player player = e.getPlayer();
+                                    if (waypointPlayer.getUUID().equals(player.getUniqueId()))
                                         player.sendMessage(ChatColor.RED + languageManager.getString("removed-private-waypoint") + " " + ChatColor.BOLD + privateWaypoint.getName());
                                 }
                             }
