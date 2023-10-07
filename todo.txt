@@ -1,5 +1,6 @@
-- update to 1.19.4 (done)
-- fix bug where breaking protected block in WorldGuard deletes waypoint (done)
+- update to 1.20.2 (done)
+- make player skull button creation function (done)
+- fix messages not being sent when a waypoint beacon is broken
 
 MAYBE:
 - share private waypoints with other players

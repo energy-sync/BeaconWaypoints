@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.Collection;
@@ -261,15 +262,7 @@ public class GUIs {
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 2);
 
         //back button
-        InventoryGUIButton backButton = new InventoryGUIButton(gui, null, null, Material.PLAYER_HEAD);
-        org.bukkit.inventory.ItemStack skull = new org.bukkit.inventory.ItemStack(Material.PLAYER_HEAD);
-        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-        skullMeta.setOwner("MHF_ArrowLeft");
-        skull.setItemMeta(skullMeta);
-        backButton.setItem(skull);
-        backButton.setName(ChatColor.WHITE + languageManager.getString("back"));
-        backButton.setDescription(ChatColor.DARK_GRAY + previousGUI.getTitle());
-
+        InventoryGUIButton backButton = GUIs.createHeadButton(gui, languageManager.getString("back"), ChatColor.DARK_GRAY + previousGUI.getTitle(), "MHF_ArrowLeft");
         backButton.setOnClick(e -> {
             previousGUI.showMenu();
         });
@@ -354,5 +347,18 @@ public class GUIs {
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 2);
 
         gui.showMenu();
+    }
+
+    //creates an inventory GUI button with a player's head
+    public static InventoryGUIButton createHeadButton(InventoryGUI gui, String name, String description, String playerName) {
+        InventoryGUIButton button = new InventoryGUIButton(gui, name, description, Material.PLAYER_HEAD);
+        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
+        skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(playerName));
+        skull.setItemMeta(skullMeta);
+        button.setItem(skull);
+        button.setName(name);
+        button.setDescription(description);
+        return button;
     }
 }

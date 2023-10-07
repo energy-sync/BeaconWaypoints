@@ -95,10 +95,12 @@ public class InventoryGUIButton {
      */
     public void setDescription(String description) {
         this.description = description;
-        ItemMeta meta = this.item.getItemMeta();
-        String[] lines = description.split("\n");
-        Objects.requireNonNull(meta).setLore(Arrays.asList(lines));
-        this.item.setItemMeta(meta);
+        if (description != null) {
+            ItemMeta meta = this.item.getItemMeta();
+            String[] lines = description.split("\n");
+            Objects.requireNonNull(meta).setLore(Arrays.asList(lines));
+            this.item.setItemMeta(meta);
+        }
         this.parentGUI.getInventory().setItem(this.slot, this.item);
     }
 
