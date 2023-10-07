@@ -1,6 +1,6 @@
 already-exists-at-location: A waypoint already exists at that location
 back: Back
-beacon-obstructed: The destination beacon is not able to be traveled to. It either is not constructed correctly, or something is obstructing the beam.
+beacon-obstructed: You are not able to teleport. One of the beacons is constructed incorrectly, or something is obstructing the beam.
 blocks: blocks
 cancel: Cancel
 cannot-check-for-update: Unable to check for updates
