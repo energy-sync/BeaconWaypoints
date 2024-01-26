@@ -10,7 +10,6 @@ import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
 import org.bukkit.*;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -84,7 +83,7 @@ public class WaypointHelper {
                         WaypointManager waypointManager = Main.getWaypointManager();
                         WaypointPlayer waypointPlayer = waypointManager.getPlayer(entity.getUniqueId());
                         if (waypointPlayer == null) {
-                            waypointManager.addPlayer(entity.getUniqueId());
+                            waypointManager.addPlayer(entity.getUniqueId(), entity.getName());
                             waypointPlayer = waypointManager.getPlayer(entity.getUniqueId());
                         }
 
@@ -337,7 +336,7 @@ public class WaypointHelper {
                         BigDecimal currentMoney = essentialsUser.getMoney();
                         BigDecimal moneyNeeded = currentMoney.subtract(BigDecimal.valueOf(costPerChunk)).multiply(BigDecimal.valueOf(-1));
                         if (moneyNeeded.compareTo(BigDecimal.ZERO) > 0) {
-                            player.sendMessage(ChatColor.RED + languageManager.getString("insufficient-money") + ": $" + moneyNeeded);
+                            player.sendMessage(ChatColor.RED + languageManager.getString("insufficient-money") + ": " + essentials.getSettings().getCurrencySymbol() + moneyNeeded);
                             xpOrMoneyRequirementMet = false;
                         }
                     }
@@ -533,7 +532,7 @@ public class WaypointHelper {
             if (paymentMode.equals("xp"))
                 description.append(calculateCost(startWaypoint, destinationWaypoint, "xp", config.getInt("xp-cost-per-chunk"), config.getDouble("cost-multiplier"))).append(" XP\n");
             else if (paymentMode.equals("money") && essentials != null)
-                description.append("$").append(calculateCost(startWaypoint, destinationWaypoint, "money", config.getInt("money-cost-per-chunk"), config.getDouble("cost-multiplier"))).append("\n");
+                description.append(essentials.getSettings().getCurrencySymbol()).append(calculateCost(startWaypoint, destinationWaypoint, "money", config.getInt("money-cost-per-chunk"), config.getDouble("cost-multiplier"))).append("\n");
         }
 
         //required items

@@ -36,6 +36,7 @@ public class Waypoint implements Cloneable {
     private boolean isWaypoint;
     private boolean pinned;
     private ArrayList<UUID> playersDiscovered;
+    private ArrayList<UUID> sharedPlayers;
 
     /**
      * @param ownerUUID
@@ -48,6 +49,7 @@ public class Waypoint implements Cloneable {
         this.isWaypoint = false;
         this.pinned = false;
         this.playersDiscovered = new ArrayList<>();
+        this.sharedPlayers = new ArrayList<>();
     }
 
     /**
@@ -71,6 +73,12 @@ public class Waypoint implements Cloneable {
         if (jsonPlayersDiscovered != null) {
             for (Object jsonPlayer : jsonPlayersDiscovered)
                 this.playersDiscovered.add(UUID.fromString((String) jsonPlayer));
+        }
+        JSONArray jsonSharedPlayers = (JSONArray) jsonWaypoint.get("sharedPlayers");
+        this.sharedPlayers = new ArrayList<>();
+        if (jsonSharedPlayers != null) {
+            for (Object jsonPlayer : jsonSharedPlayers)
+                this.sharedPlayers.add(UUID.fromString((String) jsonPlayer));
         }
     }
 
@@ -253,6 +261,51 @@ public class Waypoint implements Cloneable {
     }
 
     /**
+     * Gives a player access to this waypoint if private
+     * @param uuid
+     */
+    public void givePlayerAccess(UUID uuid, String username) {
+        WaypointManager waypointManager = Main.getWaypointManager();
+        if (waypointManager.getPlayer(uuid) == null)
+            waypointManager.addPlayer(uuid, username);
+        if (!this.sharedPlayers.contains(uuid))
+            this.sharedPlayers.add(uuid);
+    }
+
+    /**
+     * Revokes a player's access to this waypoint if private
+     * @param uuid
+     */
+    public void removePlayerAccess(UUID uuid) {
+        this.sharedPlayers.remove(uuid);
+    }
+
+    /**
+     * Checks if a player has been given access to this waypoint if private
+     * @param uuid
+     * @return Whether the player has access to this waypoint
+     */
+    public boolean sharedWithPlayer(UUID uuid) {
+        return this.sharedPlayers.contains(uuid);
+    }
+
+    /**
+     * Returns a list of UUIDs for players who have access to this waypoint if private
+     * @return
+     */
+    public ArrayList<UUID> getSharedPlayers() {
+        return this.sharedPlayers;
+    }
+
+    /**
+     * Sets the list of UUIDs for players who have been given access to this waypoint if private
+     * @param sharedPlayers
+     */
+    public void setSharedPlayers(ArrayList<UUID> sharedPlayers) {
+        this.sharedPlayers = (ArrayList<UUID>) sharedPlayers.clone();
+    }
+
+    /**
      * @return jsonWaypoint
      */
     public JSONObject toJSON() {
@@ -270,6 +323,10 @@ public class Waypoint implements Cloneable {
         for (UUID uuid : this.playersDiscovered)
             jsonPlayersDiscovered.add(uuid.toString());
         jsonWaypoint.put("playersDiscovered", jsonPlayersDiscovered);
+        JSONArray jsonSharedPlayers = new JSONArray();
+        for (UUID uuid : this.sharedPlayers)
+            jsonSharedPlayers.add(uuid.toString());
+        jsonWaypoint.put("sharedPlayers", jsonSharedPlayers);
         return jsonWaypoint;
     }
 
@@ -280,6 +337,7 @@ public class Waypoint implements Cloneable {
         clonedWaypoint.setIsWaypoint(this.isWaypoint);
         clonedWaypoint.setPinned(this.pinned);
         clonedWaypoint.setPlayersDiscovered(this.playersDiscovered);
+        clonedWaypoint.setSharedPlayers(this.sharedPlayers);
         return clonedWaypoint;
     }
 }

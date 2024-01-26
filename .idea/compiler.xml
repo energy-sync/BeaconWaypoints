@@ -19,12 +19,12 @@
         <module name="1_15_R1" />
         <module name="1_16_R2" />
         <module name="Build" />
-        <module name="1_20_R2" />
         <module name="1_16_R3" />
         <module name="1_20_R1" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="1_20_R2" target="17" />
       <module name="_1_20_R2" target="18" />
     </bytecodeTargetLevel>
   </component>

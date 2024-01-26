@@ -1,21 +1,23 @@
 package com.github.dawsonvilamaa.beaconwaypoint.waypoints;
 
+import org.bukkit.Bukkit;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
 public class WaypointPlayer {
-    private UUID uuid;
+    private PlayerIdentifier identifier;
     private HashMap<WaypointCoord, Waypoint> waypoints;
     private boolean isTeleporting;
 
     /**
      * @param uuid
      */
-    public WaypointPlayer(UUID uuid) {
-        this.uuid = uuid;
+    public WaypointPlayer(UUID uuid, String username) {
+        this.identifier = new PlayerIdentifier(uuid, username);
         this.waypoints = new HashMap<>();
         this.isTeleporting = false;
     }
@@ -24,13 +26,12 @@ public class WaypointPlayer {
      * @param jsonPlayer
      */
     public WaypointPlayer(JSONObject jsonPlayer) {
-        this.uuid = UUID.fromString(jsonPlayer.get("uuid").toString());
+        this.identifier = new PlayerIdentifier(UUID.fromString(jsonPlayer.get("uuid").toString()), jsonPlayer.get("username").toString());
         this.waypoints = new HashMap<>();
 
-        this.uuid = UUID.fromString(jsonPlayer.get("uuid").toString());
         JSONArray jsonWaypoints = (JSONArray) jsonPlayer.get("waypoints");
-        for (Object jsonWaypoint : jsonWaypoints)
-            this.waypoints.put(new WaypointCoord((JSONObject) jsonWaypoint), new Waypoint((JSONObject) jsonWaypoint));
+        for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonWaypoints)
+            this.waypoints.put(new WaypointCoord(jsonWaypoint), new Waypoint(jsonWaypoint));
 
         this.isTeleporting = false;
     }
@@ -39,7 +40,21 @@ public class WaypointPlayer {
      * @return uuid
      */
     public UUID getUUID() {
-        return uuid;
+        return this.identifier.getUUID();
+    }
+
+    /**
+     * @return username
+     */
+    public String getUsername() {
+        return this.identifier.getUsername();
+    }
+
+    /**
+     * @param username
+     */
+    public void setUsername(String username) {
+        this.identifier.setUsername(username);
     }
 
     /**
@@ -90,11 +105,13 @@ public class WaypointPlayer {
      */
     public JSONObject toJSON() {
         JSONObject playerData = new JSONObject();
-        playerData.put("uuid", this.uuid.toString());
+        playerData.put("uuid", this.identifier.getUUID().toString());
+        playerData.put("username", this.identifier.getUsername());
         JSONArray jsonPlayerWaypoints = new JSONArray();
-        for (Waypoint waypoint : this.waypoints.values())
+        for (Waypoint waypoint : this.waypoints.values()) {
             if (waypoint != null)
                 jsonPlayerWaypoints.add(waypoint.toJSON());
+        }
         playerData.put("waypoints", jsonPlayerWaypoints);
         return playerData;
     }

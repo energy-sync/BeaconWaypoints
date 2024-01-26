@@ -84,6 +84,18 @@ public class WaypointCoord {
         return false;
     }
 
+    /**
+     * @return jsonCoord
+     */
+    public JSONObject toJSON() {
+        JSONObject jsonCoord = new JSONObject();
+        jsonCoord.put("x", String.valueOf(this.x));
+        jsonCoord.put("y", String.valueOf(this.y));
+        jsonCoord.put("z", String.valueOf(this.z));
+        jsonCoord.put("world", this.worldName);
+        return jsonCoord;
+    }
+
     @Override
     public int hashCode() {
         return hashCode;

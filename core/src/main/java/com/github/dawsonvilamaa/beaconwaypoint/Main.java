@@ -7,6 +7,7 @@ import com.github.dawsonvilamaa.beaconwaypoint.listeners.WorldListener;
 import com.github.dawsonvilamaa.beaconwaypoint.version.VersionMatcher;
 import com.github.dawsonvilamaa.beaconwaypoint.version.VersionWrapper;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.Waypoint;
+import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointCoord;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointManager;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointPlayer;
 import org.bukkit.Bukkit;
@@ -117,7 +118,7 @@ public class Main extends JavaPlugin {
         //check if EssentialsX is installed
         IEssentials essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
         if (essentials == null)
-            this.getLogger().warning("EssentialsX is not installed, ignoring Essentials money cost for teleporting.");
+            this.getLogger().warning(languageManager.getString("essentials-not-installed"));
     }
 
     @Override
@@ -149,9 +150,14 @@ public class Main extends JavaPlugin {
             for (File playerFile : Objects.requireNonNull(playerDir.listFiles())) {
                 if (playerFile.isFile() && playerFile.getName().endsWith(".json")) {
                     JSONObject jsonPlayer = (JSONObject) parser.parse(new InputStreamReader(Files.newInputStream(Paths.get("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "players/" + File.separator + "" + playerFile.getName())), StandardCharsets.UTF_8));
-                    waypointManager.addPlayer(UUID.fromString(jsonPlayer.get("uuid").toString()));
-                    for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonPlayer.get("waypoints"))
-                        waypointManager.addPrivateWaypoint(UUID.fromString(jsonPlayer.get("uuid").toString()), new Waypoint(jsonWaypoint));
+                    Object uuid = jsonPlayer.get("uuid");
+                    Object username = jsonPlayer.get("username");
+                    if (waypointManager.getPlayer(UUID.fromString(uuid.toString())) == null) {
+                        waypointManager.addPlayer(UUID.fromString(uuid.toString()), username.toString());
+                    }
+                    for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonPlayer.get("waypoints")) {
+                        waypointManager.addPrivateWaypoint(UUID.fromString(jsonPlayer.get("uuid").toString()), username != null ? username.toString() : null, new Waypoint(jsonWaypoint));
+                    }
                 }
             }
         } catch (IOException | ParseException e) {
@@ -191,7 +197,7 @@ public class Main extends JavaPlugin {
             }
         }
 
-        //save player waypoints
+        //save player data
         for (WaypointPlayer waypointPlayer : waypointManager.getWaypointPlayers().values()) {
             JSONObject playerData = waypointPlayer.toJSON();
 

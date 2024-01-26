@@ -8,7 +8,10 @@ commands:
   waypoint:
     aliases: [wp, waypoints]
     description: Add or remove a waypoint
-    usage: /waypoint <name> <public | private>
+    usage: |+
+      /waypoint <name> <public | private>
+      /waypoint share <username | UUID>
+      /waypoints reload
     permission: BeaconWaypoints.createWaypoints
     permission-message: You don't have permission to use that command
     

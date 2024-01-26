@@ -47,7 +47,9 @@ public class WorldListener implements Listener {
 
         //add if not in map
         if (waypointPlayer == null)
-            waypointManager.addPlayer(e.getPlayer().getUniqueId());
+            waypointManager.addPlayer(e.getPlayer().getUniqueId(), e.getPlayer().getName());
+        else if (!waypointPlayer.getUsername().equals(e.getPlayer().getName()))
+            waypointPlayer.setUsername(e.getPlayer().getName());
 
         //if player is op, check for updates
         if (e.getPlayer().isOp()) {
@@ -110,30 +112,7 @@ public class WorldListener implements Listener {
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        if (!waypointCoord.getLocation().getBlock().getType().equals(Material.BEACON)) {
-                            //remove public/pinned waypoint
-                            Waypoint publicWaypoint = waypointManager.getPublicWaypoint(waypointCoord);
-                            if (publicWaypoint != null) {
-                                waypointManager.removePublicWaypoint(waypointCoord);
-                                e.getPlayer().sendMessage(ChatColor.RED + languageManager.getString("removed-public-waypoint") + " " + ChatColor.BOLD + publicWaypoint.getName());
-                            }
-
-                            //remove private waypoint
-                            for (WaypointPlayer waypointPlayer : waypointManager.getWaypointPlayers().values()) {
-                                Waypoint privateWaypoint = waypointManager.getPrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
-                                if (privateWaypoint != null) {
-                                    waypointManager.removePrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
-                                    Player player = e.getPlayer();
-                                    if (waypointPlayer.getUUID().equals(player.getUniqueId()))
-                                        player.sendMessage(ChatColor.RED + languageManager.getString("removed-private-waypoint") + " " + ChatColor.BOLD + privateWaypoint.getName());
-                                }
-                            }
-
-                            //remove inactive waypoint
-                            Waypoint inactiveWaypoint = waypointManager.getInactiveWaypoint(waypointCoord);
-                            if (inactiveWaypoint != null)
-                                waypointManager.removeInactiveWaypoint(waypointCoord);
-                        }
+                        waypointManager.removeWaypointsAtCoord(waypointCoord);
                     }
                 }.runTaskLater(Main.getPlugin(), 1);
             }
@@ -146,24 +125,7 @@ public class WorldListener implements Listener {
         if (e.getBlock().getType() == Material.AIR) {
             WaypointManager waypointManager = Main.getWaypointManager();
             WaypointCoord waypointCoord = new WaypointCoord(e.getBlock().getLocation());
-
-            //remove public waypoint
-            Waypoint publicWaypoint = waypointManager.getPublicWaypoint(waypointCoord);
-            if (publicWaypoint != null) {
-                waypointManager.removePublicWaypoint(waypointCoord);
-            }
-
-            //remove private waypoint
-            for (WaypointPlayer waypointPlayer : waypointManager.getWaypointPlayers().values()) {
-                Waypoint privateWaypoint = waypointManager.getPrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
-                if (privateWaypoint != null)
-                    waypointManager.removePrivateWaypoint(waypointPlayer.getUUID(), waypointCoord);
-            }
-
-            //remove inactive waypoint
-            Waypoint inactiveWaypoint = waypointManager.getInactiveWaypoint(waypointCoord);
-            if (inactiveWaypoint != null)
-                waypointManager.removeInactiveWaypoint(waypointCoord);
+            waypointManager.removeWaypointsAtCoord(waypointCoord);
         }
     }
 

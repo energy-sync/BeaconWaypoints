@@ -1,6 +1,11 @@
 package com.github.dawsonvilamaa.beaconwaypoint.waypoints;
 
+import com.github.dawsonvilamaa.beaconwaypoint.LanguageManager;
+import com.github.dawsonvilamaa.beaconwaypoint.Main;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.util.*;
 
@@ -61,12 +66,10 @@ public class WaypointManager {
     /**
      * Adds a private waypoint for a player
      * @param uuid
+     * @param username
      * @param waypoint
      */
-    public void addPrivateWaypoint(UUID uuid, Waypoint waypoint) {
-        if (!waypointPlayers.containsKey(uuid)) {
-            addPlayer(uuid);
-        }
+    public void addPrivateWaypoint(UUID uuid, String username, Waypoint waypoint) {
         waypointPlayers.get(uuid).addWaypoint(waypoint);
     }
 
@@ -190,8 +193,9 @@ public class WaypointManager {
         List<Waypoint> privateWaypoints = new ArrayList<>();
         for (WaypointPlayer waypointPlayer : waypointPlayers.values()) {
             Waypoint privateWaypoint = waypointPlayer.getWaypoint(waypointCoord);
-            if (privateWaypoint != null)
+            if (privateWaypoint != null) {
                 privateWaypoints.add(privateWaypoint);
+            }
         }
         return privateWaypoints;
     }
@@ -213,7 +217,17 @@ public class WaypointManager {
      * @return waypoints
      */
     public Collection<Waypoint> getPrivateWaypointsSortedAlphabetically(UUID uuid) {
-        return sortWaypointsAlphabetically(waypointPlayers.get(uuid).getWaypoints().values());
+        ArrayList<Waypoint> waypoints = new ArrayList<>(waypointPlayers.get(uuid).getWaypoints().values());
+        for (WaypointPlayer player : getWaypointPlayers().values()) {
+            if (!player.getUUID().equals(uuid)) {
+                for (Waypoint privateWaypoint : player.getWaypoints().values()) {
+                    if (privateWaypoint.sharedWithPlayer(uuid)) {
+                        waypoints.add(privateWaypoint);
+                    }
+                }
+            }
+        }
+        return sortWaypointsAlphabetically(waypoints);
     }
 
     /**
@@ -273,9 +287,11 @@ public class WaypointManager {
     /**
      * Adds a player to the waypoint player list
      * @param uuid
+     * @return waypointPlayer
      */
-    public void addPlayer(UUID uuid) {
-        waypointPlayers.put(uuid, new WaypointPlayer(uuid));
+    public WaypointPlayer addPlayer(UUID uuid, String username) {
+        waypointPlayers.put(uuid, new WaypointPlayer(uuid, username));
+        return waypointPlayers.get(uuid);
     }
 
     /**
@@ -284,7 +300,7 @@ public class WaypointManager {
      * @return waypointPlayer
      */
     public WaypointPlayer getPlayer(UUID uuid) {
-        return waypointPlayers.get(uuid);
+        return uuid != null ? waypointPlayers.get(uuid) : null;
     }
 
     /**
@@ -292,5 +308,59 @@ public class WaypointManager {
      */
     public HashMap<UUID, WaypointPlayer> getWaypointPlayers() {
         return waypointPlayers;
+    }
+
+    /**
+     * Get a player's username by their UUID
+     * @param uuid
+     * @return username
+     */
+    public String getPlayerUsername(UUID uuid) {
+        return this.waypointPlayers.get(uuid).getUsername();
+    }
+
+    /**
+     * Sends a message to online players that own a waypoint at the coordinate that it has been removed, and delete the waypoints
+     * @param waypointCoord
+     */
+    public void removeWaypointsAtCoord(WaypointCoord waypointCoord) {
+        LanguageManager languageManager = Main.getLanguageManager();
+
+        //remove public waypoint
+        Waypoint publicWaypoint = getPublicWaypoint(waypointCoord);
+        if (publicWaypoint != null) {
+            removePublicWaypoint(waypointCoord);
+            Player messagePlayer = Bukkit.getPlayer(publicWaypoint.getOwnerUUID());
+            if (messagePlayer != null) {
+                waypointRemoveNotify(publicWaypoint, messagePlayer, true);
+            }
+        }
+
+        //remove private waypoints
+        for (Waypoint privateWaypoint : getPrivateWaypointsAtCoord(waypointCoord)) {
+            removePrivateWaypoint(privateWaypoint.getOwnerUUID(), waypointCoord);
+
+            //notify players who had private waypoints that it was removed
+            Player messagePlayer = Bukkit.getPlayer(privateWaypoint.getOwnerUUID());
+            if (messagePlayer != null) {
+                waypointRemoveNotify(privateWaypoint, messagePlayer, false);
+            }
+        }
+
+        //remove inactive waypoint
+        Waypoint inactiveWaypoint = getInactiveWaypoint(waypointCoord);
+        if (inactiveWaypoint != null)
+            removeInactiveWaypoint(waypointCoord);
+    }
+
+    /**
+     * Notifies a player that a waypoint they own has been removed
+     * @param waypoint
+     * @param player
+     * @param publicMenu
+     */
+    public void waypointRemoveNotify(Waypoint waypoint, Player player, boolean publicMenu) {
+        LanguageManager languageManager = Main.getLanguageManager();
+        player.sendMessage(ChatColor.RED + (publicMenu ? languageManager.getString("removed-public-waypoint") : languageManager.getString("removed-private-waypoint")) + " " + ChatColor.BOLD + waypoint.getName());
     }
 }

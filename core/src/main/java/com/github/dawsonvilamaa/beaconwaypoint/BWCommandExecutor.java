@@ -1,15 +1,17 @@
 package com.github.dawsonvilamaa.beaconwaypoint;
 
 import com.github.dawsonvilamaa.beaconwaypoint.gui.GUIs;
+import com.github.dawsonvilamaa.beaconwaypoint.gui.InventoryGUIButton;
+import com.github.dawsonvilamaa.beaconwaypoint.gui.MultiPageInventoryGUI;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.*;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 public class BWCommandExecutor implements CommandExecutor {
     private final Main plugin;
@@ -40,6 +42,45 @@ public class BWCommandExecutor implements CommandExecutor {
                     }
                     else
                         player.sendMessage(ChatColor.RED + languageManager.getString("no-command-permission"));
+                    return true;
+                }
+
+                //share private waypoint
+                if (args[0].equalsIgnoreCase("share")) {
+                    //check if player has permission to use private waypoints
+                    if (!player.hasPermission("BeaconWaypoints.useWaypoints")) {
+                        player.sendMessage(ChatColor.RED + languageManager.getString("no-private-waypoint-permission"));
+                        return true;
+                    }
+
+                    //check if player has any private waypoints
+                    if (waypointManager.getPlayer(player.getUniqueId()).getWaypoints().isEmpty()) {
+                        player.sendMessage(ChatColor.RED + languageManager.getString("no-private-waypoints"));
+                        return true;
+                    }
+
+                    if (args.length < 2)
+                        return false;
+
+                    //CHECK IF THE PLAYER ALREADY HAS THIS WAYPOINT SHARED
+
+                    UUID playerUUID;
+
+                    //username
+                    OfflinePlayer sharedBukkitPlayer = Bukkit.getOfflinePlayer(args[1]);
+                    if (sharedBukkitPlayer == null) {
+                        player.sendMessage(ChatColor.RED + languageManager.getString("player-not-found"));
+                        return true;
+                    }
+                    playerUUID = sharedBukkitPlayer.getUniqueId();
+
+                    if (playerUUID.equals(player.getUniqueId())) {
+                        player.sendMessage(ChatColor.RED + languageManager.getString("self-share"));
+                        return true;
+                    }
+
+                    //player chooses waypoint to share
+                    GUIs.sharePrivateWaypointMenu(player, playerUUID, args[1]);
                     return true;
                 }
 
