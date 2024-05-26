@@ -1,3 +1,7 @@
+- update to 1.20.2 (done)
+- make player skull button creation function (done)
+- fix messages not being sent when a waypoint beacon is broken
+
 - share private waypoints with other players
     - don't allow sharing if it is already shared with that player (done)
     - make sure player usernames are updated in player save files when their usernames are changed (done)
