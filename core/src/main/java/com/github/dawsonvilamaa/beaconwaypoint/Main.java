@@ -53,78 +53,84 @@ public class Main extends JavaPlugin {
 
         //get version wrapper
         versionWrapper = new VersionMatcher().match();
+        if (versionWrapper == null) {
+            this.setEnabled(false);
+        }
+        else {
+            //bStats
+            Metrics metrics = new Metrics(this, 14276);
+            metrics.addCustomChart(new Metrics.SingleLineChart("waypoints", new Callable<Integer>() {
+                @Override
+                public Integer call() throws Exception {
+                    return waypointManager.getPublicWaypoints().size() + waypointManager.getNumPrivateWaypoints();
+                }
+            }));
 
-        //bStats
-        Metrics metrics = new Metrics(this, 14276);
-        metrics.addCustomChart(new Metrics.SingleLineChart("waypoints", new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                return waypointManager.getPublicWaypoints().size() + waypointManager.getNumPrivateWaypoints();
+            //register commands
+            BWCommandExecutor commandExecutor = new BWCommandExecutor(this);
+            Objects.requireNonNull(getCommand("waypoint")).setExecutor(commandExecutor);
+
+            //register events
+            PluginManager pm = getServer().getPluginManager();
+            pm.registerEvents(worldListener, this);
+            pm.registerEvents(inventoryListener, this);
+
+            //create data folder if it doesn't exist
+            if (!getDataFolder().exists())
+                getDataFolder().mkdirs();
+
+            //create config file if it doesn't exist
+            if (!new File(getDataFolder(), "config.yml").exists())
+                saveDefaultConfig();
+
+            //load language config
+            loadLanguage();
+
+            //config update checker
+            try {
+                ConfigUpdater.checkConfig(getConfig());
+            } catch (IOException e) {
+                getLogger().warning("Unable to run the update checker for config.yml");
             }
-        }));
 
-        //register commands
-        BWCommandExecutor commandExecutor = new BWCommandExecutor(this);
-        Objects.requireNonNull(getCommand("waypoint")).setExecutor(commandExecutor);
+            try {
+                ConfigUpdater.checkLanguageConfig(languageManager.getDefaults());
+            } catch (IOException e) {
+                getLogger().warning("Unable to run the update checker for language.yml");
+            }
 
-        //register events
-        PluginManager pm = getServer().getPluginManager();
-        pm.registerEvents(worldListener, this);
-        pm.registerEvents(inventoryListener, this);
+            //create folder for player waypoints if it doesn't exist
+            File playerDir = new File(getDataFolder() + File.separator + "players");
+            if (!playerDir.exists())
+                playerDir.mkdirs();
 
-        //create data folder if it doesn't exist
-        if (!getDataFolder().exists())
-            getDataFolder().mkdirs();
+            loadData();
+            autoSave.runTaskTimer(plugin, 6000, 6000);
 
-        //create config file if it doesn't exist
-        if (!new File(getDataFolder(), "config.yml").exists())
-            saveDefaultConfig();
+            //update checker
+            new UpdateChecker(this, 99866).getVersion(version -> {
+                if (!this.getDescription().getVersion().equals(version))
+                    this.getLogger().info("\n=======================================================================\n"
+                            + ChatColor.AQUA + languageManager.getString("new-version-available") + "\n"
+                            + ChatColor.YELLOW + languageManager.getString("current-version") + ": " + Main.plugin.getDescription().getVersion() + "\n"
+                            + languageManager.getString("updated-version") + ": " + version + "\n"
+                            + ChatColor.WHITE +languageManager.getString("download-link") + ": " + ChatColor.UNDERLINE + "https://www.spigotmc.org/resources/beaconwaypoints.99866\n"
+                            + ChatColor.RESET + "=======================================================================");
+            });
 
-        //load language config
-        loadLanguage();
-
-        //config update checker
-        try {
-            ConfigUpdater.checkConfig(getConfig());
-        } catch (IOException e) {
-            getLogger().warning("Unable to run the update checker for config.yml");
+            //check if EssentialsX is installed
+            IEssentials essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
+            if (essentials == null)
+                this.getLogger().warning(languageManager.getString("essentials-not-installed"));
         }
-
-        try {
-            ConfigUpdater.checkLanguageConfig(languageManager.getDefaults());
-        } catch (IOException e) {
-            getLogger().warning("Unable to run the update checker for language.yml");
-        }
-
-        //create folder for player waypoints if it doesn't exist
-        File playerDir = new File(getDataFolder() + File.separator + "players");
-        if (!playerDir.exists())
-            playerDir.mkdirs();
-
-        loadData();
-        autoSave.runTaskTimer(plugin, 6000, 6000);
-
-        //update checker
-        new UpdateChecker(this, 99866).getVersion(version -> {
-            if (!this.getDescription().getVersion().equals(version))
-                this.getLogger().info("\n=======================================================================\n"
-                        + ChatColor.AQUA + languageManager.getString("new-version-available") + "\n"
-                        + ChatColor.YELLOW + languageManager.getString("current-version") + ": " + Main.plugin.getDescription().getVersion() + "\n"
-                        + languageManager.getString("updated-version") + ": " + version + "\n"
-                        + ChatColor.WHITE +languageManager.getString("download-link") + ": " + ChatColor.UNDERLINE + "https://www.spigotmc.org/resources/beaconwaypoints.99866\n"
-                        + ChatColor.RESET + "=======================================================================");
-        });
-
-        //check if EssentialsX is installed
-        IEssentials essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
-        if (essentials == null)
-            this.getLogger().warning(languageManager.getString("essentials-not-installed"));
     }
 
     @Override
     public void onDisable() {
-        autoSave.cancel();
-        saveData();
+        if (versionWrapper != null) {
+            autoSave.cancel();
+            saveData();
+        }
     }
 
     public void loadData() {
@@ -136,9 +142,11 @@ public class Main extends JavaPlugin {
             JSONArray jsonWaypoints = (JSONArray) parser.parse(new InputStreamReader(Files.newInputStream(Paths.get("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "public.json")), StandardCharsets.UTF_8));
             for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonWaypoints) {
                 Waypoint waypoint = new Waypoint(jsonWaypoint);
-                if (waypoint.isPinned())
-                    waypointManager.addPinnedWaypoint(waypoint);
-                else waypointManager.addPublicWaypoint(new Waypoint(jsonWaypoint));
+                if (waypoint.getName() != null) {
+                    if (waypoint.isPinned())
+                        waypointManager.addPinnedWaypoint(waypoint);
+                    else waypointManager.addPublicWaypoint(waypoint);
+                }
             }
         } catch(IOException | ParseException e) {
             getLogger().info(e.getMessage());
@@ -156,7 +164,9 @@ public class Main extends JavaPlugin {
                         waypointManager.addPlayer(UUID.fromString(uuid.toString()), username.toString());
                     }
                     for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonPlayer.get("waypoints")) {
-                        waypointManager.addPrivateWaypoint(UUID.fromString(jsonPlayer.get("uuid").toString()), username != null ? username.toString() : null, new Waypoint(jsonWaypoint));
+                        Waypoint waypoint = new Waypoint(jsonWaypoint);
+                        if (waypoint.getName() != null)
+                            waypointManager.addPrivateWaypoint(UUID.fromString(jsonPlayer.get("uuid").toString()), username != null ? username.toString() : null, waypoint);
                     }
                 }
             }
@@ -167,8 +177,11 @@ public class Main extends JavaPlugin {
         //load inactive waypoints
         try {
             JSONArray jsonInactiveWaypoints = (JSONArray) parser.parse(new FileReader("plugins/" + File.separator + "BeaconWaypoints/" + File.separator + "inactive.json"));
-            for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonInactiveWaypoints)
-                waypointManager.addInactiveWaypoint(new Waypoint(jsonWaypoint));
+            for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonInactiveWaypoints) {
+                Waypoint waypoint = new Waypoint(jsonWaypoint);
+                if (waypoint.getName() != null)
+                    waypointManager.addInactiveWaypoint(waypoint);
+            }
         } catch(IOException | ParseException e) {
             getLogger().info(e.getMessage());
         }
@@ -250,7 +263,7 @@ public class Main extends JavaPlugin {
             try {
                 defaultLanguageConfig.save(languageConfigFile);
             } catch (IOException e) {
-                Bukkit.getLogger().severe(languageConfig.getString("cannot-save-default-language-config"));
+                Main.getPlugin().getLogger().severe(languageConfig.getString("cannot-save-default-language-config"));
                 throw new RuntimeException(e);
             }
         }

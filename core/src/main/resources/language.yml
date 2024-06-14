@@ -20,6 +20,8 @@ delete-waypoint: Delete Waypoint
 discovered-waypoint: Discovered waypoint
 distance: Distance
 download-link: Download link
+error-reading-players-discovered: Error while reading players discovered. Check the save files for incorrect player UUIDs
+error-reading-shared-player: Error while reading shared player. Check the save files for incorrect player UUIDs
 essentials-not-installed: EssentialsX is not installed, ignoring Essentials money cost for teleporting.
 has-banned-items: You cannot teleport because you have these items in your inventory
 insufficient-items: You are missing items that are required to teleport
@@ -28,9 +30,12 @@ insufficient-xp: You do not have enough XP to teleport to that waypoint. Additio
 invalid-name: Waypoint names must be 30 characters or fewer
 invalid-name-alphanumeric: Waypoint names must be 30 characters or fewer and can only contain letters, numbers, spaces, underscores, and hyphens.
 manage-access: Manage access
+missing-attribute: Waypoint is missing attribute
+missing-attributes: A waypoint is missing one or more attributes. Check the save files
 name-taken: There is already a public waypoint of that name
 new-version-available: A new version of Beacon Waypoints is available!
 next-page: Next Page
+no-access-to-private-waypoint: You do not have access to the private waypoint
 no-break-permission: You do not have permission to break beacons that have waypoints set
 no-command-permission: You don't have permission to use that command
 no-longer-has-access: no longer has access to the private waypoint
@@ -42,8 +47,10 @@ options: Options
 owner: Owner
 payment-mode-not-found: Payment mode not recognized, defaulting to "none"
 pinned: pinned
+pinned-default: Waypoint is missing attribute "pinned", setting to default false
 pin-waypoint: Pin waypoint
 player-not-found: That player cannot be found or is offline
+players-discovered-default: Waypoint is missing attribute "playersDiscovered", setting to default empty list
 previous-page: Previous Page
 private-list-full: Private waypoint list is full!
 private-name-taken: There is already a private waypoint of that name

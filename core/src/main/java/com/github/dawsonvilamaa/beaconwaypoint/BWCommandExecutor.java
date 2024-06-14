@@ -62,8 +62,6 @@ public class BWCommandExecutor implements CommandExecutor {
                     if (args.length < 2)
                         return false;
 
-                    //CHECK IF THE PLAYER ALREADY HAS THIS WAYPOINT SHARED
-
                     UUID playerUUID;
 
                     //username
@@ -132,14 +130,13 @@ public class BWCommandExecutor implements CommandExecutor {
                     //check if public waypoint list is full
                     if (!plugin.getConfig().contains("max-public-waypoints"))
                         plugin.getConfig().set("max-public-waypoints", 100);
-                    else {
-                        int maxPublicWaypoints = plugin.getConfig().getInt("max-public-waypoints");
-                        if (maxPublicWaypoints < 0)
-                            maxPublicWaypoints = 0;
-                        if (waypointManager.getPublicWaypoints().values().size() == maxPublicWaypoints) {
-                            player.sendMessage(ChatColor.RED + languageManager.getString("public-list-full"));
-                            return true;
-                        }
+
+                    int maxPublicWaypoints = plugin.getConfig().getInt("max-public-waypoints");
+                    if (maxPublicWaypoints < 0)
+                        maxPublicWaypoints = 0;
+                    if (waypointManager.getPublicWaypoints().values().size() == maxPublicWaypoints) {
+                        player.sendMessage(ChatColor.RED + languageManager.getString("public-list-full"));
+                        return true;
                     }
 
                     if (waypointManager.getPublicWaypoint(playerLoc) != null)
@@ -148,17 +145,16 @@ public class BWCommandExecutor implements CommandExecutor {
                     //check if private waypoint list is full
                     if (!plugin.getConfig().contains("max-private-waypoints"))
                         plugin.getConfig().set("max-private-waypoints", 30);
-                    else {
-                        int maxPrivateWaypoints = plugin.getConfig().getInt("max-private-waypoints");
-                        if (maxPrivateWaypoints < 0)
-                            maxPrivateWaypoints = 0;
-                        if (waypointManager.getPrivateWaypoints(player.getUniqueId()).values().size() == maxPrivateWaypoints) {
-                            player.sendMessage(ChatColor.RED + languageManager.getString("private-list-full"));
-                            return true;
-                        }
-                        if (waypointManager.getPrivateWaypoint(player.getUniqueId(), playerLoc) != null)
-                            waypointExists = true;
+
+                    int maxPrivateWaypoints = plugin.getConfig().getInt("max-private-waypoints");
+                    if (maxPrivateWaypoints < 0)
+                        maxPrivateWaypoints = 0;
+                    if (waypointManager.getPrivateWaypoints(player.getUniqueId()).values().size() == maxPrivateWaypoints) {
+                        player.sendMessage(ChatColor.RED + languageManager.getString("private-list-full"));
+                        return true;
                     }
+                    if (waypointManager.getPrivateWaypoint(player.getUniqueId(), playerLoc) != null)
+                        waypointExists = true;
                 }
 
                 if (waypointExists) {
@@ -207,6 +203,7 @@ public class BWCommandExecutor implements CommandExecutor {
                 }
                 else {
                     newWaypoint = new Waypoint(player.getUniqueId(), new WaypointCoord(playerLoc));
+                    newWaypoint.addPlayerDiscovered(player);
                 }
                 newWaypoint.setName(fullWaypointName.toString());
                 newWaypoint.setIsWaypoint(true);

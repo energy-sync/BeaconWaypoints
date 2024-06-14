@@ -5,7 +5,7 @@
     <parent>
         <artifactId>BeaconWaypoints</artifactId>
         <groupId>com.github.dawsonvilamaa</groupId>
-        <version>1.6.5</version>
+        <version>1.7</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -105,6 +105,18 @@
         <dependency>
             <groupId>com.github.dawsonvilamaa</groupId>
             <artifactId>1_20_R3</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.dawsonvilamaa</groupId>
+            <artifactId>1_20_R4</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.dawsonvilamaa</groupId>
+            <artifactId>1_21_R1</artifactId>
             <version>${project.parent.version}</version>
             <scope>compile</scope>
         </dependency>

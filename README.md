@@ -5,7 +5,7 @@
 
 [CurseForge page](https://www.curseforge.com/minecraft/bukkit-plugins/beaconwaypoints)
 
-Supports versions 1.14-1.20.4
+Supports versions 1.14-1.20.6
 
 This plugin uses bStats.
 
@@ -20,6 +20,7 @@ This plugin uses bStats.
 ## Commands
 - /waypoint <name> <public | private> - Create a public or private waypoint for the beacon the player is standing on
 - /waypoints reload - Reloads the config
+- /waypoint share <player> - share private waypoints with other players
 
 
 ## Demo
@@ -72,6 +73,20 @@ Note: If WorldEdit is used to delete a beacon, the waypoint will not be deleted.
 ### Contact me on Discord: energy_sync#9851
 
 ## Changelog
+
+### 1.7
+Changes:
+- Added support for 1.20.6
+- Added private waypoint sharing
+- Usage: /waypoint share <player>
+- Shared private waypoints will appear in the other player's private waypoint list
+- Remove player access in the waypoint options menu
+- Added more checks and default fallbacks for any missing plugin data or config items
+- A beacon no longer needs a public waypoint associated with it to open the waypoint menu, though it still requires at least one public or private waypoint. This may change to have no restrictions in a future update so that any beacon can be used to teleport, even if it doesn't have any waypoint set
+
+Fixes:
+- Messages are now properly sent to waypoint owner(s) when a beacon with waypoints is broken
+- Players are no able to take items from inventory menus if there is an error on a click event
 
 ### 1.6.5
 Changes:

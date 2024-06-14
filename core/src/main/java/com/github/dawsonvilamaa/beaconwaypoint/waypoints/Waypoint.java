@@ -56,29 +56,108 @@ public class Waypoint implements Cloneable {
      * @param jsonWaypoint
      */
     public Waypoint(JSONObject jsonWaypoint) {
+        LanguageManager languageManager = Main.getLanguageManager();
+        boolean dataError = false;
+
         Object jsonName = jsonWaypoint.get("name");
-        this.name = jsonName == null ? null : jsonName.toString();
-        int x = Integer.parseInt(jsonWaypoint.get("x").toString());
-        int y = Integer.parseInt(jsonWaypoint.get("y").toString());
-        int z = Integer.parseInt(jsonWaypoint.get("z").toString());
-        String worldName = jsonWaypoint.get("world").toString();
-        this.coord = new WaypointCoord(x, y, z, worldName);
-        this.icon = Material.valueOf(jsonWaypoint.get("icon").toString());
-        this.ownerUUID = UUID.fromString(jsonWaypoint.get("ownerUUID").toString());
-        this.isWaypoint = Boolean.parseBoolean(jsonWaypoint.get("isWaypoint").toString());
-        Object jsonPinned = (Object) jsonWaypoint.get("pinned");
-        this.pinned = jsonPinned == null ? false : Boolean.parseBoolean(jsonWaypoint.get("pinned").toString());
-        JSONArray jsonPlayersDiscovered = (JSONArray) jsonWaypoint.get("playersDiscovered");
-        this.playersDiscovered = new ArrayList<>();
-        if (jsonPlayersDiscovered != null) {
-            for (Object jsonPlayer : jsonPlayersDiscovered)
-                this.playersDiscovered.add(UUID.fromString((String) jsonPlayer));
+        if (jsonName == null) {
+            dataError = true;
+            Main.getPlugin().getLogger().warning(languageManager.getString("missing-attribute") + " \"name\"");
         }
-        JSONArray jsonSharedPlayers = (JSONArray) jsonWaypoint.get("sharedPlayers");
-        this.sharedPlayers = new ArrayList<>();
-        if (jsonSharedPlayers != null) {
-            for (Object jsonPlayer : jsonSharedPlayers)
-                this.sharedPlayers.add(UUID.fromString((String) jsonPlayer));
+        else this.name = jsonName.toString();
+
+        int x = 0, y = 0, z = 0;
+
+        Object jsonX = jsonWaypoint.get("x");
+        if (jsonX == null) {
+            dataError = true;
+            Main.getPlugin().getLogger().warning(languageManager.getString("missing-attribute") + " \"x'\"");
+        }
+        else x = Integer.parseInt(jsonX.toString());
+
+        Object jsonY = jsonWaypoint.get("y");
+        if (jsonY == null) {
+            dataError = true;
+            Main.getPlugin().getLogger().warning(languageManager.getString("missing-attribute") + " \"y\"");
+        }
+        else y = Integer.parseInt(jsonY.toString());
+
+        Object jsonZ = jsonWaypoint.get("z");
+        if (jsonZ == null) {
+            dataError = true;
+            Main.getPlugin().getLogger().warning(languageManager.getString("missing-attribute") + " \"z\"");
+        }
+        else z = Integer.parseInt(jsonZ.toString());
+
+        Object jsonWorldName = jsonWaypoint.get("world");
+        if (jsonWorldName == null) {
+            dataError = true;
+            Main.getPlugin().getLogger().warning(languageManager.getString("missing-attribute") + " \"world\"");
+        }
+        else {
+            this.coord = new WaypointCoord(x, y, z, jsonWorldName.toString());
+        }
+
+        Object jsonIcon = jsonWaypoint.get("icon");
+        if (jsonIcon == null) {
+            dataError = true;
+            Main.getPlugin().getLogger().warning(languageManager.getString("missing-attribute") + " \"icon\"");
+        }
+        else this.icon = Material.valueOf(jsonIcon.toString());
+
+        Object jsonOwnerUUID = jsonWaypoint.get("ownerUUID");
+        if (jsonOwnerUUID == null) {
+            dataError = true;
+            Main.getPlugin().getLogger().warning(languageManager.getString("missing-attribute") + " \"ownerUUID\"");
+        }
+        else this.ownerUUID = UUID.fromString(jsonOwnerUUID.toString());
+
+        Object jsonIsWaypoint = jsonWaypoint.get("isWaypoint");
+        if (jsonIsWaypoint == null) {
+            dataError = true;
+            Main.getPlugin().getLogger().warning(languageManager.getString("missing-attribute") + " \"isWaypoint\"");
+        }
+        else this.isWaypoint = Boolean.parseBoolean(jsonIsWaypoint.toString());
+
+        if (dataError) {
+            Main.getPlugin().getLogger().severe(languageManager.getString("missing-attributes"));
+        }
+        else {
+            Object jsonPinned = jsonWaypoint.get("pinned");
+            if (jsonPinned == null) {
+                Main.getPlugin().getLogger().warning(languageManager.getString("pinned-default"));
+                this.pinned = false;
+            }
+            else this.pinned = Boolean.parseBoolean(jsonPinned.toString());
+
+            Object jsonPlayersDiscovered = jsonWaypoint.get("playersDiscovered");
+            if (jsonPlayersDiscovered == null) {
+                Main.getPlugin().getLogger().warning(languageManager.getString("players-discovered-default"));
+            }
+            JSONArray jsonPlayersDiscoveredArr = (JSONArray) jsonWaypoint.get("playersDiscovered");
+            this.playersDiscovered = new ArrayList<>();
+            if (jsonPlayersDiscoveredArr != null) {
+                for (Object jsonPlayer : jsonPlayersDiscoveredArr) {
+                    try {
+                        this.playersDiscovered.add(UUID.fromString((String) jsonPlayer));
+                    }
+                    catch (Exception e) {
+                        Main.getPlugin().getLogger().severe(languageManager.getString("error-reading-players-discovered"));
+                    }
+                }
+            }
+            JSONArray jsonSharedPlayers = (JSONArray) jsonWaypoint.get("sharedPlayers");
+            this.sharedPlayers = new ArrayList<>();
+            if (jsonSharedPlayers != null) {
+                for (Object jsonPlayer : jsonSharedPlayers) {
+                    try {
+                        this.sharedPlayers.add(UUID.fromString((String) jsonPlayer));
+                    }
+                    catch (Exception e) {
+                        Main.getPlugin().getLogger().severe(languageManager.getString("error-reading-shared-player"));
+                    }
+                }
+            }
         }
     }
 
@@ -310,22 +389,26 @@ public class Waypoint implements Cloneable {
      */
     public JSONObject toJSON() {
         JSONObject jsonWaypoint = new JSONObject();
-        jsonWaypoint.put("name", this.name);
-        jsonWaypoint.put("x", String.valueOf(this.coord.getX()));
-        jsonWaypoint.put("y", String.valueOf(this.coord.getY()));
-        jsonWaypoint.put("z", String.valueOf(this.coord.getZ()));
-        jsonWaypoint.put("world", this.coord.getWorldName());
-        jsonWaypoint.put("icon", this.icon.toString());
-        jsonWaypoint.put("ownerUUID", this.ownerUUID.toString());
+        jsonWaypoint.put("name", this.name == null ? null : this.name);
+        jsonWaypoint.put("x", this.coord == null ? null : String.valueOf(this.coord.getX()));
+        jsonWaypoint.put("y", this.coord == null ? null : String.valueOf(this.coord.getY()));
+        jsonWaypoint.put("z", this.coord == null ? null : String.valueOf(this.coord.getZ()));
+        jsonWaypoint.put("world", this.coord == null ? null : this.coord.getWorldName());
+        jsonWaypoint.put("icon", this.icon == null ? null : this.icon.toString());
+        jsonWaypoint.put("ownerUUID", this.ownerUUID == null ? null : this.ownerUUID.toString());
         jsonWaypoint.put("isWaypoint", String.valueOf(this.isWaypoint));
         jsonWaypoint.put("pinned", String.valueOf(this.pinned));
         JSONArray jsonPlayersDiscovered = new JSONArray();
-        for (UUID uuid : this.playersDiscovered)
-            jsonPlayersDiscovered.add(uuid.toString());
+        if (this.playersDiscovered != null) {
+            for (UUID uuid : this.playersDiscovered)
+                jsonPlayersDiscovered.add(uuid.toString());
+        }
         jsonWaypoint.put("playersDiscovered", jsonPlayersDiscovered);
         JSONArray jsonSharedPlayers = new JSONArray();
-        for (UUID uuid : this.sharedPlayers)
-            jsonSharedPlayers.add(uuid.toString());
+        if (this.sharedPlayers != null) {
+            for (UUID uuid : this.sharedPlayers)
+                jsonSharedPlayers.add(uuid.toString());
+        }
         jsonWaypoint.put("sharedPlayers", jsonSharedPlayers);
         return jsonWaypoint;
     }

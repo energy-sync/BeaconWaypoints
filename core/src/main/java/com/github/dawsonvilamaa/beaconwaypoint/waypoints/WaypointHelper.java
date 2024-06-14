@@ -315,7 +315,7 @@ public class WaypointHelper {
 
         String paymentMode = config.getString("payment-mode");
         if (!(paymentMode.equals("xp") || paymentMode.equals("money") || paymentMode.equals("none"))) {
-            Bukkit.getLogger().warning(languageManager.getString("payment-mode-not-found"));
+            Main.getPlugin().getLogger().warning(languageManager.getString("payment-mode-not-found"));
             paymentMode = "none";
         }
         if (!paymentMode.equals("none")) {
@@ -516,7 +516,7 @@ public class WaypointHelper {
 
         String paymentMode = config.getString("payment-mode");
         if (!(paymentMode.equals("xp") || paymentMode.equals("money") || paymentMode.equals("none"))) {
-            Bukkit.getLogger().warning(languageManager.getString("payment-mode-not-found"));
+            Main.getPlugin().getLogger().warning(languageManager.getString("payment-mode-not-found"));
             paymentMode = "none";
         }
         IEssentials essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");

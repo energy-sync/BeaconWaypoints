@@ -139,17 +139,21 @@ public class WorldListener implements Listener {
                 WaypointManager waypointManager = Main.getWaypointManager();
                 WaypointCoord waypointCoord = new WaypointCoord(e.getClickedBlock().getLocation());
                 Waypoint waypoint = waypointManager.getPinnedWaypoint(waypointCoord);
+                boolean isWaypointPublic = true;
                 if (waypoint == null)
                     waypoint = waypointManager.getPublicWaypoint(waypointCoord);
-                if (waypoint == null)
-                    waypoint = waypointManager.getPrivateWaypoint(player.getUniqueId(), waypointCoord);
+                if (waypoint == null) {
+                    isWaypointPublic = false;
+                    waypoint = waypointManager.getPlayer(player.getUniqueId()).getWaypoint(waypointCoord);
+                }
                 if (waypoint != null) {
                     e.setCancelled(true);
                     if (Main.getPlugin().getConfig().getBoolean("discovery-mode")) {
                         //discovery mode
-                        if (!waypoint.playerDiscoveredWaypoint(player)) {
+                        if (isWaypointPublic && !waypoint.playerDiscoveredWaypoint(player)) {
                             waypoint.addPlayerDiscovered(player);
-                            player.sendMessage(ChatColor.GREEN + Main.getLanguageManager().getString("discovered-waypoint") + ": " + ChatColor.BOLD + waypoint.getName());
+                            if (!waypoint.getOwnerUUID().equals(player.getUniqueId()))
+                                player.sendMessage(ChatColor.GREEN + Main.getLanguageManager().getString("discovered-waypoint") + ": " + ChatColor.BOLD + waypoint.getName());
                         }
                     }
                     GUIs.beaconMenu(player, waypoint);

@@ -1,5 +1,7 @@
 package com.github.dawsonvilamaa.beaconwaypoint.gui;
 
+import com.github.dawsonvilamaa.beaconwaypoint.Main;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
@@ -151,8 +153,19 @@ public class InventoryGUIButton {
      * @param e
      */
     public void onClick(InventoryClickEvent e) {
-        if (this.onClick != null)
-            this.onClick.accept(e);
+        if (this.onClick != null) {
+            try {
+                this.onClick.accept(e);
+            }
+            catch (Exception ex) {
+                e.setCancelled(true);
+                StringBuilder stackTraceStr = new StringBuilder(ex.getMessage()).append("\n");
+                for (StackTraceElement frame : ex.getStackTrace()) {
+                    stackTraceStr.append(frame.toString()).append("\n");
+                }
+                Main.getPlugin().getLogger().severe(stackTraceStr.toString());
+            }
+        }
     }
 
     /**

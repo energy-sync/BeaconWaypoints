@@ -1,4 +1,17 @@
 Changes:
-- Added support for 1.20.2
-- The compass is no longer visible if a multi-page menu only has one page
-- Changed the wording of the message given when a player cannot teleport to make more sense
+    - Added support for 1.20.6*
+    - Added private waypoint sharing
+        - Usage: /waypoint share <player>
+        - Shared private waypoints will appear in the other player's private waypoint list
+        - Remove player access in the waypoint options menu
+    - Added more checks and default fallbacks for any missing plugin data or config items
+    - A beacon no longer needs a public waypoint associated with it to open the waypoint menu, though it still requires at least one public or private waypoint. This may change to have no restrictions in a future update so that any beacon can be used to teleport, even if it doesn't have any waypoint set
+
+Fixes:
+    - Messages are now properly sent to waypoint owner(s) when a beacon with waypoints is broken
+    - Players are no able to take items from inventory menus if there is an error on a click event
+
+NOTE:
+*This update also adds support for 1.21, but player heads will show as default skins. This will affect back and forward menu buttons as well as player heads in the waypoint sharing menu. I will try to find an alternative way to load player skulls for 1.21+.
+
+I recommend backing your plugin data in case upgrading to this version breaks something. I thoroughly tested upgrading versions and making sure it filled in missing language and config values wherever it could, but you should probably back up just in case.

@@ -30,8 +30,11 @@ public class WaypointPlayer {
         this.waypoints = new HashMap<>();
 
         JSONArray jsonWaypoints = (JSONArray) jsonPlayer.get("waypoints");
-        for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonWaypoints)
-            this.waypoints.put(new WaypointCoord(jsonWaypoint), new Waypoint(jsonWaypoint));
+        for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonWaypoints) {
+            Waypoint waypoint = new Waypoint(jsonWaypoint);
+            if (waypoint.getName() != null)
+                this.waypoints.put(new WaypointCoord(jsonWaypoint), waypoint);
+        }
 
         this.isTeleporting = false;
     }

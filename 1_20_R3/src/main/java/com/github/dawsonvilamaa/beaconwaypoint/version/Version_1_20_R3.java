@@ -34,11 +34,11 @@ public class Version_1_20_R3 implements VersionWrapper{
         BlockPosition blockPosition = new BlockPosition(beaconLoc.getBlockX(), beaconLoc.getBlockY(), beaconLoc.getBlockZ());
         EntityPlayer playerHandle = ((CraftPlayer) player).getHandle();
         net.minecraft.world.level.block.Block beaconHandle = ((CraftBlock) beacon).getNMS().b(); //b(): getBlock()
-        ItemStack itemStackHandle = playerHandle.fS().f(); //fN().f(): getInventory().getSelected()
+        ItemStack itemStackHandle = playerHandle.fS().f(); //fS().f(): getInventory().getSelected()
         MovingObjectPositionBlock blockHitResult = new MovingObjectPositionBlock(blockLocVec3D, EnumDirection.b, blockPosition, true); //EnumDirection.b: EnumDirection.UP
         BlockActionContext blockPlaceContext = new BlockActionContext(playerHandle, EnumHand.a, itemStackHandle, blockHitResult); //EnumHand.a: EnumHand.MAIN_HAND
         IBlockData blockState = beaconHandle.a(blockPlaceContext); //a(): getPlacedState()
-        World levelHandle = playerHandle.dM(); //x(): getWorld()
+        World levelHandle = playerHandle.dM(); //dM(): getWorld()
         beaconHandle.a(blockState, levelHandle, blockPosition, playerHandle, EnumHand.a, blockHitResult); //a(): interact(), EnumHand.a: EnumHand.MAIN_HAND
     }
 

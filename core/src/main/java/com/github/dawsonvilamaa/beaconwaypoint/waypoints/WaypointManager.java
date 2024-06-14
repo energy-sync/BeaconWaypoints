@@ -231,6 +231,22 @@ public class WaypointManager {
     }
 
     /**
+     * Returns a collection of private waypoints owned by the player that are not already shared with the other player
+     * @param ownerUUID
+     * @param shareUUID
+     * @return waypoints
+     */
+    public Collection<Waypoint> getPrivateOwnedWaypointsSortedAlphabetically(UUID ownerUUID, UUID shareUUID) {
+        ArrayList<Waypoint> waypoints = new ArrayList<>();
+        for (Waypoint waypoint : waypointPlayers.get(ownerUUID).getWaypoints().values()) {
+            if (!waypoint.sharedWithPlayer(shareUUID)) {
+                waypoints.add(waypoint);
+            }
+        }
+        return sortWaypointsAlphabetically(waypoints);
+    }
+
+    /**
      * Returns a HashMap of all waypoints where the beacon has been placed, but a waypoint has not been created
      * @return
      */

@@ -7,9 +7,24 @@
       <option name="url" value="https://repo.essentialsx.net/releases/" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="md_5-releases" />
+      <option name="name" value="md_5-releases" />
+      <option name="url" value="https://repo.md-5.net/content/repositories/releases/" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="central" />
       <option name="name" value="Central Repository" />
       <option name="url" value="https://repo.maven.apache.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="md_5-snapshots" />
+      <option name="name" value="md_5-snapshots" />
+      <option name="url" value="https://repo.md-5.net/content/repositories/snapshots/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="spigot" />
+      <option name="name" value="spigot" />
+      <option name="url" value="https://hub.spigotmc.org/nexus/content/repositories/snapshots/" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="spigot-repo" />
@@ -20,6 +35,16 @@
       <option name="id" value="paper-repo" />
       <option name="name" value="paper-repo" />
       <option name="url" value="https://papermc.io/repo/repository/maven-public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="spigot-repo" />
+      <option name="name" value="spigot-repo" />
+      <option name="url" value="https://hub.spigotmc.org/nexus/content/groups/public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven" />
+      <option name="name" value="maven" />
+      <option name="url" value="https://oss.sonatype.org/content/repositories/snapshots" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="central" />

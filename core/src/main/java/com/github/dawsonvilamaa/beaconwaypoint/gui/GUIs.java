@@ -3,7 +3,6 @@ package com.github.dawsonvilamaa.beaconwaypoint.gui;
 import com.github.dawsonvilamaa.beaconwaypoint.LanguageManager;
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
 import com.github.dawsonvilamaa.beaconwaypoint.waypoints.*;
-import com.mojang.authlib.GameProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -39,7 +38,7 @@ public class GUIs {
                 });
                 gui.addButton(iconButton);
             } catch (IllegalArgumentException e) {
-                Bukkit.getLogger().warning(languageManager.getString("waypoint-icon-not-found") + " " + iconStr);
+                Main.getPlugin().getLogger().warning(languageManager.getString("waypoint-icon-not-found") + " " + iconStr);
             }
         }
 
@@ -112,13 +111,12 @@ public class GUIs {
         int numRows = 0;
         if (!config.contains("public-waypoint-menu-rows"))
             config.set("public-waypoint-menu-rows", 3);
-        else {
-            numRows = config.getInt("public-waypoint-menu-rows");
-            if (numRows <= 0)
-                numRows = 1;
-            else if (numRows > 5)
-                numRows = 5;
-        }
+
+        numRows = config.getInt("public-waypoint-menu-rows");
+        if (numRows <= 0)
+            numRows = 1;
+        else if (numRows > 5)
+            numRows = 5;
 
         MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, languageManager.getString("public-waypoints"), numRows, previousGUI);
 
@@ -127,7 +125,7 @@ public class GUIs {
         Collection<Waypoint> allPublicWaypoints = waypointManager.getPinnedWaypointsSortedAlphabetically();
         allPublicWaypoints.addAll(waypointManager.getPublicWaypointsSortedAlphabetically());
         for (Waypoint publicWaypoint : allPublicWaypoints) {
-            if ((!discoveryModeEnabled || publicWaypoint.playerDiscoveredWaypoint(player)) && !publicWaypoint.getCoord().equals(waypoint.getCoord())) {
+            if ((!discoveryModeEnabled || publicWaypoint.playerDiscoveredWaypoint(player) || publicWaypoint.getOwnerUUID().equals(player.getUniqueId())) && !publicWaypoint.getCoord().equals(waypoint.getCoord())) {
                 WaypointCoord coord = publicWaypoint.getCoord();
                 String waypointName = publicWaypoint.getName();
                 if (publicWaypoint.isPinned())
@@ -197,14 +195,18 @@ public class GUIs {
                 waypointButton.setOnClick(e -> {
                     player.closeInventory();
                     if (player.getLocation().distance(waypoint.getCoord().getLocation()) <= 5.5) {
-                        boolean waypointExists = waypointManager.getPrivateWaypoint(player.getUniqueId(), coord) == null;
+                        boolean waypointExists = waypointManager.getPrivateWaypoint(player.getUniqueId(), coord) != null;
                         if (!waypointExists) {
                             for (Waypoint sharedWaypoint : waypointManager.getPrivateWaypointsAtCoord(coord)) {
-                                if (sharedWaypoint.sharedWithPlayer(player.getUniqueId()))
+                                if (sharedWaypoint.sharedWithPlayer(player.getUniqueId())) {
                                     waypointExists = true;
+                                    break;
+                                }
                             }
                         }
-                        if (!waypointExists)
+                        if (!privateWaypoint.getOwnerUUID().equals(player.getUniqueId()) && !privateWaypoint.sharedWithPlayer(player.getUniqueId()))
+                            player.sendMessage(ChatColor.RED + languageManager.getString("no-access-to-private-waypoint") + " " + ChatColor.BOLD + privateWaypoint.getName());
+                        else if (!waypointExists)
                             player.sendMessage(ChatColor.RED + languageManager.getString("waypoint-does-not-exist"));
                         else if (privateWaypoint.getBeaconStatus() == 0)
                             player.sendMessage(ChatColor.RED + languageManager.getString("beacon-obstructed"));
@@ -255,13 +257,12 @@ public class GUIs {
         int numRows = 0;
         if (!config.contains("private-waypoint-menu-rows"))
             config.set("private-waypoint-menu-rows", 2);
-        else {
-            numRows = config.getInt("private-waypoint-menu-rows");
-            if (numRows <= 0)
-                numRows = 1;
-            else if (numRows > 5)
-                numRows = 5;
-        }
+
+        numRows = config.getInt("private-waypoint-menu-rows");
+        if (numRows <= 0)
+            numRows = 1;
+        else if (numRows > 5)
+            numRows = 5;
         return numRows;
     }
 
@@ -337,7 +338,7 @@ public class GUIs {
         MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, languageManager.getString("private-waypoints"), getNumPrivateWaypointMenuRows(), null);
 
         //add buttons for all private waypoints
-        for (Waypoint privateWaypoint : waypointManager.getPrivateWaypointsSortedAlphabetically(player.getUniqueId())) {
+        for (Waypoint privateWaypoint : waypointManager.getPrivateOwnedWaypointsSortedAlphabetically(player.getUniqueId(), sharedPlayerUUID)) {
             if (!privateWaypoint.sharedWithPlayer(player.getUniqueId())) {
                 InventoryGUIButton waypointButton = new InventoryGUIButton(gui.getGUI(), privateWaypoint.getName(), null, privateWaypoint.getIcon());
                 waypointButton.setOnClick(e -> {
@@ -400,6 +401,9 @@ public class GUIs {
     public static void managePrivateWaypointAccessMenu(Player player, Waypoint waypoint, InventoryGUI previousGUI) {
         LanguageManager languageManager = Main.getLanguageManager();
         FileConfiguration config = Main.getPlugin().getConfig();
+
+        if (!config.contains("private-waypoint-menu-rows"))
+            config.set("private-waypoint-menu-rows", 2);
 
         MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, languageManager.getString("manage-access"), config.getInt("private-waypoint-menu-rows"), previousGUI);
         for (UUID uuid : waypoint.getSharedPlayers()) {
@@ -464,11 +468,5 @@ public class GUIs {
         button.setName(name);
         button.setDescription(description);
         return button;
-    }
-
-    //creates an inventory GUI button with a player's head
-    //the OfflinePlayer's username must not be null
-    public static InventoryGUIButton createHeadButton(InventoryGUI gui, String name, String description, OfflinePlayer player) {
-        return createHeadButton(gui, name, description, player.getName());
     }
 }

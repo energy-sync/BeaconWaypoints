@@ -67,7 +67,7 @@ public class ConfigUpdater {
                     "disable-group-teleporting: false";
         }
         if (!configStr.contains("allow-beacon-break-by-owner:")) {
-            configStr += "\n\n# If the BeaconWaypoints.removeWaypoints permission is disabled for a player, this will still allow them to break\n" +
+            configStr += "\n\n# If the BeaconWaypoints.breakWaypointBeacons permission is disabled for a player, this will still allow them to break\n" +
                     "# a beacon if all waypoints attached to it are owned by them. The owner of a beacon is the player who placed it.\n" +
                     "allow-beacon-break-by-owner: true";
         }
@@ -335,6 +335,10 @@ public class ConfigUpdater {
             configStr += "\ndistance: Distance";
         if (!configStr.contains("download-link:"))
             configStr += "\ndownload-link: Download link";
+        if (!configStr.contains("error-reading-players-discovered:"))
+            configStr += "\nerror-reading-players-discovered: Error while reading players discovered. Check the save files for incorrect player UUIDs";
+        if (!configStr.contains("error-reading-shared-player:"))
+            configStr += "\nerror-reading-shared-player: Error while reading shared player. Check the save files for incorrect player UUIDs";
         if (!configStr.contains("essentials-not-installed"))
             configStr += "\nessentials-not-installed: EssentialsX is not installed, ignoring Essentials money cost for teleporting.";
         if (!configStr.contains("has-banned-items:"))
@@ -351,12 +355,18 @@ public class ConfigUpdater {
             configStr += "\ninvalid-name-alphanumeric: Waypoint names must be 30 characters or fewer and can only contain letters, numbers, spaces, underscores, and hyphens.";
         if (!configStr.contains("manage-access:"))
             configStr += "\nmanage-access: Manage access";
+        if (!configStr.contains("missing-attribute:"))
+            configStr += "\nmissing-attribute: Waypoint is missing attribute";
+        if (!configStr.contains("missing-attributes:"))
+            configStr += "\nmissing-attributes: A waypoint is missing one or more attributes. Check the save files";
         if (!configStr.contains("name-taken:"))
             configStr += "\nname-taken: There is already a public waypoint of that name";
         if (!configStr.contains("new-version-available:"))
             configStr += "\nnew-version-available: A new version of Beacon Waypoints is available!";
         if (!configStr.contains("next-page:"))
             configStr += "\nnext-page: Next Page";
+        if (!configStr.contains("no-access-to-private-waypoint:"))
+            configStr += "\nno-access-to-private-waypoint: You do not have access to the private waypoint";
         if (!configStr.contains("no-break-permission:"))
             configStr += "\nno-break-permission: You do not have permission to break beacons that have waypoints set";
         if (!configStr.contains("no-command-permission:"))
@@ -379,10 +389,14 @@ public class ConfigUpdater {
             configStr += "\npayment-mode-not-found: Payment mode not recognized, defaulting to \"none\"";
         if (!configStr.contains("pinned:"))
             configStr += "\npinned: pinned";
+        if (!configStr.contains("pinned-default:"))
+            configStr += "\npinned-default: Waypoint is missing attribute 'pinned', setting to default false";
         if (!configStr.contains("pin-waypoint:"))
             configStr += "\npin-waypoint: Pin waypoint";
         if (!configStr.contains("player-not-found:"))
             configStr += "\nplayer-not-found: That player cannot be found or is offline";
+        if (!configStr.contains("players-discovered-default:"))
+            configStr += "\nplayers-discovered-default: Waypoint is missing attribute 'playersDiscovered', setting to default empty list";
         if (!configStr.contains("previous-page:"))
             configStr += "\nprevious-page: Previous Page";
         if (!configStr.contains("private-list-full:"))
@@ -400,7 +414,7 @@ public class ConfigUpdater {
         if (!configStr.contains("public-waypoints:"))
             configStr += "\npublic-waypoints: Public Waypoints";
         if (!configStr.contains("click-to-remove-access:"))
-            configStr += "\nremove-access: Click to remove access";
+            configStr += "\nclick-to-remove-access: Click to remove access";
         if (!configStr.contains("remove-access:"))
             configStr += "\nremove-access-for-player: Remove access";
         if (!configStr.contains("removed-private-waypoint:"))
