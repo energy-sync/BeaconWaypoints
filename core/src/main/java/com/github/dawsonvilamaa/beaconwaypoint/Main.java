@@ -161,7 +161,7 @@ public class Main extends JavaPlugin {
                     Object uuid = jsonPlayer.get("uuid");
                     Object username = jsonPlayer.get("username");
                     if (waypointManager.getPlayer(UUID.fromString(uuid.toString())) == null) {
-                        waypointManager.addPlayer(UUID.fromString(uuid.toString()), username.toString());
+                        waypointManager.addPlayer(UUID.fromString(uuid.toString()), username == null ? null : username.toString());
                     }
                     for (JSONObject jsonWaypoint : (Iterable<JSONObject>) jsonPlayer.get("waypoints")) {
                         Waypoint waypoint = new Waypoint(jsonWaypoint);

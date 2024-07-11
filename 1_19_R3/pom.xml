@@ -4,7 +4,7 @@
     <parent>
         <artifactId>BeaconWaypoints</artifactId>
         <groupId>com.github.dawsonvilamaa</groupId>
-        <version>1.7</version>
+        <version>1.7.1</version>
     </parent>
 
     <artifactId>1_19_R3</artifactId>

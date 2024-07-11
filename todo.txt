@@ -1,18 +1,6 @@
-- update to 1.20.6 (done)
-- make player skull button creation function (done)
-- fix messages not being sent when a waypoint beacon is broken (done)
-- share private waypoints with other players (done)
-    - don't allow sharing if it is already shared with that player (done)
-    - make sure player usernames are updated in player save files when their usernames are changed (done)
 - make function for confirmation menus (including option for center item)
 - make function for adding white stained glass panes in menus quickly
 - structure ConfigUpdater better
-- prevent player from taking items on onclick errors (done)
-- add failsafes if any field is missing from save files (done)
-- check for shared private waypoint status on click so already open menus don't allow travel to waypoints that are no longer shared (done)
-- test upgrading from old version (done)
-- don't show waypoints in share GUI if they are already shared with the given player (done)
-- allow player to open waypoint menu if they have a private waypoint set at that beacon but if there are no public waypoints (done)
 
 MAYBE:
 - add a GUI option for creating beacons
@@ -21,3 +9,4 @@ MAYBE:
 - add option to only allow a waypoint to go to other specific waypoint(s)
 - choose name color for waypoint in list
 - add text on waypoint hover to tell player that they can right click for options (for beacons they own)
+- dynmap markers

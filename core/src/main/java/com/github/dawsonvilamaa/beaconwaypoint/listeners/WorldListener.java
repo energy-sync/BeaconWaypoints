@@ -48,7 +48,7 @@ public class WorldListener implements Listener {
         //add if not in map
         if (waypointPlayer == null)
             waypointManager.addPlayer(e.getPlayer().getUniqueId(), e.getPlayer().getName());
-        else if (!waypointPlayer.getUsername().equals(e.getPlayer().getName()))
+        else if (waypointPlayer.getUsername() == null || !waypointPlayer.getUsername().equals(e.getPlayer().getName()))
             waypointPlayer.setUsername(e.getPlayer().getName());
 
         //if player is op, check for updates
