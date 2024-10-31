@@ -37,8 +37,10 @@ public class VersionMatcher {
             nmsVersion = "1_20_R3";
         else if (serverVersion.startsWith("1.20.6"))
             nmsVersion = "1_20_R4";
-        else if (serverVersion.startsWith("1.21"))
+        else if (serverVersion.startsWith("1.21.0") || serverVersion.startsWith("1.21.1"))
             nmsVersion = "1_21_R1";
+        else if (serverVersion.startsWith("1.21.2") || serverVersion.startsWith("1.21.3"))
+            nmsVersion = "1_21_R2";
         else {
             Bukkit.getLogger().severe("BeaconWaypoints does not support version " + serverVersion);
             return null;
