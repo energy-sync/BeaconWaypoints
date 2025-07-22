@@ -9,13 +9,13 @@ import net.minecraft.world.level.block.entity.TileEntityBeacon;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class Version_1_21_R1 implements VersionWrapper{
+public class Version_1_21_R3 implements VersionWrapper{
     /**
      * Opens the vanilla beacon GUI for a player
      *
@@ -27,9 +27,9 @@ public class Version_1_21_R1 implements VersionWrapper{
         Location beaconLoc = beacon.getLocation();
         BlockPosition blockPosition = new BlockPosition(beaconLoc.getBlockX(), beaconLoc.getBlockY(), beaconLoc.getBlockZ());
         EntityPlayer playerHandle = ((CraftPlayer) player).getHandle();
-        World levelHandle = playerHandle.dO(); //dO(): getWorld()
+        World levelHandle = playerHandle.dV(); //dV(): getWorld()
         TileEntity beaconTileHandle = levelHandle.getBlockEntity(blockPosition, false);
-        Container containerHandle = ((TileEntityBeacon) beaconTileHandle).createMenu(playerHandle.nextContainerCounter(), playerHandle.fY(), playerHandle); //fY(): getInventory()
+        Container containerHandle = ((TileEntityBeacon) beaconTileHandle).createMenu(playerHandle.nextContainerCounter(), playerHandle.gi(), playerHandle); //gi(): getInventory()
         playerHandle.a(containerHandle); //a(): initMenu()
         playerHandle.a((TileEntityBeacon) beaconTileHandle); //a(): openMenu()
     }

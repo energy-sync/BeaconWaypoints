@@ -157,7 +157,7 @@ public class InventoryGUIButton {
             try {
                 this.onClick.accept(e);
             }
-            catch (Exception ex) {
+            catch (Throwable ex) {
                 e.setCancelled(true);
                 StringBuilder stackTraceStr = new StringBuilder(ex.getMessage()).append("\n");
                 for (StackTraceElement frame : ex.getStackTrace()) {
