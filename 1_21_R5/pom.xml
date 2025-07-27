@@ -7,7 +7,7 @@
         <version>1.7.2</version>
     </parent>
 
-    <artifactId>1_21_R3</artifactId>
+    <artifactId>1_21_R5</artifactId>
 
     <repositories>
         <repository>
@@ -20,7 +20,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
-            <version>1.21.4-R0.1-SNAPSHOT</version>
+            <version>1.21.6-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

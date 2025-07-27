@@ -95,5 +95,6 @@
 /core/target/classes/com/github/dawsonvilamaa/beaconwaypoint/waypoints/WaypointHelper.class
 /core/target/classes/com/github/dawsonvilamaa/beaconwaypoint/waypoints/WaypointManager.class
 /core/target/classes/com/github/dawsonvilamaa/beaconwaypoint/waypoints/WaypointPlayer.class
-/.idea/workspace.xml
 /core/target/classes/com/github/dawsonvilamaa/beaconwaypoint/listeners/WorldListener.class
+.idea/*
+*.iml

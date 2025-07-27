@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.dawsonvilamaa</groupId>
     <artifactId>BeaconWaypoints</artifactId>
-    <version>1.7.1</version>
+    <version>1.7.2</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -27,6 +27,7 @@
         <module>1_21_R2</module>
         <module>1_21_R3</module>
         <module>1_21_R4</module>
+        <module>1_21_R5</module>
         <module>Build</module>
     </modules>
 
