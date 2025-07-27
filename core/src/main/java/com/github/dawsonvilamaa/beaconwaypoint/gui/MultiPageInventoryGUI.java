@@ -48,6 +48,7 @@ public class MultiPageInventoryGUI {
      */
     public InventoryGUIButton addButton(InventoryGUIButton button) {
         this.buttons.add(button);
+        this.gui.setSlot(this.gui.getSlot() + 1);
         return button;
     }
 
@@ -69,17 +70,17 @@ public class MultiPageInventoryGUI {
 
         //back button if previous GUI was provided
         if (this.previousGUI != null) {
-            InventoryGUIButton backButton = GUIs.createHeadButton(this.gui, ChatColor.WHITE + languageManager.getString("back"), ChatColor.DARK_GRAY + this.previousGUI.getTitle(), "MHF_ArrowLeft");
+            InventoryGUIButton backButton = GUIs.headManager.createHeadButton(this.gui, ChatColor.WHITE + languageManager.getString("back"), ChatColor.DARK_GRAY + this.previousGUI.getTitle(), "MHF_ArrowLeft");
             backButton.setOnClick(e -> {
                 this.previousGUI.showMenu();
             });
             gui.setButton(this.bottomRowSlot, backButton);
-            gui.setButton(0, null);
+            //gui.setButton(0, null);
         }
 
         //previous page button
         if (page > 0) {
-            InventoryGUIButton previousButton = GUIs.createHeadButton(gui, languageManager.getString("previous-page"), null, "MHF_ArrowLeft");
+            InventoryGUIButton previousButton = GUIs.headManager.createHeadButton(gui, languageManager.getString("previous-page"), null, "MHF_ArrowLeft");
             previousButton.setOnClick(e -> {
                 showPage(page - 1);
             });
@@ -93,7 +94,7 @@ public class MultiPageInventoryGUI {
 
         //next page button
         if (this.buttons.size() > (page + 1) * this.numRows * 9) {
-            InventoryGUIButton nextButton = GUIs.createHeadButton(gui, languageManager.getString("next-page"), null, "MHF_ArrowRight");
+            InventoryGUIButton nextButton = GUIs.headManager.createHeadButton(gui, languageManager.getString("next-page"), null, "MHF_ArrowRight");
             nextButton.setOnClick(e -> {
                 showPage(page + 1);
             });

@@ -114,6 +114,20 @@ public class InventoryGUIButton {
     }
 
     /**
+     * @return slot
+     */
+    public int getSlot() {
+        return this.slot;
+    }
+
+    /**
+     * @param slot
+     */
+    public void setSlot(int slot) {
+        this.slot = slot;
+    }
+
+    /**
      * @return item
      */
     public ItemStack getItem() {

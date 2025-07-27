@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 public class GUIs {
+    public static final HeadManager headManager = new HeadManager();
 
     //shows all icons for waypoints
     public static void waypointIconPickerMenu(Player player, Waypoint waypoint, InventoryGUI previousGUI) {
@@ -275,7 +276,7 @@ public class GUIs {
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 2);
 
         //back button
-        InventoryGUIButton backButton = GUIs.createHeadButton(gui, languageManager.getString("back"), ChatColor.DARK_GRAY + previousGUI.getTitle(), "MHF_ArrowLeft");
+        InventoryGUIButton backButton = headManager.createHeadButton(gui, languageManager.getString("back"), ChatColor.DARK_GRAY + previousGUI.getTitle(), "MHF_ArrowLeft");
         backButton.setOnClick(e -> {
             previousGUI.showMenu();
         });
@@ -407,7 +408,8 @@ public class GUIs {
 
         MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, languageManager.getString("manage-access"), config.getInt("private-waypoint-menu-rows"), previousGUI);
         for (UUID uuid : waypoint.getSharedPlayers()) {
-            InventoryGUIButton playerButton = createHeadButton(gui.getGUI(), Main.getWaypointManager().getPlayerUsername(uuid), ChatColor.RED + languageManager.getString("click-to-remove-access"), Main.getWaypointManager().getPlayerUsername(uuid));
+            String playerName = Main.getWaypointManager().getPlayerUsername(uuid);
+            InventoryGUIButton playerButton = headManager.createHeadButton(gui.getGUI(), playerName, ChatColor.RED + languageManager.getString("click-to-remove-access"), playerName);
             playerButton.setOnClick(e -> {
                 confirmRemovePlayerAccessMenu(player, uuid, waypoint, gui.getGUI());
             });
@@ -455,18 +457,5 @@ public class GUIs {
         gui.addButton(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE));
 
         gui.showMenu();
-    }
-
-    //creates an inventory GUI button with a player's head
-    public static InventoryGUIButton createHeadButton(InventoryGUI gui, String name, String description, String playerName) {
-        InventoryGUIButton button = new InventoryGUIButton(gui, name, description, Material.PLAYER_HEAD);
-        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-        skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(playerName));
-        skull.setItemMeta(skullMeta);
-        button.setItem(skull);
-        button.setName(name);
-        button.setDescription(description);
-        return button;
     }
 }

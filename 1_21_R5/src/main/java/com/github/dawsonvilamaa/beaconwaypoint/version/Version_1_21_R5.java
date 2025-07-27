@@ -1,5 +1,6 @@
 package com.github.dawsonvilamaa.beaconwaypoint.version;
 
+import org.bukkit.Bukkit;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.world.inventory.Container;
@@ -11,9 +12,13 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_21_R5.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.profile.PlayerProfile;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class Version_1_21_R5 implements VersionWrapper{
     /**
@@ -42,5 +47,23 @@ public class Version_1_21_R5 implements VersionWrapper{
     @Override
     public List<Material> getPyramidBlocks() {
         return Arrays.asList(Material.IRON_BLOCK, Material.GOLD_BLOCK, Material.DIAMOND_BLOCK, Material.EMERALD_BLOCK, Material.NETHERITE_BLOCK);
+    }
+
+    /**
+     * Creates a player head that belongs to a username
+     * @param username
+     * @return item stack
+     */
+    @Override
+    public ItemStack getPlayerHead(String username) {
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
+        if (skullMeta == null)
+            return head;
+
+        PlayerProfile profile = Bukkit.getServer().createPlayerProfile(username);
+        skullMeta.setOwnerProfile(profile);
+        head.setItemMeta(skullMeta);
+        return head;
     }
 }
