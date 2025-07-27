@@ -1,23 +1,14 @@
 package com.github.dawsonvilamaa.beaconwaypoint.version;
 
 import net.minecraft.core.BlockPosition;
-import net.minecraft.core.EnumDirection;
 import net.minecraft.server.level.EntityPlayer;
-import net.minecraft.world.EnumHand;
-import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.inventory.Container;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockActionContext;
 import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.entity.TileEntity;
 import net.minecraft.world.level.block.entity.TileEntityBeacon;
-import net.minecraft.world.level.block.state.IBlockData;
-import net.minecraft.world.phys.MovingObjectPositionBlock;
-import net.minecraft.world.phys.Vec3D;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_21_R1.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 

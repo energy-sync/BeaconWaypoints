@@ -37,11 +37,19 @@ public class VersionMatcher {
             nmsVersion = "1_20_R3";
         else if (serverVersion.startsWith("1.20.6"))
             nmsVersion = "1_20_R4";
-        else if (serverVersion.startsWith("1.21"))
+        else if (serverVersion.startsWith("1.21-") || serverVersion.startsWith("1.21.1") || serverVersion.startsWith("1.21.2"))
             nmsVersion = "1_21_R1";
+        else if (serverVersion.startsWith("1.21.3"))
+            nmsVersion = "1_21_R2";
+        else if (serverVersion.startsWith("1.21.4"))
+            nmsVersion = "1_21_R3";
+        else if (serverVersion.startsWith("1.21.5"))
+            nmsVersion = "1_21_R4";
+        else if (serverVersion.startsWith("1.21.6") || serverVersion.startsWith("1.21.7") || serverVersion.startsWith("1.21.8"))
+            nmsVersion = "1_21_R5";
         else {
-            Bukkit.getLogger().severe("BeaconWaypoints does not support version " + serverVersion);
-            return null;
+            Bukkit.getLogger().severe("BeaconWaypoints may not support version " + serverVersion);
+            nmsVersion = "1_21_R5";
         }
 
         //final String serverVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);

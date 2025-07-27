@@ -4,7 +4,7 @@
     <parent>
         <artifactId>BeaconWaypoints</artifactId>
         <groupId>com.github.dawsonvilamaa</groupId>
-        <version>1.7.1</version>
+        <version>1.7.2</version>
     </parent>
 
     <artifactId>core</artifactId>
@@ -13,10 +13,6 @@
         <repository>
             <id>essentials-releases</id>
             <url>https://repo.essentialsx.net/releases/</url>
-        </repository>
-        <repository>
-            <id>paper-repo</id>
-            <url>https://papermc.io/repo/repository/maven-public/</url>
         </repository>
         <repository>
             <id>md_5-snapshots</id>
@@ -29,6 +25,10 @@
         <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+        </repository>
+        <repository>
+            <id>papermc-repo</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
     </repositories>
 

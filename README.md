@@ -70,9 +70,16 @@ Note: Teleportation between beacons requires the beacon to have no blocks inside
 Note: If WorldEdit is used to delete a beacon, the waypoint will not be deleted. You will need to manually place back the beacon and break it, or use the setblock and fill commands instead.
 
 ### [Issue Tracker](https://github.com/dawson-vilamaa/BeaconWaypoints/issues) - Please report bugs here
-### Contact me on Discord: energy_sync#9851
+### Contact me on Discord: ti.mirro
 
 ## Changelog
+
+### 1.7.2
+Changes:
+- Added support up to 1.21.8
+
+Fixes:
+- The player is no longer able to take a beacon from the inventory menu if an error occurs when clicking it
 
 ### 1.7.1
 Fixes:
