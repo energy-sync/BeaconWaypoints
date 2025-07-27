@@ -1,3 +1,7 @@
+- fix payment not happening when launch-players is set to false (done)
+- fix heads not working across all versions (done)
+- fix multi page issue
+- fix items being taken from shulker box incorrectly
 - make function for confirmation menus (including option for center item)
 - make function for adding white stained glass panes in menus quickly
 - structure ConfigUpdater better

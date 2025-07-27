@@ -2,22 +2,21 @@ package com.github.dawsonvilamaa.beaconwaypoint.gui;
 
 import com.github.dawsonvilamaa.beaconwaypoint.LanguageManager;
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
-import com.github.dawsonvilamaa.beaconwaypoint.waypoints.*;
+import com.github.dawsonvilamaa.beaconwaypoint.waypoints.Waypoint;
+import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointCoord;
+import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointHelper;
+import com.github.dawsonvilamaa.beaconwaypoint.waypoints.WaypointManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.Collection;
 import java.util.UUID;
 
 public class GUIs {
-
     //shows all icons for waypoints
     public static void waypointIconPickerMenu(Player player, Waypoint waypoint, InventoryGUI previousGUI) {
         FileConfiguration config = Main.getPlugin().getConfig();
@@ -275,7 +274,9 @@ public class GUIs {
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 2);
 
         //back button
-        InventoryGUIButton backButton = GUIs.createHeadButton(gui, languageManager.getString("back"), ChatColor.DARK_GRAY + previousGUI.getTitle(), "MHF_ArrowLeft");
+        //InventoryGUIButton backButton = headManager.createHeadButton(gui, languageManager.getString("back"), ChatColor.DARK_GRAY + previousGUI.getTitle(), "MHF_ArrowLeft");
+        InventoryGUIButton backButton = new InventoryGUIButton(gui, languageManager.getString("back"), ChatColor.DARK_GRAY + previousGUI.getTitle(), Material.PLAYER_HEAD);
+        backButton.setPlayerHead("MHF_ArrowLeft"); // a68f0b64-8d14-4000-a95f-4b9ba14f8df9
         backButton.setOnClick(e -> {
             previousGUI.showMenu();
         });
@@ -407,7 +408,10 @@ public class GUIs {
 
         MultiPageInventoryGUI gui = new MultiPageInventoryGUI(player, languageManager.getString("manage-access"), config.getInt("private-waypoint-menu-rows"), previousGUI);
         for (UUID uuid : waypoint.getSharedPlayers()) {
-            InventoryGUIButton playerButton = createHeadButton(gui.getGUI(), Main.getWaypointManager().getPlayerUsername(uuid), ChatColor.RED + languageManager.getString("click-to-remove-access"), Main.getWaypointManager().getPlayerUsername(uuid));
+            String playerName = Main.getWaypointManager().getPlayerUsername(uuid);
+            //InventoryGUIButton playerButton = headManager.createHeadButton(gui.getGUI(), playerName, ChatColor.RED + languageManager.getString("click-to-remove-access"), playerName);
+            InventoryGUIButton playerButton = new InventoryGUIButton(gui.getGUI(), playerName, ChatColor.RED + languageManager.getString("click-to-remove-access"), Material.PLAYER_HEAD);
+            playerButton.setPlayerHead(playerName);
             playerButton.setOnClick(e -> {
                 confirmRemovePlayerAccessMenu(player, uuid, waypoint, gui.getGUI());
             });
@@ -432,14 +436,9 @@ public class GUIs {
 
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 2);
 
-        InventoryGUIButton playerIcon = new InventoryGUIButton(gui, null, null, Material.PLAYER_HEAD);
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(sharedPlayerUUID);
-        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-        skullMeta.setOwner(offlinePlayer.getName());
-        skull.setItemMeta(skullMeta);
-        playerIcon.setItem(skull);
-        playerIcon.setName(offlinePlayer.getName());
+        String sharedPlayerName = Main.getWaypointManager().getPlayerUsername(sharedPlayerUUID);
+        InventoryGUIButton playerIcon = new InventoryGUIButton(gui, sharedPlayerName, null, Material.PLAYER_HEAD);
+        playerIcon.setPlayerHead(sharedPlayerName);
         gui.addButton(playerIcon);
 
         gui.addButtons(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE), 2);
@@ -447,7 +446,7 @@ public class GUIs {
         InventoryGUIButton confirmButton = new InventoryGUIButton(gui, ChatColor.GREEN + languageManager.getString("confirm"), null, Material.LIME_STAINED_GLASS_PANE);
         confirmButton.setOnClick(e -> {
             waypoint.removePlayerAccess(sharedPlayerUUID);
-            player.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + offlinePlayer.getName() + ChatColor.RESET + ChatColor.GREEN + " " + languageManager.getString("no-longer-has-access") + " " + ChatColor.BOLD + waypoint.getName());
+            player.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + sharedPlayerName + ChatColor.RESET + ChatColor.GREEN + " " + languageManager.getString("no-longer-has-access") + " " + ChatColor.BOLD + waypoint.getName());
             player.closeInventory();
         });
         gui.addButton(confirmButton);
@@ -455,18 +454,5 @@ public class GUIs {
         gui.addButton(new InventoryGUIButton(gui, null, null, Material.WHITE_STAINED_GLASS_PANE));
 
         gui.showMenu();
-    }
-
-    //creates an inventory GUI button with a player's head
-    public static InventoryGUIButton createHeadButton(InventoryGUI gui, String name, String description, String playerName) {
-        InventoryGUIButton button = new InventoryGUIButton(gui, name, description, Material.PLAYER_HEAD);
-        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-        skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(playerName));
-        skull.setItemMeta(skullMeta);
-        button.setItem(skull);
-        button.setName(name);
-        button.setDescription(description);
-        return button;
     }
 }

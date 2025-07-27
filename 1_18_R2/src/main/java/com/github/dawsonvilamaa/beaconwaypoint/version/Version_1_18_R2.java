@@ -1,13 +1,7 @@
 package com.github.dawsonvilamaa.beaconwaypoint.version;
 
-import com.github.dawsonvilamaa.beaconwaypoint.Main;
-import com.github.dawsonvilamaa.beaconwaypoint.UpdateChecker;
-import com.github.dawsonvilamaa.beaconwaypoint.version.VersionWrapper;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.core.EnumDirection;
-import net.minecraft.network.chat.ChatMessageType;
-import net.minecraft.network.chat.IChatBaseComponent;
-import net.minecraft.network.protocol.game.PacketPlayOutChat;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.item.ItemStack;
@@ -16,7 +10,6 @@ import net.minecraft.world.level.World;
 import net.minecraft.world.level.block.state.IBlockData;
 import net.minecraft.world.phys.MovingObjectPositionBlock;
 import net.minecraft.world.phys.Vec3D;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;

@@ -90,6 +90,7 @@ public class WaypointHelper {
                         //if launch is disabled
                         if (!launchPlayer) {
                             tpLoc.setDirection(entity.getLocation().getDirection());
+                            pay(player, startWaypoint, destinationWaypoint);
                             entity.teleport(tpLoc, PlayerTeleportEvent.TeleportCause.PLUGIN);
                         } else {
                             boolean ncpLoaded = Bukkit.getPluginManager().isPluginEnabled("NoCheatPlus");
@@ -255,7 +256,7 @@ public class WaypointHelper {
                         if (invItem == null)
                             continue;
                         //check shulker boxes for items
-                        if (invItem.getType() == Material.SHULKER_BOX) {
+                        /*if (invItem.getType() == Material.SHULKER_BOX) {
                             ItemStack newShulkerBox = invItem.clone();
                             BlockStateMeta itemMeta = (BlockStateMeta) newShulkerBox.getItemMeta();
                             ShulkerBox shulker = (ShulkerBox) itemMeta.getBlockState();
@@ -278,7 +279,7 @@ public class WaypointHelper {
                                 newShulkerBox.setItemMeta(itemMeta);
                                 player.getInventory().setItem(invIndex, newShulkerBox);
                             }
-                        }
+                        }*/
                         if (invItem.getType() == requiredMaterial && (!matchName || invItem.getItemMeta().getDisplayName().equals(requiredName))) {
                             int slotAmount = invItem.getAmount();
                             if (itemCost > slotAmount) {

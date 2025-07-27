@@ -7,8 +7,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.util.Consumer;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -114,6 +116,20 @@ public class InventoryGUIButton {
     }
 
     /**
+     * @return slot
+     */
+    public int getSlot() {
+        return this.slot;
+    }
+
+    /**
+     * @param slot
+     */
+    public void setSlot(int slot) {
+        this.slot = slot;
+    }
+
+    /**
      * @return item
      */
     public ItemStack getItem() {
@@ -125,7 +141,39 @@ public class InventoryGUIButton {
      */
     public void setItem(ItemStack item) {
         this.item = item.clone();
-        this.parentGUI.getInventory().setItem(this.slot, item);
+        InventoryGUIButton button = this.parentGUI.getButtons().get(this.slot);
+        if (button != null) {
+            button.setItem(item);
+            this.parentGUI.setButton(this.slot, button);
+        }
+        //this.parentGUI.getInventory().setItem(this.slot, item);
+    }
+
+    /**
+     * @param username
+     */
+    public void setPlayerHead(String username) {
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta meta = (SkullMeta) head.getItemMeta();
+        try {
+            // >1.19
+            Class<?> profileClass = Class.forName("org.bukkit.profile.PlayerProfile");
+            Method createProfile = Bukkit.class.getMethod("createPlayerProfile", String.class);
+            Object profile = createProfile.invoke(null, username);
+            Method setOwnerProfile = SkullMeta.class.getMethod("setOwnerProfile", profileClass);
+            setOwnerProfile.invoke(meta, profile);
+        }
+        catch (ClassNotFoundException e) {
+            // <1.19
+            meta.setOwningPlayer(Bukkit.getOfflinePlayer(username));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        head.setItemMeta(meta);
+        setItem(head);
+        setName(this.name);
+        setDescription(this.description);
     }
 
     /**

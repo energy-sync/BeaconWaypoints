@@ -10,7 +10,7 @@ public class VersionMatcher {
         if (serverVersion.startsWith("1.14"))
             nmsVersion = "1_14_R1";
         else if (serverVersion.startsWith("1.15"))
-            nmsVersion = "1_14_R1";
+            nmsVersion = "1_15_R1";
         else if (serverVersion.startsWith("1.16.1"))
             nmsVersion = "1_16_R1";
         else if (serverVersion.startsWith("1.16.2") || serverVersion.startsWith("1.16.3"))
