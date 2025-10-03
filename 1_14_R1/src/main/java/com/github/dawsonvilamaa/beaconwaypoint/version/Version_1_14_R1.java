@@ -1,9 +1,6 @@
 package com.github.dawsonvilamaa.beaconwaypoint.version;
 
-import com.github.dawsonvilamaa.beaconwaypoint.Main;
-import com.github.dawsonvilamaa.beaconwaypoint.UpdateChecker;
 import net.minecraft.server.v1_14_R1.*;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;

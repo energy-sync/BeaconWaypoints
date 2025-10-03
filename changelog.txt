@@ -1,2 +1,2 @@
 Fixes:
-    - Fixed error when reading player JSON files that were created in a previous version
+- Teleportation item and XP consumption now works when the launch-player option is set to false

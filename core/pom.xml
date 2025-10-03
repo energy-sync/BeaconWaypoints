@@ -4,7 +4,7 @@
     <parent>
         <artifactId>BeaconWaypoints</artifactId>
         <groupId>com.github.dawsonvilamaa</groupId>
-        <version>1.7.2</version>
+        <version>1.7.3</version>
     </parent>
 
     <artifactId>core</artifactId>
@@ -92,6 +92,21 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.github.dawsonvilamaa.*</include>
+                                </includes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>org.spigotmc:spigot</artifact>
+                                    <excludes>
+                                        <exclude>**/*</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

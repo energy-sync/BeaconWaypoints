@@ -3,8 +3,8 @@ package com.github.dawsonvilamaa.beaconwaypoint.version;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
-import java.util.Arrays;
 import java.util.List;
 
 public interface VersionWrapper {

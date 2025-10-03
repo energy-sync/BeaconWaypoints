@@ -2,6 +2,7 @@ package com.github.dawsonvilamaa.beaconwaypoint.gui;
 
 import com.github.dawsonvilamaa.beaconwaypoint.LanguageManager;
 import com.github.dawsonvilamaa.beaconwaypoint.Main;
+import com.github.dawsonvilamaa.beaconwaypoint.version.VersionWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -48,6 +49,7 @@ public class MultiPageInventoryGUI {
      */
     public InventoryGUIButton addButton(InventoryGUIButton button) {
         this.buttons.add(button);
+        //this.gui.setSlot(this.gui.getSlot() + 1);
         return button;
     }
 
@@ -69,7 +71,9 @@ public class MultiPageInventoryGUI {
 
         //back button if previous GUI was provided
         if (this.previousGUI != null) {
-            InventoryGUIButton backButton = GUIs.createHeadButton(this.gui, ChatColor.WHITE + languageManager.getString("back"), ChatColor.DARK_GRAY + this.previousGUI.getTitle(), "MHF_ArrowLeft");
+            //InventoryGUIButton backButton = GUIs.headManager.createHeadButton(this.gui, ChatColor.WHITE + languageManager.getString("back"), ChatColor.DARK_GRAY + this.previousGUI.getTitle(), "MHF_ArrowLeft");
+            InventoryGUIButton backButton = new InventoryGUIButton(this.gui, ChatColor.WHITE + languageManager.getString("back"), ChatColor.DARK_GRAY + this.previousGUI.getTitle(), Material.PLAYER_HEAD);
+            backButton.setPlayerHead("MHF_ArrowLeft"); // a68f0b64-8d14-4000-a95f-4b9ba14f8df9
             backButton.setOnClick(e -> {
                 this.previousGUI.showMenu();
             });
@@ -79,7 +83,9 @@ public class MultiPageInventoryGUI {
 
         //previous page button
         if (page > 0) {
-            InventoryGUIButton previousButton = GUIs.createHeadButton(gui, languageManager.getString("previous-page"), null, "MHF_ArrowLeft");
+            //InventoryGUIButton previousButton = GUIs.headManager.createHeadButton(gui, languageManager.getString("previous-page"), null, "MHF_ArrowLeft");
+            InventoryGUIButton previousButton = new InventoryGUIButton(gui, languageManager.getString("previous-page"), null, Material.PLAYER_HEAD);
+            previousButton.setPlayerHead("MHF_ArrowLeft"); // a68f0b64-8d14-4000-a95f-4b9ba14f8df9
             previousButton.setOnClick(e -> {
                 showPage(page - 1);
             });
@@ -93,7 +99,9 @@ public class MultiPageInventoryGUI {
 
         //next page button
         if (this.buttons.size() > (page + 1) * this.numRows * 9) {
-            InventoryGUIButton nextButton = GUIs.createHeadButton(gui, languageManager.getString("next-page"), null, "MHF_ArrowRight");
+            //InventoryGUIButton nextButton = GUIs.headManager.createHeadButton(gui, languageManager.getString("next-page"), null, "MHF_ArrowRight");
+            InventoryGUIButton nextButton = new InventoryGUIButton(gui, languageManager.getString("next-page"), null, Material.PLAYER_HEAD);
+            nextButton.setPlayerHead("MHF_ArrowRight"); // 50c8510b-5ea0-4d60-be9a-7d542d6cd156
             nextButton.setOnClick(e -> {
                 showPage(page + 1);
             });
